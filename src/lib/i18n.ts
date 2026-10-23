@@ -291,7 +291,7 @@ export const dict = {
       loginRequired: "Entre para sincronizar seu progresso.",
       sessionNote: "Sua sessão usa cookie seguro httpOnly.",
       authErrorGeneric: "Não foi possível autenticar. Verifique os dados e tente novamente.",
-      anonNote: "Modo anônimo: progresso salvo neste navegador.",
+      anonNote: "Login é opcional: sem conta, tudo funciona e o progresso fica salvo neste navegador. Com uma conta gratuita, o progresso sincroniza entre dispositivos — só e-mail e senha, sem rastreamento.",
     },
     footer: {
       disclaimer: "Projeto independente e gratuito. Não afiliado à Databricks, Microsoft ou Pearson VUE.",
@@ -303,7 +303,7 @@ export const dict = {
       community: "Comunidade",
       license: "Conteúdo CC BY-SA 4.0 · Código MIT",
       adsLabel: "Publicidade",
-      version: "v1.2.0 — dados do exame: maio/2026",
+      version: "v1.2.1 — dados do exame: maio/2026",
     },
     toast: {
       started: "Simulado iniciado. Boa sorte!",
@@ -619,7 +619,7 @@ export const dict = {
       loginRequired: "Sign in to sync your progress.",
       sessionNote: "Your session uses a secure httpOnly cookie.",
       authErrorGeneric: "Could not authenticate. Check your credentials and try again.",
-      anonNote: "Anonymous mode: progress saved in this browser.",
+      anonNote: "Login is optional: without an account everything works and progress stays saved in this browser. With a free account, progress syncs across devices — email and password only, no tracking.",
     },
     footer: {
       disclaimer: "Independent, free project. Not affiliated with Databricks, Microsoft or Pearson VUE.",
@@ -631,7 +631,7 @@ export const dict = {
       community: "Community",
       license: "Content CC BY-SA 4.0 · Code MIT",
       adsLabel: "Advertisement",
-      version: "v1.2.0 — exam data: May 2026",
+      version: "v1.2.1 — exam data: May 2026",
     },
     toast: {
       started: "Practice exam started. Good luck!",

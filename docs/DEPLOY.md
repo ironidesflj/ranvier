@@ -191,6 +191,10 @@ curl -sS -o /dev/null -w "%{http_code}\n" https://<SEU_APP>.vercel.app/
 # 2) o catálogo responde JSON (certificação DBDEA com domínios; SEM campos de gabarito)
 curl -sS https://<SEU_APP>.vercel.app/api/catalog | head -c 400
 
+# 2b) saúde do banco — deve retornar {"status":"ok","db":"ok",..."questions":116}
+#     503/db:error = DATABASE_URL ausente/errada, engine errado (build sem build:vercel) ou schema não-aplicado (db:push:prod) → ver §5 e §11
+curl -sS -w "\nHTTP %{http_code}\n" https://<SEU_APP>.vercel.app/api/health
+
 # 3) o contrato do hub serve as 116 questões
 curl -sS https://<SEU_APP>.vercel.app/manifest.jsonl | wc -l          # → 116
 curl -sS https://<SEU_APP>.vercel.app/manifest.jsonl | head -c 120    # → começa com {"id":"RAN-DBDEA-00001",...
@@ -340,7 +344,7 @@ Cada item tem verificação **objetiva**. Marque só o que passou. \(☐ = a faz
 |---|---|---|
 | **Build da Vercel falha com erro de tipo** | `next.config.ts` tem `typescript.ignoreBuildErrors: false` — o build quebra alto em erro de tipo (por design) | Local: `bunx tsc --noEmit` → corrigir os erros apontados → commit/push. Nunca "resolver" ligando `ignoreBuildErrors`. |
 | **Erro de engine Prisma / conexão absurda no dev local** (ex.: quer conectar o Neon com client sqlite, ou o SQLite com engine postgres) | Client Prisma gerado com o schema errado para o contexto | Regenerar o client certo: local/sandbox → `bun run db:generate`; antes de mexer no Neon → `bun run db:generate:prod`. Cenário clássico: pulou o passo (5) da seção 5. |
-| **500 em `/api/catalog`, `/api/attempts` etc. em produção** | `DATABASE_URL` ausente/errada na Vercel, ou banco Neon vazio (seção 5 não executada) | Vercel → Settings → Environment Variables (conferir a string pooled com `sslmode=require`) → se env estava errada, redeploy; se banco vazio, rodar a sequência completa da seção 5. Logs: Deployments → Functions. |
+| **500 em `/api/catalog`, `/api/attempts` etc. em produção** (sintoma no app: aba Certification com erro, Study Mode "carregando para sempre", simulado com "erro de comunicação com o servidor") | `DATABASE_URL` ausente/errada na Vercel, engine errado (build sem o override `bun run build:vercel`), ou banco Neon sem schema/seed (seção 5 não executada) | **Diagnosticar primeiro:** `curl https://<SEU_APP>.vercel.app/api/health` → `db:error` confirma a camada de banco. Vercel → Settings → Environment Variables (conferir a string pooled com `sslmode=require`) → se env estava errada ou o build não usou `build:vercel`, corrigir e redeploy; se banco vazio, rodar a sequência completa da seção 5. Logs: Deployments → Functions. |
 | **Login/sessão não persistem; erro sobre secret/assinatura; cookies "inválidos"** | `SESSION_SECRET` ausente em produção | `openssl rand -hex 32` → definir na Vercel → redeploy. Os nomes `ct_anon`/`ct_session` são internos e **não devem ser renomeados**. |
 | **CI manifest vermelho com `no public ID registered for <key>`** | Questão nova sem ID no registry (o CI **não** atribui IDs — append-only é local) | `bun scripts/generate-manifest.ts --assign` → conferir `src/data/questions/id-registry.ts` (nova entrada `RAN-DBDEA-00117+`) → `bun scripts/validate-questions.ts` → commit/push. |
 | **CI manifest vermelho com `Domain S#: expected N, got M`** | Contagens por domínio divergem do esperado — o validador tem `expected` com valores atuais | Atualizar `const expected` em `scripts/validate-questions.ts` para as novas contagens (e conferir que a distribuição continua fiel aos pesos oficiais do exame). |

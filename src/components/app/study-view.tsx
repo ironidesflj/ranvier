@@ -15,6 +15,7 @@ import { useLang } from "@/components/app/language-provider";
 import { useAppStore } from "@/store/app-store";
 import { api } from "@/lib/api-client";
 import { QuestionCard, type FeedbackState } from "@/components/app/question-card";
+import { QueryError } from "@/components/app/query-error";
 import type { PublicQuestion, StartAttemptResponse } from "@/lib/types";
 
 type Phase = "config" | "session" | "summary";
@@ -24,7 +25,11 @@ export function StudyView() {
   const { navigate, studyDomainCode, studyQuestionIds } = useAppStore();
   const queryClient = useQueryClient();
 
-  const { data, isLoading } = useQuery({ queryKey: ["catalog", lang], queryFn: () => api.catalog(lang) });
+  const { data, isLoading, isError, isFetching, refetch } = useQuery({
+    queryKey: ["catalog", lang],
+    queryFn: () => api.catalog(lang),
+    retry: 1,
+  });
   const cert = data?.certifications[0] ?? null;
 
   const [phase, setPhase] = useState<Phase>("config");
@@ -123,11 +128,15 @@ export function StudyView() {
           <p className="mt-1 text-sm text-muted-foreground">{t.study.subtitle}</p>
         </div>
 
-        {isLoading || !cert ? (
+        {isLoading ? (
           <div className="space-y-4">
             <Skeleton className="h-40 w-full" />
             <Skeleton className="h-20 w-full" />
           </div>
+        ) : isError ? (
+          <QueryError onRetry={() => void refetch()} isRetrying={isFetching} />
+        ) : !cert ? (
+          <div className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">{t.common.error}</div>
         ) : (
           <Card>
             <CardHeader>

@@ -25,12 +25,17 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useLang } from "@/components/app/language-provider";
 import { useAppStore } from "@/store/app-store";
 import { api } from "@/lib/api-client";
+import { QueryError } from "@/components/app/query-error";
 import { EXAM_DISTRIBUTION } from "@/data/certifications";
 
 export function CertView() {
   const { t, lang } = useLang();
   const { navigate } = useAppStore();
-  const { data, isLoading } = useQuery({ queryKey: ["catalog", lang], queryFn: () => api.catalog(lang) });
+  const { data, isLoading, isError, isFetching, refetch } = useQuery({
+    queryKey: ["catalog", lang],
+    queryFn: () => api.catalog(lang),
+    retry: 1,
+  });
   const cert = data?.certifications[0] ?? null;
 
   const startExam = useMutation({
@@ -54,6 +59,10 @@ export function CertView() {
         </div>
       </div>
     );
+  }
+
+  if (isError) {
+    return <QueryError onRetry={() => void refetch()} isRetrying={isFetching} />;
   }
 
   if (!cert) {

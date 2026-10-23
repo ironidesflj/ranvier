@@ -353,3 +353,29 @@ Stage Summary:
 - Lacuna de handoff fechada: `.env.example` agora viaja no repo (fresh clones funcionam com `cp .env.example .env` + db:push, conforme DEPLOY.md §1).
 - Sandbox .env íntegro de novo (SESSION_SECRET dev rotacionado — irrelevantes as sessões antigas, eram dev-only).
 - Três formas de transferência disponíveis e verificadas: zip fonte (mais simples), git bundle (história completa), patch (aplica sobre v1.1.0).
+
+---
+Task ID: 5
+Agent: Orquestrador (sessão de continuação 2)
+Task: Teste live na produção v1.2.0 + correções de resiliência de UI + explicação de login + /api/health
+
+Work Log:
+- Teste live via curl + agent-browser em https://ranvier-seven.vercel.app (URL correta; worklog anterior tinha typo "ranrier").
+- Sintomas reproduzidos e documentados: /api/catalog, /api/progress, /api/auth/login (leitura) → 500 "Internal server error" em TODAS as queries de banco. UI: aba Certification = "Something went wrong"; Study Mode = skeleton infinito (bug de front: `isLoading || !cert` sem isError); Progress = zeros silenciosos; simulado = toast "Communication error with the server". Home renderiza por fallback estático (design correto). /api/auth/me 200 (não toca banco sem cookie).
+- Causa raiz (produção): camada de banco — DATABASE_URL ausente/errada na Vercel, engine errado (build sem `build:vercel`), ou Neon sem db:push:prod/seed (§5 do DEPLOY.md não executado). Distinguir: um banco vazio retornaria lista vazia (200), o 500 indica conexão/schema quebrado. Fix é ação do lado do fundador (receita no DEPLOY.md §5 + §11 atualizada).
+- Correções implementadas (v1.2.1):
+  * Novo `src/components/app/query-error.tsx` (estado de erro acessível role=alert + botão retry).
+  * study-view.tsx: query destruturada com isError/refetch/retry:1 → erro com retry em vez de skeleton eterno; caso "!cert sem erro" recebe mensagem dedicada.
+  * cert-view.tsx: isError → QueryError com retry (antes: texto sem retry).
+  * progress-view.tsx: isError → cabeçalho + QueryError com retry (antes: zeros silenciosos que simulavam "progresso zerado").
+  * auth-modal (i18n PT+EN): anonNote expandida — explica que login é OPCIONAL, função = sincronizar progresso entre dispositivos, "só e-mail e senha, sem rastreamento" (alinhado à filosofia Noos).
+  * Novo `/api/health` (route.ts, force-dynamic): {"status","db","certifications","questions"} — 503/db:error quando o banco falha; sem dados sensíveis. Adicionado ao DEPLOY.md §6 (check 2b) e §11 (diagnóstico primeiro).
+  * Versão: i18n footer PT/EN + package.json → 1.2.1.
+- QA (agent-browser, sandbox): falha de banco simulada de forma REAL (truncate do SQLite em uso → P2021 "table does not exist" — mesmo modo de falha de produção; descoberta lateral: SW stale-while-revalidate serve catálogo cacheado para visitantes recorrentes, por isso visitantes novos veem o erro primeiro). Com banco quebrado: Certification/Study/Progress mostram erro+retry em EN; restauração do banco + reload → views recuperam; auth modal verificado em EN e PT com novo texto; regressão do caminho feliz PT: estudo 1/10 → resposta → "Correto!" + explicação + fonte; footer v1.2.1; console 0 erros; lint 0; tsc 0.
+- Incidente do sandbox resolvido: conexão Prisma travou com schema vazio em cache após o truncate; restauração exigiu rename do arquivo + restart completo do dev (touch em next.config.ts). /api/health final: ok/ok/1/116. Marcadores temporários removidos de db.ts e next.config.ts.
+
+Stage Summary:
+- Produção v1.2.0 está com a camada de banco quebrada (todas as queries 500); a correção é execução do DEPLOY.md §4 (env vars + build:vercel) e §5 (db:push:prod + seed) pelo fundador/GPT local — agora diagnosticável em 1 curl via /api/health.
+- v1.2.1 fecha as lacunas de UX encontradas no incidente: nenhuma tela "carrega para sempre" ou "mente com zeros" quando a API falha; retry em todas as views de dados.
+- Explicação de login: nada foi perdido desde a v1.0 (strings idênticas; local: nota na aba Progresso + descrição do auth-modal) — agora ampliada no modal com a frase de privacidade alinhada ao Noos (opcional, só sincronização, sem rastreamento).
+- Artefatos de transferência regenerados (zip/bundle/patch) apontando para o commit v1.2.1.

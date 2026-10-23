@@ -26,13 +26,18 @@ import { useAppStore } from "@/store/app-store";
 import { api } from "@/lib/api-client";
 import { useState } from "react";
 import { AuthModal } from "@/components/app/auth-modal";
+import { QueryError } from "@/components/app/query-error";
 
 export function ProgressView() {
   const { t, f, lang } = useLang();
   const { navigate } = useAppStore();
   const [authOpen, setAuthOpen] = useState(false);
 
-  const { data: progress, isLoading: progressLoading } = useQuery({ queryKey: ["progress"], queryFn: api.progress });
+  const { data: progress, isLoading: progressLoading, isError: progressError, isFetching: progressFetching, refetch: refetchProgress } = useQuery({
+    queryKey: ["progress"],
+    queryFn: api.progress,
+    retry: 1,
+  });
   const { data: me } = useQuery({ queryKey: ["me"], queryFn: api.me });
   const { data: attemptsData, isLoading: attemptsLoading } = useQuery({ queryKey: ["attempts"], queryFn: api.listAttempts });
   const user = me?.user ?? null;
@@ -47,6 +52,18 @@ export function ProgressView() {
           ))}
         </div>
         <Skeleton className="mt-6 h-72 w-full" />
+      </div>
+    );
+  }
+
+  if (progressError) {
+    return (
+      <div className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold tracking-tight">{t.progress.title}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{t.progress.subtitle}</p>
+        </div>
+        <QueryError onRetry={() => void refetchProgress()} isRetrying={progressFetching} />
       </div>
     );
   }
