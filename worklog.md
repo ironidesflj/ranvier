@@ -302,3 +302,54 @@ Stage Summary:
 - Decisões: prefixo --noos- nos tokens (colisão shadcn); exam code DBDEA (registry documentado em axon/ids.ts); badge no rodapé com nome em text-2xl para cumprir 32–40% com legibilidade; Contato aponta para a página Sobre in-app (hub ainda não existe — link do hub fica no badge e no cartão Ecossistema); cookies ct_anon/ct_session preservados (não órfar sessões).
 - Deploy pronto para o fluxo do fundador: repo commitado → GPT local publica no GitHub → Vercel (build:vercel) + Neon (schema.prod.prisma) seguindo docs/DEPLOY.md; Go-live checklist (Tabela 6 + jurídico) incluído lá.
 - Ressalva honesta: o hub (noos-hub.vercel.app) não existe ainda — links de Comunidade/badge apontam para onde a discussão vai nascer (por design do guia, Fase 2 do ecossistema).
+---
+Task ID: 3
+Agent: SaaS Transformation Lead (orquestrador)
+Task: PWA — instalar o app do navegador + funcionar offline; e ampliar o badge "by Noos" do rodapé (pequeno no celular, minúsculo no PC)
+
+Work Log:
+- Contexto lido: worklog.md completo (kickoff → Tasks 1–8 → Noos Fase 1 → DEPLOY.md); app no ar em https://ranrier-seven.vercel.app/#/ (v1.1.0); repo local idêntico ao commit 7ff4315 (diffs pendentes = apenas mudanças de file mode 644→755, sem conteúdo).
+- Badge ampliado (noos-badge.tsx): marca 12px → 16px mobile / 20px desktop (md:); texto 9px → 11px/13px; gap 1→1.5; comment atualizado documentando o override da regra manual 32–40% por feedback do fundador (46%/54% do nome de 24px).
+- Ícones PWA gerados (scripts/generate-icons.ts com sharp; `bun run icons`): icon-192/512 (rounded, propósito any), icon-maskable-192/512 (fundo cheio #246cad, check na safe zone de 80% — path derivado do favicon escalado 7.2×), apple-touch-icon 180. Em public/icons/.
+- Manifest via rota de metadata src/app/manifest.ts → /manifest.webmanifest: id "/", start_url/scope "/", standalone, theme/background #0B1424, lang pt-BR, categories education, ícones any+maskable, atalhos Modo Estudo/Simulado/Progresso (#/study, #/exam, #/progress).
+- Service worker public/sw.js (hand-written, sem dependências): navegação network-first com fallback do shell e offline.html; assets de build cache-first APENAS quando resposta é immutable (produção: URLs com hash de conteúdo; dev: no-store → nunca cacheado → dev sempre fresco — bug de CSS stale descoberto e corrigido durante o QA); assets de marca cache-first versionado por VERSION; API GETs + manifest.jsonl em stale-while-revalidate; POST/PUT/DELETE nunca interceptados (scoring server-side + rate limit intactos); sem skipWaiting (nunca interromper simulado em andamento); clients.claim + reload único na primeira visita.
+- PwaProvider (src/components/app/pwa-provider.tsx) montado em providers.tsx dentro do LanguageProvider: registra SW em contexto seguro; captura beforeinstallprompt; detecta standalone (display-mode + navigator.standalone) e iOS (UA + iPadOS MacIntel/maxTouchPoints); toasts de offline/online/installed (tRef pattern para listeners únicos); diálogo iOS com os 3 passos de Adicionar à Tela de Início.
+- UI de instalação: InstallBanner (faixa abaixo do hero na Home; "Agora não" persiste 7 dias em localStorage ranvier-install-dismissed; escondida quando standalone) + botão "Instalar app" no rodapé (linha de assinatura, entre badge e Contato, ícone MonitorSmartphone); ambos exibidos só quando canInstall || isIOS.
+- i18n: seção `pwa` completa em PT e EN (título, descrição, botões, toasts, passos iOS); versões de rodapé v1.1.0 → v1.2.0 (PT e EN); package.json v1.2.0 + script `icons`.
+- Infra: next.config.ts ganha headers Cache-Control no-cache para /sw.js (+ Service-Worker-Allowed) e max-age 3600 para /manifest.webmanifest; layout.tsx ganha apple-touch-icon, ícones PNG, appleWebApp (capable/statusBarStyle black-translucent/title Ranvier) e formatDetection telephone false.
+- api-client.ts: fetch envolvido em try/catch — falha de rede vira ApiError(0, "offline"/"network") tipado (views degradam com toast genérico; toasts de conectividade vêm do PwaProvider).
+- QA E2E (agent-browser):
+  * Rotas: /manifest.webmanifest 200 (application/manifest+json, JSON íntegro), /sw.js 200 com headers corretos, /offline.html 200, 5 ícones 200.
+  * SW: registrado, controla a página (controllerchange → 1 reload na 1ª visita), caches populados (shell 7: offline.html/favicon/brand/ícones//; assets: fontes woff2 immutable + brand; data: manifest+catalog pt/en+me).
+  * Offline (emulado): reload offline renderiza o shell SSR completo (h1, footer, badge) — teste completo de app interativo offline feito com a estratégia anterior (chunks dev cacheados) antes do gate immutable; em produção os chunks são immutable → mesmo resultado interativo.
+  * Instalação: evento beforeinstallprompt sintético → banner + botão do rodapé aparecem; clique chama prompt() e oculta o banner; iPhone 14 emulado → diálogo iOS com 3 passos correto; PT ("Estude até sem internet"/"Instalar app"/"Agora não") e EN verificados.
+  * Badge medido: mobile 375px = 16px/11px; desktop 1280px = 20px/13px (após corrigir md: faltante nas imgs — pego pelo teste).
+  * Regressão: modo estudo completo (config com 7 domínios → sessão → resposta → "Correto!" + explicação + fonte + RAN-DBDEA-00094); lint 0 erros; tsc 0 erros; console 0 erros/0 warnings de hidratação em carga limpa.
+- Incidente encontrado e resolvido: banco SQLite do dev VAZIO (0 certificações, 0 questões; arquivo tocado às 19:40 — hipótese: db:push sem seed durante a preparação de deploy pelo GPT local do fundador). Re-seed executado (`bun run db:seed`, idempotente): 1 cert, 7 domínios, 116 questões (8/24/25/18/12/12/17), 0 usuários. Sintoma documentado no SDD §17.3 (API vazia = rodar seed).
+- VLM (4 screenshots aprovados): banner desktop (limpo, alinhado, sem defeitos), rodapé desktop (badge legível, layout limpo), rodapé mobile 390px (badge visível, "Instalar app" presente, sem overflow), diálogo iOS (3 passos claros com ícones).
+- Docs: SDD §17 novo (PWA completo: peças, estratégias de cache, observações) + changelog renumerado §18 + entrada v1.2.0; DEPLOY.md seção 6 com checks curl de PWA + itens de navegador (instalar em desktop/Android/iOS, teste offline).
+
+Stage Summary:
+- PWA completo e verificado: instalável do navegador (Chrome/Edge/Android nativo via beforeinstallprompt; iOS com diálogo de 3 passos), offline funcional (shell + dados já vistos; mutações sempre online por design — scoring server-side preservado), dev mode sempre fresco (gate immutable).
+- Badge "by Noos" ampliado por decisão do fundador: 16/11px mobile, 20/13px desktop (override documentado da regra 32–40% do manual).
+- Versão 1.2.0; pronta para o GPT local do fundador publicar (commit criado no repo local).
+- Ressalvas honestas: (1) teste interativo-offline completo foi feito com a estratégia de cache pré-gate (equivalente em produção, onde chunks são immutable); em dev o offline renderiza o shell SSR estático; (2) labels dos atalhos do manifest em PT-BR (toggle EN completo dentro do app); (3) DB dev foi re-semeado após esvaziamento externo — produção Neon não afetada.
+
+---
+Task ID: 4
+Agent: Orquestrador (sessão de continuação)
+Task: Diagnóstico de "não encontramos os arquivos" + correção do pacote de transferência do v1.2.0
+
+Work Log:
+- Diagnóstico: trabalho do v1.2.0 (PWA + badge) está ÍNTEGRO no sandbox, commitado como bf516c2 (main); causa de "não encontrar" = arquivos nunca saíram do sandbox para a máquina do fundador (sem git remote configurado — `git remote -v` vazio).
+- Auditoria do pacote de entrega encontrou 2 falhas reais:
+  * `.env.example` documentado no DEPLOY.md (§1 `cp .env.example .env`, §6 tabela) NÃO existia no repo nem no disco — vítima do padrão `.env*` do .gitignore (nunca foi commitado; perdido junto do incidente das 19:40).
+  * `.env` do sandbox também foi resetado externamente: só tinha DATABASE_URL (perdeu SESSION_SECRET dev e NEXT_PUBLIC_NOOS_HUB_URL do v1.1.0).
+- Correções: (1) `.env.example` recriado com as 8 variáveis canônicas + comentários cross-referenciando DEPLOY.md (sqlite dev `file:../db/custom.db` + neon pooled comentado); (2) `.gitignore` ganha `!.env.example` (negação logo após `.env*`); (3) `.env` do sandbox restaurado com SESSION_SECRET dev novo (openssl rand -hex 32) + hub URL; (4) padrão `/public/ranvier-v1.2.0-source.zip` ignorado (artefato de transferência temporário).
+- Commit de correção criado sobre bf516c2; artefatos de transferência regenerados em download/: bundle (história completa), patch (2 commits via format-patch --stdout) e zip fonte (git archive).
+- Zip fonte adicionalmente copiado em public/ para download direto pelo painel de preview (caminho /ranvier-v1.2.0-source.zip), sem entrar no repo (gitignored).
+
+Stage Summary:
+- Lacuna de handoff fechada: `.env.example` agora viaja no repo (fresh clones funcionam com `cp .env.example .env` + db:push, conforme DEPLOY.md §1).
+- Sandbox .env íntegro de novo (SESSION_SECRET dev rotacionado — irrelevantes as sessões antigas, eram dev-only).
+- Três formas de transferência disponíveis e verificadas: zip fonte (mais simples), git bundle (história completa), patch (aplica sobre v1.1.0).

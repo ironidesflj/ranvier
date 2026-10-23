@@ -23,6 +23,7 @@ import { useLang } from "@/components/app/language-provider";
 import { useAppStore } from "@/store/app-store";
 import { api } from "@/lib/api-client";
 import { AdSlot } from "@/components/app/ad-slot";
+import { InstallBanner } from "@/components/app/install-banner";
 
 export function HomeView() {
   const { t, lang } = useLang();
@@ -103,6 +104,9 @@ export function HomeView() {
           </div>
         </div>
       </section>
+
+      {/* Install as app (PWA) — browser install, works offline */}
+      <InstallBanner />
 
       {/* Official exam facts */}
       <section className="mx-auto max-w-6xl px-4 py-10">

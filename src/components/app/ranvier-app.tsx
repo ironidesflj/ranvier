@@ -12,6 +12,7 @@ import {
   LogIn,
   LogOut,
   Menu,
+  MonitorSmartphone,
   Moon,
   BookOpen,
   GraduationCap,
@@ -28,6 +29,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import { useLang } from "@/components/app/language-provider";
+import { usePwa } from "@/components/app/pwa-provider";
 import { useAppStore, type View } from "@/store/app-store";
 import { api } from "@/lib/api-client";
 import { AuthModal } from "@/components/app/auth-modal";
@@ -265,6 +267,7 @@ function Header() {
 function Footer() {
   const { t } = useLang();
   const { navigate } = useAppStore();
+  const { showInstallEntry, install } = usePwa();
   return (
     <footer className="mt-auto border-t bg-card/40">
       <div className="mx-auto max-w-6xl px-4 py-8 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
@@ -275,9 +278,24 @@ function Footer() {
               <LogoMark className="h-6 w-6 text-primary" />
               <span className="text-2xl font-bold tracking-tight">{t.app.name}</span>
             </div>
-            {/* Signature row: "by Noos" endorsement badge + Contact, side by side. */}
-            <div className="flex items-center justify-center gap-2.5 md:justify-start">
+            {/* Signature row: "by Noos" endorsement badge + Install + Contact, side by side. */}
+            <div className="flex flex-wrap items-center justify-center gap-2.5 md:justify-start">
               <NoosBadge />
+              {showInstallEntry && (
+                <>
+                  <span className="text-muted-foreground/40" aria-hidden>
+                    ·
+                  </span>
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+                    onClick={install}
+                  >
+                    <MonitorSmartphone className="h-3.5 w-3.5" aria-hidden />
+                    {t.pwa.installButton}
+                  </button>
+                </>
+              )}
               <span className="text-muted-foreground/40" aria-hidden>
                 ·
               </span>

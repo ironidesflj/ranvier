@@ -5,6 +5,7 @@ import { ThemeProvider } from "next-themes";
 import { useState } from "react";
 import { LanguageProvider } from "@/components/app/language-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { PwaProvider } from "@/components/app/pwa-provider";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -24,8 +25,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
         <LanguageProvider>
-          {children}
-          <Toaster position="top-center" richColors closeButton />
+          <PwaProvider>
+            {children}
+            <Toaster position="top-center" richColors closeButton />
+          </PwaProvider>
         </LanguageProvider>
       </ThemeProvider>
     </QueryClientProvider>

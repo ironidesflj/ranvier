@@ -198,6 +198,13 @@ curl -sS https://<SEU_APP>.vercel.app/manifest.jsonl | tail -n 1 | head -c 60   
 
 # 4) headers de segurança estão ativos (X-Content-Type-Options: nosniff, X-Frame-Options: DENY, ...)
 curl -sSI https://<SEU_APP>.vercel.app/ | grep -iE 'x-frame|x-content-type|referrer-policy'
+
+# 5) PWA: manifest, service worker, ícones e fallback offline respondem
+curl -sS -o /dev/null -w "manifest %{http_code}\n" https://<SEU_APP>.vercel.app/manifest.webmanifest
+curl -sSI https://<SEU_APP>.vercel.app/sw.js | grep -i 'cache-control'      # → no-cache, no-store, must-revalidate
+curl -sS -o /dev/null -w "icon-192 %{http_code}\n" https://<SEU_APP>.vercel.app/icons/icon-192.png
+curl -sS -o /dev/null -w "apple-touch %{http_code}\n" https://<SEU_APP>.vercel.app/icons/apple-touch-icon.png
+curl -sS -o /dev/null -w "offline %{http_code}\n" https://<SEU_APP>.vercel.app/offline.html
 ```
 
 No **navegador** (o teste que importa — client-side):
@@ -207,7 +214,9 @@ No **navegador** (o teste que importa — client-side):
 - [ ] **Iniciar sessão de estudo** (modo estudo): resposta com feedback imediato (correta/incorreta + explicação bilíngue + referência oficial) — confirma banco populado **e** correção server-side funcionando.
 - [ ] **Iniciar simulado**: 45 questões, timer de 90 min, nota e review ao final.
 - [ ] **Comunidade** (botão na questão): abre `https://noos-hub.vercel.app/pt/q/RAN-DBDEA-00001` (UI em PT) ou `https://noos-hub.vercel.app/en/q/RAN-DBDEA-00001` (UI em EN) — deep-link ancorado pela ID pública.
-- [ ] Rodapé: badge **by Noos** (marca compacta 12 px + texto *by Noos* 9 px, itálico, cor suave) ao lado do nome **Ranvier** — nome do app prevalece.
+- [ ] Rodapé: badge **by Noos** (marca 16 px mobile / 20 px desktop + texto *by Noos* 11/13 px, itálico, cor suave) ao lado do nome **Ranvier** — nome do app prevalece.
+- [ ] **PWA — instalar**: no Chrome/Edge desktop ou Android, a faixa **"Estude até sem internet"** aparece abaixo do hero (ou o ícone de instalar na omnibox); instalar → o app abre em janela própria pelo ícone. No iPhone (Safari): botão **Instalar app** → diálogo com os 3 passos *Adicionar à Tela de Início*.
+- [ ] **PWA — offline**: com o app instalado (ou após 1ª visita), desligar o Wi-Fi/lost network e abrir o app → Home carrega offline (shell + dados já vistos; criar novas sessões exige conexão — comportamento esperado).
 
 Se **qualquer** item falhar → seção 11 antes de prosseguir.
 

@@ -652,13 +652,46 @@ Depósitos INPI (Noos 41+42 → Ranvier 41+42), depois EUIPO/USPTO; registrar `n
 
 ---
 
-## 17. Changelog
+## 17. PWA — instalação direto do navegador e modo offline (v1.2.0)
+
+**Objetivo do fundador:** o estudante instala o app no dispositivo direto do navegador, e o app funciona offline.
+
+### 17.1 Peças
+
+| Peça | Arquivo | Papel |
+|---|---|---|
+| Web App Manifest | `src/app/manifest.ts` (rota de metadata → `/manifest.webmanifest`) | Torna o app instalável: nome, ícones 192/512 (any + maskable), `display: standalone`, `start_url: "/"`, tema/splash escuros (#0B1424), atalhos Estudo/Simulado/Progresso (`/#/study`, `/#/exam`, `/#/progress`) |
+| Ícones PNG | `public/icons/` (gerados por `scripts/generate-icons.ts`, `bun run icons`) | icon-192/512 (qualquer propósito, cantos arredondados), icon-maskable-192/512 (fundo cheio, check na safe zone 80%), apple-touch-icon 180 |
+| Service Worker | `public/sw.js` (hand-written, zero dependências) | App shell offline + dados já vistos; **nunca** cacheia mutações (respostas/envios/auth sempre na rede) |
+| Provider | `src/components/app/pwa-provider.tsx` | Registra o SW (contexto seguro), captura `beforeinstallprompt`, detecta standalone/iOS, toasts de conectividade, diálogo iOS "Adicionar à Tela de Início" |
+| UI de instalação | `install-banner.tsx` (faixa na Home) + botão "Instalar app" no rodapé | Nativo (Chrome/Edge/Android) ou instruções iOS; oculto quando já instalado; "Agora não" reaparece após 7 dias |
+| Fallback offline | `public/offline.html` (autocontido, PT+EN) | Última instância da navegação quando nem o shell está em cache |
+| Metadados iOS | `layout.tsx` (`appleWebApp`, apple-touch-icon) | Tela de início do iOS com janela standalone e título "Ranvier" |
+
+### 17.2 Estratégias de cache do Service Worker
+
+- **Navegação (sempre `/`, hash routing):** network-first (deploys novos chegam quando online) → fallback shell em cache → fallback `offline.html`.
+- **Assets de build (`/_next/static`):** cache-first **apenas quando a resposta é `immutable`** — verdade em produção (URLs com hash de conteúdo), falso no `next dev` (URLs reutilizadas entre edits). Isso mantém o dev sempre fresco e o production offline-completo. Fontes self-hosted (`next/font`) são `immutable` mesmo em dev → cacheadas.
+- **Assets de marca (`/brand`, `/icons`, favicon):** cache-first sempre (versionados pelo `VERSION` do SW — bump ao alterá-los).
+- **API GETs + `/manifest.jsonl`:** stale-while-revalidate (leitura instantânea offline, atualização em segundo plano). POST/PUT/DELETE **nunca** são interceptados — scoring server-side e rate limit intactos.
+- **Ciclo de vida:** sem `skipWaiting` (nunca interromper um simulado em andamento); novo worker ativa quando todas as abas fecham; `clients.claim()` + um reload único na primeira visita (`controllerchange`) para cachear o load inicial.
+
+### 17.3 Observações
+
+- `sw.js` e `/manifest.webmanifest` têm headers `Cache-Control` dedicados (`next.config.ts`) para atualizações rápidas.
+- Labels dos atalhos do manifest em PT-BR (público primário); dentro do app o toggle EN/EN permanece completo.
+- Resposta vazia `{"certifications":[]}` na API = banco sem seed — rodar `bun run db:seed` (idempotente; verificado na v1.2.0 após o DB dev ser esvaziado por `db:push` sem seed durante preparação de deploy).
+
+---
+
+## 18. Changelog
 
 | Versão | Data | Mudanças |
 |---|---|---|
+| **v1.2.0** | 2026-10-23 | **PWA — instalação e offline:** manifest + ícones PNG (192/512 any+maskable, apple-touch) via `scripts/generate-icons.ts`; service worker `public/sw.js` (shell offline, SWR de dados, mutações nunca cacheadas, dev sempre fresco via gate `immutable`); PwaProvider + faixa de instalação na Home + botão no rodapé + diálogo iOS (3 passos AAT); toasts de conectividade; `offline.html` fallback; headers no-cache para `sw.js`/manifest; api-client trata falha de rede como erro tipado. **Badge "by Noos" ampliado** (feedback do fundador: pequeno no celular, minúsculo no PC): marca 12→16px mobile / 20px desktop, texto 9→11px/13px — acima da regra manual 32–40% por decisão do fundador. QA E2E re-executado (SW ativo, offline renderiza shell SSR, prompt sintético, iOS emulado, PT/EN, 0 erros de console; VLM aprovou banner/rodapés/diálogo). DB dev re-semeado (116 questões) após esvaziamento por push sem seed |
 | **v1.1.0** | 2026-10-23 | **Adaptação ao ecossistema Noos (Fase 1):** batismo visual Ranvier + badge "by Noos" (Newsreader/12px/37,5%) com marca positiva/negativa por tema; cor de domínio #246cad; fontes Instrument Sans/IBM Plex Mono/Newsreader; rodapé com Contato ao lado do badge; IDs públicas estáveis RAN-DBDEA-00001…00116 (registry imutável + examCode no banco); botão Comunidade com deep-link no idioma corrente; Axon F1 (ids/deep-links/schema); manifest.jsonl (116 linhas, Tabela 4 completa, sha256) + CI GitHub Actions; licenças → MIT + CC BY-SA 4.0 (LICENSE/LICENSE-CONTENT.md); deploy: schema.prod.prisma + build:vercel + docs/DEPLOY.md; ignoreBuildErrors=false; cookies e IDs internos preservados. QA E2E re-executado (2 temas × 2 idiomas × mobile, manifesto, fluxos completos, VLM) |
 | **v1.0.0** | 2026-10-22 | Lançamento. 116 questões autorais com referência oficial por questão (S1–S7: 8/24/25/18/12/12/17); simulado no formato oficial (45 questões / 90 min / distribuição por peso); modo estudo com feedback imediato bilíngue; progresso com radar por domínio, fila de revisão e histórico; guia de estudos bilíngue; auth opcional com merge de progresso anônimo; i18n PT-BR/EN; dark mode; ads config-gated (desligado); QA E2E aprovado (desktop + mobile, teste adversarial do timer); lint limpo |
 
 ---
 
-*Fim do SDD v1.1.0 — mantenha este documento e o `worklog.md` sempre atualizados: nada se perde.*
+*Fim do SDD v1.2.0 — mantenha este documento e o `worklog.md` sempre atualizados: nada se perde.*

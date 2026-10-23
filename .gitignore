@@ -32,6 +32,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -70,3 +71,6 @@ agent-ctx/
 /Caddyfile
 /cli_readme.md
 /upload/
+
+# Artefato temporário de transferência do v1.2.0 (download via preview; remover quando pego)
+/public/ranvier-v1.2.0-source.zip

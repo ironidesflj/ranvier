@@ -44,8 +44,19 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Ironides Junior", url: "https://github.com/ironidesflj" }],
   icons: {
-    icon: "/favicon.svg",
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
+  // iOS home-screen app: standalone, dark status bar, proper launcher title.
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Ranvier",
+  },
+  formatDetection: { telephone: false },
   openGraph: {
     title: "Ranvier — Simulados gratuitos para certificações",
     description:

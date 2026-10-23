@@ -19,10 +19,17 @@ class ApiError extends Error {
 }
 
 async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(url, {
-    ...init,
-    headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
-  });
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      ...init,
+      headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
+    });
+  } catch {
+    // Network-level failure (offline / unreachable) — surface a typed error so
+    // views degrade gracefully; the PWA provider toasts connectivity changes.
+    throw new ApiError(0, typeof navigator !== "undefined" && navigator.onLine === false ? "offline" : "network");
+  }
   let body: unknown = null;
   try {
     body = await res.json();
