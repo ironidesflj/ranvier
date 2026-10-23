@@ -1,0 +1,66 @@
+# Noos hub contract — manifest.jsonl CI (Guia de Adaptação, Fase 1, passo 5).
+#
+# Runs on every change to the question bank: validates the bank + public-ID
+# registry, regenerates public/manifest.jsonl and commits it back so the app
+# deploys it as a static file (https://<app>/manifest.jsonl) for the hub's
+# scheduled ingestion. Fails loudly when a question lacks a registered public
+# ID (registry entries are appended locally with `--assign`, never in CI).
+#
+# No runtime coupling: the hub ingests this file on its own build; if this repo
+# or the app goes offline, the hub keeps serving its last ingested manifest.
+name: manifest
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/data/questions/**"
+      - "src/data/certifications.ts"
+      - "src/lib/axon/**"
+      - "scripts/generate-manifest.ts"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  manifest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Validate question bank (structure + public IDs)
+        run: bun scripts/validate-questions.ts
+
+      - name: Generate manifest.jsonl
+        run: bun scripts/generate-manifest.ts
+
+      - name: Commit updated manifest (if changed)
+        run: |
+          git config user.name "ranvier-manifest-bot"
+          git config user.email "actions@users.noreply.github.com"
+          if git diff --quiet public/manifest.jsonl; then
+            echo "manifest.jsonl unchanged — nothing to publish."
+          else
+            git add public/manifest.jsonl
+            git commit -m "chore(manifest): publish question bank snapshot [skip ci]"
+            git push
+            echo "manifest.jsonl published."
+          fi
+
+      # Optional: notify the hub's deploy hook (set HUB_DEPLOY_HOOK_URL as a
+      # repository secret to enable — the hub then re-ingests immediately
+      # instead of waiting for its scheduled build).
+      - name: Trigger hub ingestion (optional)
+        if: ${{ secrets.HUB_DEPLOY_HOOK_URL != '' }}
+        run: |
+          curl -fsS -X POST "${HUB_DEPLOY_HOOK_URL}" || echo "hub hook failed (non-blocking)"
+        env:
+          HUB_DEPLOY_HOOK_URL: ${{ secrets.HUB_DEPLOY_HOOK_URL }}

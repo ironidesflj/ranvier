@@ -1,0 +1,155 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "../styles/noos-tokens.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-instrument-sans);
+  --font-mono: var(--font-ibm-plex-mono);
+  --font-display: var(--font-newsreader);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* Ranvier domain color: --noos-ranvier #246cad (Noos identity manual, Fase 1).
+   Rule: one domain color per app — fills and strokes, never small text. */
+:root {
+  --radius: 0.75rem;
+  --background: oklch(0.975 0.004 250);
+  --foreground: oklch(0.23 0.03 255);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.23 0.03 255);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.23 0.03 255);
+  --primary: var(--noos-ranvier); /* #246cad — Ranvier domain blue */
+  --primary-foreground: oklch(0.99 0.005 250);
+  --secondary: oklch(0.95 0.012 250);
+  --secondary-foreground: oklch(0.3 0.04 255);
+  --muted: oklch(0.955 0.008 250);
+  --muted-foreground: oklch(0.5 0.03 255);
+  --accent: oklch(0.94 0.025 245);
+  --accent-foreground: oklch(0.38 0.11 252);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.9 0.015 250);
+  --input: oklch(0.9 0.015 250);
+  --ring: var(--noos-ranvier);
+  --chart-1: var(--noos-ranvier); /* ranvier domain blue */
+  --chart-2: oklch(0.72 0.13 210); /* cyan */
+  --chart-3: oklch(0.78 0.16 80); /* amber */
+  --chart-4: oklch(0.7 0.14 165); /* emerald */
+  --chart-5: oklch(0.65 0.18 300); /* violet */
+  --sidebar: oklch(0.98 0.005 250);
+  --sidebar-foreground: oklch(0.23 0.03 255);
+  --sidebar-primary: var(--noos-ranvier);
+  --sidebar-primary-foreground: oklch(0.99 0.005 250);
+  --sidebar-accent: oklch(0.94 0.025 245);
+  --sidebar-accent-foreground: oklch(0.38 0.11 252);
+  --sidebar-border: oklch(0.9 0.015 250);
+  --sidebar-ring: var(--noos-ranvier);
+}
+
+.dark {
+  --background: oklch(0.19 0.032 260); /* deep slate-navy #0B1424-ish */
+  --foreground: oklch(0.93 0.01 250);
+  --card: oklch(0.235 0.035 260);
+  --card-foreground: oklch(0.93 0.01 250);
+  --popover: oklch(0.235 0.035 260);
+  --popover-foreground: oklch(0.93 0.01 250);
+  --primary: #64a1d8; /* Ranvier domain blue, night-study variant (same hue family as #246cad) */
+  --primary-foreground: oklch(0.14 0.03 260);
+  --secondary: oklch(0.29 0.04 258);
+  --secondary-foreground: oklch(0.93 0.01 250);
+  --muted: oklch(0.28 0.035 258);
+  --muted-foreground: oklch(0.67 0.025 253);
+  --accent: oklch(0.31 0.05 253);
+  --accent-foreground: oklch(0.93 0.01 250);
+  --destructive: oklch(0.66 0.19 25);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 16%);
+  --ring: #64a1d8;
+  --chart-1: #64a1d8;
+  --chart-2: oklch(0.75 0.13 210);
+  --chart-3: oklch(0.8 0.15 80);
+  --chart-4: oklch(0.72 0.14 165);
+  --chart-5: oklch(0.68 0.17 300);
+  --sidebar: oklch(0.235 0.035 260);
+  --sidebar-foreground: oklch(0.93 0.01 250);
+  --sidebar-primary: #64a1d8;
+  --sidebar-primary-foreground: oklch(0.14 0.03 260);
+  --sidebar-accent: oklch(0.31 0.05 253);
+  --sidebar-accent-foreground: oklch(0.93 0.01 250);
+  --sidebar-border: oklch(1 0 0 / 12%);
+  --sidebar-ring: #64a1d8;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Custom scrollbars (long lists: palette, review, history) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklab, var(--muted-foreground) 40%, transparent) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: color-mix(in oklab, var(--muted-foreground) 35%, transparent);
+  border-radius: 8px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in oklab, var(--muted-foreground) 55%, transparent);
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--primary) 30%, transparent);
+}
+
+/* Noos wordmark (Newsreader italic — reserved for the mother's wordmark in "by Noos"). */
+.font-newsreader {
+  font-family: var(--font-newsreader), Georgia, serif;
+}

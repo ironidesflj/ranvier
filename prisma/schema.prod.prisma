@@ -1,0 +1,128 @@
+// Ranvier — Prisma schema — PRODUCTION (PostgreSQL/Neon). Keep in sync with prisma/schema.prisma (SQLite sandbox) on every model change.
+// Design notes:
+//  - Question.correctIndex/options are NEVER sent to the client; grading is server-side only.
+//  - Attempts are keyed by userId (logged-in) OR anonId (anonymous session cookie); on login,
+//    anonymous attempts are merged into the user account (Task 3).
+//  - Cascade deletes prevent orphan data (Red Team requirement).
+//  - Question.publicId is the stable public ID (RAN-EXAM-SEQ, Noos ecosystem): assigned once at
+//    creation, NEVER changed afterwards (published IDs are immutable); version bumps on fixes.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String?
+  passwordHash String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  attempts     Attempt[]
+}
+
+model Certification {
+  id           String    @id @default(cuid())
+  slug         String    @unique
+  examCode     String    @unique // compact exam code for public IDs + manifest (e.g. DBDEA) — immutable once published
+  vendor       String
+  name         String
+  shortName    String
+  versionLabel String
+  durationMin  Int
+  questionCount Int
+  passingScore Int // community reference percent (official cut score not published)
+  fee          String
+  languages    String
+  delivery     String
+  officialUrl  String
+  guideUrl     String
+  trainingUrl  String
+  descriptionEn String
+  descriptionPt String
+  codeNoteEn   String
+  codeNotePt   String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  domains      Domain[]
+  attempts     Attempt[]
+}
+
+model Domain {
+  id              String         @id @default(cuid())
+  code            Int
+  name            String
+  namePt          String
+  weightPercent   Int
+  orderIndex      Int
+  outlineEn       String // JSON string[] (official outline bullets, EN)
+  outlinePt       String // JSON string[]
+  certificationId String
+  certification   Certification  @relation(fields: [certificationId], references: [id], onDelete: Cascade)
+  questions       Question[]
+
+  @@unique([certificationId, code])
+}
+
+model Question {
+  id             String          @id @default(cuid())
+  key            String          @unique // stable seed key, e.g. "S2-014"
+  publicId       String          @unique // stable public ID (RAN-EXAM-SEQ) — immutable after assignment (Noos ecosystem)
+  domainId       String
+  domain         Domain          @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  stem           String // EN, markdown subset
+  options        String // JSON string[] (4 options)
+  correctIndex   Int
+  explanationEn  String
+  explanationPt  String
+  referenceUrl   String?
+  referenceTitle String?
+  difficulty     String // EASY | MEDIUM | HARD
+  version        Int             @default(1) // content version: typo fixes keep the ID and bump this; rewrites get a new ID
+  enabled        Boolean         @default(true)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  answers        AttemptAnswer[]
+}
+
+model Attempt {
+  id              String         @id @default(cuid())
+  mode            String // STUDY | EXAM
+  status          String // IN_PROGRESS | COMPLETED
+  userId          String?
+  user            User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  anonId          String? // anonymous session cookie id
+  certificationId String
+  certification   Certification  @relation(fields: [certificationId], references: [id])
+  questionIds     String // JSON string[] ordered question ids
+  startedAt       DateTime       @default(now())
+  completedAt     DateTime?
+  durationSec     Int?
+  score           Int?
+  total           Int?
+  percent         Float?
+  passed          Boolean?
+  answers         AttemptAnswer[]
+
+  @@index([userId, startedAt])
+  @@index([anonId, startedAt])
+}
+
+model AttemptAnswer {
+  id           String   @id @default(cuid())
+  attemptId    String
+  attempt      Attempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  questionId   String
+  question     Question @relation(fields: [questionId], references: [id])
+  selectedIndex Int? // null = unanswered
+  correct      Boolean?
+  answeredAt   DateTime @default(now())
+
+  @@unique([attemptId, questionId])
+  @@index([questionId])
+}

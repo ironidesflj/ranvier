@@ -1,0 +1,52 @@
+/**
+ * Noos identity tokens — v1.0 (Outubro de 2026)
+ * Source: "Noos-Ranvier — Guia de Adaptação, Fase 1" (noos-tokens.css do manual).
+ *
+ * ADAPTATION NOTE: custom properties are namespaced with the `--noos-` prefix
+ * (original names were `--bg`, `--surface`, `--muted`, `--border`, …) to avoid
+ * collisions with the app's shadcn/ui theme variables. Values are verbatim
+ * from the manual. The Ranvier domain color is consumed by the app theme
+ * (see globals.css: --primary).
+ *
+ * Rules from the manual (enforced by review):
+ *  - One domain color per app: --noos-ranvier (#246cad) in fills and strokes,
+ *    never in small text; the mother's accent (--noos-accent, #066755) never
+ *    becomes a generic UI color.
+ *  - Newsreader is reserved for the mother's wordmark (the "Noos" in "by Noos").
+ *  - Instrument Sans for body, IBM Plex Mono for IDs and code.
+ */
+
+:root {
+  --noos-bg: #f7fbf9;
+  --noos-surface: #ffffff;
+  --noos-surface-2: #eef4f1;
+  --noos-fg: #0e1b1c;
+  --noos-muted: #525d5e;
+  --noos-border: #d9e0de;
+  --noos-border-strong: #7f8b89;
+  --noos-accent: #066755;
+  --noos-accent-bright: #32a188;
+  --noos-signal: #d69643;
+  --noos-synapse: #7a55b2;
+  --noos-ranvier: #246cad;
+  --noos-myelin: #b5812f;
+  --noos-theta: #b4508c;
+  --noos-engram: #267b4c;
+  --noos-font-display: "Newsreader", "Iowan Old Style", Georgia, serif;
+  --noos-font-body: "Instrument Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --noos-font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.dark {
+  /* Dark-mode tokens from the manual (night study). */
+  --noos-bg: #0a0f10;
+  --noos-surface: #121919;
+  --noos-surface-2: #182020;
+  --noos-fg: #e4e9e8;
+  --noos-muted: #929a99;
+  --noos-border: #2c3535;
+  --noos-border-strong: #5f6b69;
+  --noos-accent: #69c1ae;
+  --noos-accent-bright: #8fd6c5;
+  --noos-signal: #e0a95c;
+}
