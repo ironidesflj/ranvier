@@ -17,6 +17,8 @@
     "db:reset": "prisma migrate reset",
     "db:seed": "bun scripts/seed.ts",
     "validate:questions": "bun scripts/validate-questions.ts",
+    "ci:gate": "bun scripts/ci_gate/gate.ts src/data --strict",
+    "ci:gate:selftest": "bun scripts/ci_gate/selftest.ts",
     "manifest": "bun scripts/generate-manifest.ts",
     "icons": "bun scripts/generate-icons.ts"
   },
