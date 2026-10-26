@@ -61,7 +61,7 @@ export async function runGate(
   opts: { strict?: boolean; allowlistPath?: string } = {},
 ): Promise<GateResult> {
   const strict = opts.strict === true;
-  const allowlistPath = opts.allowlistPath || new URL("./allowlist.tsv", import.meta.url).pathname;
+  const allowlistPath = opts.allowlistPath || decodeURIComponent(new URL("./allowlist.tsv", import.meta.url).pathname);
 
   const { s1Questions } = await import(`${baseDir}/questions/s1-platform`);
   const { s2Questions } = await import(`${baseDir}/questions/s2-ingestion`);
@@ -360,8 +360,8 @@ export async function runGate(
 // ============================ CLI ============================
 if (import.meta.main) {
   const args = process.argv.slice(2);
-  let baseDir = new URL("../../src/data", import.meta.url).pathname;
-  let out = new URL("./gate_result.json", import.meta.url).pathname;
+  let baseDir = decodeURIComponent(new URL("../../src/data", import.meta.url).pathname);
+  let out = decodeURIComponent(new URL("./gate_result.json", import.meta.url).pathname);
   let allowlistPath: string | undefined;
   let strict = false, quiet = false;
   for (let i = 0; i < args.length; i++) {
