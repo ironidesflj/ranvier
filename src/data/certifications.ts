@@ -1,7 +1,7 @@
 /**
  * Canonical certification metadata (seed source of truth).
  * All facts verified against the official Databricks page and the Exam Guide
- * (version as of May 4, 2026) on 2025-XX research session:
+ * (version as of May 4, 2026) on an October 2025 research session:
  *  - https://www.databricks.com/learn/certification/data-engineer-associate
  *  - https://www.databricks.com/sites/default/files/2026-05/databricks-certified-data-engineer-associate-exam-guide-may-2026-000.pdf
  */
