@@ -13,9 +13,9 @@
 import { cp, rm, mkdir } from "node:fs/promises";
 import { runGate } from "./gate.ts";
 
-const SRC = new URL("../../src/data", import.meta.url).pathname;
-const TMP = new URL("./tmp_selftest", import.meta.url).pathname;
-const ALLOW = new URL("./allowlist.tsv", import.meta.url).pathname;
+const SRC = decodeURIComponent(new URL("../../src/data", import.meta.url).pathname);
+const TMP = decodeURIComponent(new URL("./tmp_selftest", import.meta.url).pathname);
+const ALLOW = decodeURIComponent(new URL("./allowlist.tsv", import.meta.url).pathname);
 
 // dados originais (p/ saber correctIndex etc. sem tocar nas cópias)
 const { s2Questions } = await import(`${SRC}/questions/s2-ingestion`);
@@ -216,7 +216,7 @@ for (const c of cases) {
   const okDir = await freshCopy("14a-cli-pass");
   const badDir = await freshCopy("14b-cli-fail");
   await edit(badDir, "questions/s1-platform.ts", t => t.replace('key: "S1-002"', 'key: "S1-001"'));
-  const run = (d: string) => Bun.spawnSync(["bun", new URL("./gate.ts", import.meta.url).pathname, d, "--quiet", "--out", `${TMP}/cli.json`]);
+  const run = (d: string) => Bun.spawnSync(["bun", decodeURIComponent(new URL("./gate.ts", import.meta.url).pathname), d, "--quiet", "--out", `${TMP}/cli.json`]);
   const a = run(okDir), b = run(badDir);
   const aOk = a.exitCode === 0, bOk = b.exitCode === 1;
   console.log(`${aOk ? "✓" : "✗"} 14a-cli-exit-code PASS (exit=${a.exitCode}, esperado 0)`);
