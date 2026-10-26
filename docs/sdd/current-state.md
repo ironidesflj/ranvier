@@ -20,6 +20,14 @@ v1.4.0 = patch de design v1.1 sobre os 7 feedbacks.
 - `/api/health`: `{"status":"ok","db":"ok","certifications":1,"questions":116}`
   no sandbox.
 
+## Documentação pública sincronizada
+
+- Regra permanente: toda atualização publicada do Ranvier deve manter o
+  `README.md` e os metadados públicos **About** do GitHub alinhados com o estado
+  atual do app, sempre em inglês. O README é a referência detalhada; o About é
+  o resumo curto, com website e tópicos coerentes. Nenhuma versão é considerada
+  documentalmente fechada sem revisar os dois.
+
 ## Consumidores do Axon
 
 - `@ironidesflj/axon@0.2.1` está linkado com pin exato no `package.json` e no
