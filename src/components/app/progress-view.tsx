@@ -37,6 +37,8 @@ export function ProgressView() {
     queryKey: ["progress"],
     queryFn: api.progress,
     retry: 1,
+    staleTime: 0,
+    refetchOnMount: "always",
   });
   const { data: me } = useQuery({ queryKey: ["me"], queryFn: api.me });
   const { data: attemptsData, isLoading: attemptsLoading } = useQuery({
@@ -81,6 +83,7 @@ export function ProgressView() {
   const byDomain = progress?.byDomain ?? [];
   const attempts = attemptsData?.attempts ?? [];
   const hasData = (totals?.totalAnswered ?? 0) > 0;
+  const examsCompleted = totals?.examsCompleted ?? 0;
 
   const radarData = byDomain.map((d) => ({
     domain: lang === "pt" ? `S${d.code}` : `S${d.code}`,
@@ -91,7 +94,7 @@ export function ProgressView() {
   const statCards = [
     { icon: CheckCircle2, label: t.progress.statCards.answered, value: String(totals?.totalAnswered ?? 0) },
     { icon: Target, label: t.progress.statCards.accuracy, value: `${totals?.accuracy ?? 0}%` },
-    { icon: Award, label: t.progress.statCards.exams, value: String(totals?.examsCompleted ?? 0) },
+    { icon: Award, label: examsCompleted === 1 ? t.progress.statCards.exam : t.progress.statCards.exams, value: String(examsCompleted) },
     { icon: TrendingUp, label: t.progress.statCards.best, value: totals?.bestExamPercent != null ? `${Math.round(totals.bestExamPercent)}%` : "—" },
     { icon: BookOpenCheck, label: t.progress.statCards.sessions, value: String(totals?.studySessions ?? 0) },
     { icon: History, label: t.progress.statCards.review, value: String(totals?.reviewQueueCount ?? 0) },
