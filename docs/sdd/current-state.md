@@ -20,6 +20,13 @@ v1.4.0 = patch de design v1.1 sobre os 7 feedbacks.
 - `/api/health`: `{"status":"ok","db":"ok","certifications":1,"questions":116}`
   no sandbox.
 
+## Consumidores do Axon
+
+- `@ironidesflj/axon@0.2.1` está linkado com pin exato no `package.json` e no
+  lockfile. Esta primeira fatia formaliza o Ranvier como consumidor do pacote;
+  validação de IDs, checksum e manifesto ainda será adotada separadamente,
+  atrás de feature flags, sem alterar o acervo nesta etapa.
+
 ## Verificado na v1.4.1 (evidência no worklog Task 10)
 
 - **Fim da letra gigante**: pergunta e alternativas voltaram ao tamanho de
