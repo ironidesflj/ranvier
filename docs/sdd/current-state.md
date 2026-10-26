@@ -20,6 +20,19 @@ v1.4.0 = patch de design v1.1 sobre os 7 feedbacks.
 - `/api/health`: `{"status":"ok","db":"ok","certifications":1,"questions":116}`
   confirmado em produção e no sandbox.
 
+## Auditoria do banco — data_fixed_v2
+
+- Pacote auditado em 27/10/2026: 116/116 gabaritos aprovados, 57/57
+  referências oficiais válidas, IDs RAN-DBDEA-00001..00116 íntegros e zero
+  achados críticos.
+- Aplicadas as correções do pacote `data_fixed_v2.zip`: URLs canônicas de
+  COPY INTO, funções Spark SQL e JDBC; normalização de metadados; e
+  reequilíbrio das alternativas em 76 questões, sem alterar gabaritos,
+  enunciados, explicações, referências ou dificuldades.
+- A validação local confirmou 116 questões, 0 erros e 0 warnings. A expansão
+  recomendada para aproximadamente 300 questões é roadmap, não bloqueio da
+  versão atual.
+
 ## Documentação pública sincronizada
 
 - Regra permanente: toda atualização publicada do Ranvier deve manter o
