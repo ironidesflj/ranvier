@@ -73,7 +73,7 @@ export const GUIDE_SECTIONS: GuideSection[] = [
       "Critérios de decisão entre métodos: volume de arquivos, frequência de chegada, tipo de fonte, necessidade de governança.",
     ],
     links: [
-      { title: "COPY INTO", url: "https://docs.databricks.com/aws/en/ingestion/copy-into" },
+      { title: "COPY INTO", url: "https://docs.databricks.com/aws/en/ingestion/cloud-object-storage/copy-into" },
       { title: "Auto Loader", url: "https://docs.databricks.com/aws/en/ingestion/cloud-object-storage/auto-loader/" },
       { title: "File notification mode", titlePt: "Modo file notification", url: "https://docs.databricks.com/aws/en/ingestion/cloud-object-storage/auto-loader/file-notification-mode" },
       { title: "Lakeflow Connect", url: "https://docs.databricks.com/aws/en/ingestion/lakeflow-connect/" },
