@@ -27,7 +27,7 @@ const all: SeedQuestion[] = [
 const errors: string[] = [];
 const warnings: string[] = [];
 
-const expected: Record<number, number> = { 1: 8, 2: 24, 3: 25, 4: 18, 5: 12, 6: 12, 7: 17 };
+const expected: Record<number, number> = { 1: 19, 2: 59, 3: 69, 4: 43, 5: 31, 6: 33, 7: 46 };
 
 // Counts per domain
 const byDomain = new Map<number, SeedQuestion[]>();
