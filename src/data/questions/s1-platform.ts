@@ -42,12 +42,12 @@ Which approach directly addresses these requirements on the Databricks Data Inte
       "Convert all data to unstructured JSON files so both teams can parse them with their own custom readers",
     ],
     correctIndex: 1,
-    explanationPt: `A abordagem lakehouse usa o Delta Lake — um formato de tabela aberto sobre o cloud object storage — para trazer transações ACID, controle de schema e time travel diretamente ao data lake. Uma única cópia dos dados serve simultaneamente analytics (SQL) e ciência de dados (PySpark/ML), com o Unity Catalog fornecendo governança, linhagem e controle de acesso centralizados sobre essas tabelas.
-
-Manter duas cópias (warehouse + lake) gera custo dobrado e inconsistência; DataFrames em memória são efêmeros e não constituem fonte da verdade; e JSON não estruturado perde schema e garantias transacionais.`,
     explanationEn: `The lakehouse approach uses Delta Lake — an open table format layered on cloud object storage — to bring ACID transactions, schema enforcement, and time travel directly to the data lake. A single copy of the data serves both analytics (SQL) and data science (PySpark/ML) workloads, with Unity Catalog providing governance, lineage, and centralized access control over those tables.
 
 Keeping two copies (warehouse + lake) doubles cost and creates consistency risks; in-memory DataFrames are ephemeral and are not a source of truth; and unstructured JSON loses schema and transactional guarantees.`,
+    explanationPt: `A abordagem lakehouse usa o Delta Lake — um formato de tabela aberto sobre o cloud object storage — para trazer transações ACID, controle de schema e time travel diretamente ao data lake. Uma única cópia dos dados serve simultaneamente analytics (SQL) e ciência de dados (PySpark/ML), com o Unity Catalog fornecendo governança, linhagem e controle de acesso centralizados sobre essas tabelas.
+
+Manter duas cópias (warehouse + lake) gera custo dobrado e inconsistência; DataFrames em memória são efêmeros e não constituem fonte da verdade; e JSON não estruturado perde schema e garantias transacionais.`,
     referenceUrl: "https://docs.databricks.com/aws/en/introduction",
     referenceTitle: "Introduction to the Databricks Data Intelligence Platform",
     difficulty: "EASY",
@@ -59,8 +59,8 @@ Keeping two copies (warehouse + lake) doubles cost and creates consistency risks
 
 Which platform component is the foundation for these requirements?`,
     options: [
-      "Unity Catalog, which centralizes permissions, lineage, and auditing across the lakehouse",
-      "Delta Lake, which enforces access rules inside the table format through its ACID transaction log",
+      "Unity Catalog, the lakehouse's unified governance layer, with centralized permissions, lineage, and auditing",
+      "Delta Lake, which enforces access rules inside the table format through the ACID transaction log it maintains on every write",
       "Serverless SQL warehouses, which automatically apply row-level filters to every query they execute",
       "Lakeflow Jobs, which can grant and revoke privileges each time a scheduled task runs",
     ],
@@ -99,7 +99,7 @@ Which compute service should the team use?`,
     options: [
       "A classic all-purpose Spark cluster with Photon enabled, shared by all analysts",
       "A SQL warehouse, the compute optimized for SQL queries, analytics, and business intelligence workloads",
-      "A job cluster scoped to a nightly Lakeflow Job, which the BI tools connect to during the day",
+      "A classic job cluster scoped to a nightly Lakeflow Job, which the BI tools would have to connect to during the day while it stays running",
       "Serverless compute for jobs, because the BI tools schedule their queries as job tasks",
     ],
     correctIndex: 1,
@@ -118,7 +118,7 @@ Which statement is correct?`,
     options: [
       "The JAR task can run on serverless compute for jobs once the JAR is uploaded as a dependent library",
       "The JAR task must run on a serverless SQL warehouse, because SQL warehouses execute compiled artifacts",
-      "JAR tasks are not supported on serverless compute for jobs — they need classic jobs compute instead",
+      "JAR tasks are not supported on serverless compute for jobs — that task needs classic jobs compute",
       "Serverless compute for jobs supports every task type; the team only needs to pick a Databricks Runtime version",
     ],
     correctIndex: 2,
@@ -138,7 +138,7 @@ What should the data engineer answer?`,
       "Yes — serverless compute automatically attaches GPU instances when it detects ML libraries",
       "Yes — serverless compute supports every Databricks Runtime version, including ML runtimes",
       "No — interactive GPU training must be submitted as separate Lakeflow Jobs that each create a job cluster",
-      "No — ML Runtime on GPU is not supported on serverless compute; it requires a classic compute resource",
+      "No — ML Runtime on GPU is not supported on serverless compute; use a classic compute resource",
     ],
     correctIndex: 3,
     explanationEn: `Serverless compute is on-demand and automatically managed, but it does not support every workload: Databricks recommends serverless for most new workloads, and for workloads that serverless does not support — such as ML Runtime on GPU — the guidance is to configure a classic compute resource with the required instance types, runtime, and libraries. Serverless never attaches GPUs based on detected libraries, and moving interactive experimentation into per-run job clusters would break the team's interactive workflow while adding orchestration overhead.`,
@@ -156,8 +156,8 @@ Which platform capability should the company use?`,
     options: [
       "Databricks Git Folders (formerly Repos), which run notebooks on a schedule from a Git branch",
       "Unity Catalog, which governs data access and can also schedule notebook refreshes",
-      "Delta Lake time travel, which can rewind and replay a notebook's previous outputs from the table's transaction log",
-      "Lakeflow Jobs (formerly Workflows), which schedule notebooks with retries and failure notifications",
+      "Delta Lake time travel, which can rewind and replay a notebook's previous outputs",
+      "Lakeflow Jobs, which schedule the notebook with retries and failure notifications",
     ],
     correctIndex: 3,
     explanationEn: `Lakeflow Jobs is the platform's workflow automation service: it schedules and orchestrates tasks such as notebooks and SQL queries, supports task retries, and can send email or webhook notifications when a run fails or takes too long. Git Folders provide version control for code in Git repositories — they never execute code on a schedule. Unity Catalog centralizes governance (permissions, lineage, auditing) and does not schedule notebooks. Time travel is a Delta Lake feature for querying historical versions of a table, unrelated to orchestration.`,
