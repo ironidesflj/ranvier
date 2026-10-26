@@ -262,6 +262,7 @@ export const dict = {
       statCards: {
         answered: "Questões respondidas",
         accuracy: "Precisão geral",
+        exam: "Simulado feito",
         exams: "Simulados feitos",
         best: "Melhor simulado",
         sessions: "Sessões de estudo",
@@ -698,6 +699,7 @@ export const dict = {
       statCards: {
         answered: "Questions answered",
         accuracy: "Overall accuracy",
+        exam: "Exam taken",
         exams: "Exams taken",
         best: "Best exam",
         sessions: "Study sessions",
