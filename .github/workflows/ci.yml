@@ -38,5 +38,11 @@ jobs:
       - name: Validate question bank
         run: bun run validate:questions
 
+      - name: Question-bank quality gate
+        run: bun run ci:gate
+
+      - name: Quality-gate red team selftest
+        run: bun run ci:gate:selftest
+
       - name: Build
         run: bun run build
