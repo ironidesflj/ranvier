@@ -18,7 +18,7 @@ v1.4.0 = patch de design v1.1 sobre os 7 feedbacks.
 - PWA: manifest (tema papel #f7fbf9), sw.js stale-while-revalidate
   (`ranvier-v1.4.1`), offline.html, ícones com monograma R.
 - `/api/health`: `{"status":"ok","db":"ok","certifications":1,"questions":116}`
-  no sandbox.
+  confirmado em produção e no sandbox.
 
 ## Documentação pública sincronizada
 
@@ -110,10 +110,11 @@ v1.4.0 = patch de design v1.1 sobre os 7 feedbacks.
 
 ## Limitações conhecidas (honestas)
 
-1. **Produção Vercel segue com a camada de banco quebrada** (incidente
-   2026-10-24: 500 em todas as queries de DB). Diagnóstico e receita de
-   reparo em `../DEPLOY.md` §4/§5/§11 (`curl /api/health` primeiro). A
-   publicação da v1.4.0 exige aplicar o reparo no mesmo lote.
+1. **Deploy exige conferência de saúde após cada alteração de infraestrutura**
+   (incidente resolvido em 2026-10-24: a produção chegou a retornar 500 nas
+   queries de DB). O procedimento permanente é executar `curl /api/health`
+   após redeploy e confirmar `status: ok`, `db: ok`, `certifications: 1` e
+   `questions: 116`; a receita de reparo permanece em `../DEPLOY.md` §4/§5/§11.
 2. SW stale-while-revalidate: primeira visita offline sem cache prévio não tem
    catálogo (comportamento esperado do SWR; visitantes que já usaram o app
    têm cache).
