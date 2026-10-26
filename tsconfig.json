@@ -45,6 +45,7 @@
     "skills",
     "upload",
     "tool-results",
-    "download"
+    "download",
+    "scripts/ci_gate"
   ]
 }
