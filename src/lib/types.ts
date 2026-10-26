@@ -122,6 +122,8 @@ export interface AttemptDetail {
   status: "IN_PROGRESS" | "COMPLETED";
   startedAt: string;
   durationMin: number | null;
+  /** Certification short name (e.g. "DBDEA") — session bars (patch v1.1 §10). */
+  certShortName: string;
   result: AttemptResult | null;
   questions: PublicQuestion[] | ReviewQuestion[];
   answers: Record<string, number | null>; // questionId -> selectedIndex

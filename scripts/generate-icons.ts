@@ -1,11 +1,13 @@
 /**
- * Generates the PWA icon set (public/icons/) from the Ranvier brand mark.
+ * Generates the PWA icon set (public/icons/) from the Ranvier monograma
+ * (patch de identidade v1.0 §4).
  *
  * Sources:
- *  - "any" icons: public/favicon.svg (rounded square #246cad + white check).
- *  - "maskable" + Apple touch icons: full-bleed square with the check scaled
- *    into the 80% safe zone (maskable icons are cropped by the launcher to a
- *    circle/squircle — nothing important may live near the edges).
+ *  - "any" icons: public/favicon.svg (tile #246cad raio 26/120 + monograma
+ *    compacto em #f7fbf9) — the launcher icon of the app.
+ *  - "maskable" + Apple touch icons: full-bleed square #246cad with the
+ *    compact monograma inside the 80% safe zone (launchers crop maskable
+ *    icons to a circle/squircle — nothing important near the edges).
  *
  * Run: bun scripts/generate-icons.ts   (idempotent — overwrites outputs)
  */
@@ -14,17 +16,25 @@ import { mkdir } from "node:fs/promises";
 
 const OUT_DIR = "public/icons";
 
-/** Ranvier blue + dark ink, straight from noos-tokens.css. */
+/** Ranvier domain blue + paper ink, straight from the identity patch. */
 const BRAND_BLUE = "#246cad";
+const PAPER = "#f7fbf9";
 
-/** Full-bleed icon: check mark centered in the maskable safe zone. */
+/** Compact monograma (full leg, no node) — patch §4. */
+const COMPACT_MONOGRAM = `
+  <g fill="none" stroke="${PAPER}" stroke-width="10" stroke-linecap="round">
+    <path d="M38 94V26"/>
+    <path d="M38 26h22a20 20 0 0 1 0 40H38"/>
+    <path d="M60 66l28 28"/>
+  </g>`;
+
+/** Full-bleed maskable icon: tile + compact monograma centered (57% of the
+ *  canvas height — well inside the 80% maskable safe zone). */
 function fullBleedSvg(size: number): Buffer {
-  // Check path derived from favicon.svg (viewBox 64 → scaled to a 512 canvas,
-  // centered, ~49% width incl. stroke — well inside the 80% safe zone).
   return Buffer.from(
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="${size}" height="${size}">
-  <rect width="512" height="512" fill="${BRAND_BLUE}"/>
-  <path d="M155 261 227 333 357 179" fill="none" stroke="#FFFFFF" stroke-width="47" stroke-linecap="round" stroke-linejoin="round"/>
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="${size}" height="${size}">
+  <rect width="120" height="120" fill="${BRAND_BLUE}"/>
+  ${COMPACT_MONOGRAM}
 </svg>`
   );
 }
@@ -40,18 +50,18 @@ async function renderPng(input: Buffer | string, size: number, file: string) {
 async function main() {
   await mkdir(OUT_DIR, { recursive: true });
 
-  // "any" purpose — rounded square, transparent corners (straight from the favicon).
+  // "any" purpose — tile #246cad (raio 26/120) + monograma compacto.
   await renderPng("public/favicon.svg", 192, "icon-192.png");
   await renderPng("public/favicon.svg", 512, "icon-512.png");
 
-  // "maskable" purpose — full-bleed blue, check inside the safe zone.
+  // "maskable" purpose — full-bleed blue, monograma in the safe zone.
   await renderPng(fullBleedSvg(512), 192, "icon-maskable-192.png");
   await renderPng(fullBleedSvg(512), 512, "icon-maskable-512.png");
 
   // Apple touch icon (iOS home screen) — full-bleed, 180 px.
   await renderPng(fullBleedSvg(512), 180, "apple-touch-icon.png");
 
-  console.log("PWA icon set generated.");
+  console.log("PWA icon set generated (monograma R).");
 }
 
 main().catch((err) => {

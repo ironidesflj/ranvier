@@ -5,37 +5,40 @@ import { useLang } from "@/components/app/language-provider";
 import { hubHomeUrl } from "@/lib/axon/deep-links";
 
 /**
- * "by Noos" endorsement badge (Noos identity manual — Guia de Adaptação, Fase 1).
+ * Assinatura "by Noos" (guia Noos v1.1 §02 + decisões do fundador).
  *
- * Rules enforced here:
- *  - Compact mark, positive on light / negative on dark.
- *  - Soft ink (muted), never a title, never a primary button, shown once
- *    (footer only) — the app's own name prevails on every screen.
- *  - Links to the Noos hub with the free canonical fallback URL embedded until
- *    noos.study exists (NEXT_PUBLIC_NOOS_HUB_URL overrides it).
- *  - The word is "Noos" — no accent, no caps, no translation, in any language.
- *
- * Sizing (founder feedback 2026-10-23 — overrides the manual's 11–13 px mark):
- * the 12 px mark read as "small on mobile, tiny on desktop". Now responsive:
- *  - Mobile: 16 px mark / 11 px text (46% of the 24 px app name).
- *  - Desktop (md+): 20 px mark / 13 px text (54% of the 24 px app name) —
- *    larger screens are viewed from farther away, so the endorsement scales up.
+ *  - Lugar (guia §04-F + checklist de lançamento + pedido do fundador
+ *    2026-10-25): o RODAPÉ de conteúdo, ao lado de Local-First e da versão —
+ *    uma única vez por tela, nunca nas duas pontas (o topo fica só com a
+ *    marca do app: monograma + Ranvier).
+ *  - Decisão do fundador (ADR v1.3.1): a assinatura VOLTA a ser um LINK para
+ *    o hub Noos. Isso sobrepõe o "nunca como ação" do guia §02 — é endosso
+ *    de origem que leva ao ecossistema, não CTA de produto; a assinatura
+ *    continua sem vender nada dentro do app.
+ *  - Sempre em inglês: "by" minúsculo, "Noos" capitalizado (nunca "por Noos").
+ *  - Mono, tinta suave (muted → foreground no hover), símbolo compacto de
+ *    14 px + texto de 13 px (teto do range do guia, preservando o pedido de
+ *    legibilidade do fundador de 2026-10-23).
+ *  - Alvo de 44 px (mínimo de touch do patch §12).
+ *  - Símbolo compacto positivo no claro / negativo no escuro.
  */
 export function NoosBadge({ className }: { className?: string }) {
-  const { lang } = useLang();
+  const { lang, t } = useLang();
   return (
     <a
       href={hubHomeUrl(lang)}
       target="_blank"
       rel="noopener noreferrer"
+      aria-label={t.footer.byNoosLabel}
       className={cn(
-        "inline-flex items-center gap-1.5 text-muted-foreground transition-colors hover:text-foreground",
+        "inline-flex min-h-11 items-center gap-1.5 font-mono text-[13px] leading-none text-muted-foreground transition-colors hover:text-foreground",
+        "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--app-ink)]",
         className
       )}
     >
-      <img src="/brand/noos-compact.svg" alt="" width={16} height={16} aria-hidden className="h-4 w-4 dark:hidden md:h-5 md:w-5" />
-      <img src="/brand/noos-mark-negative.svg" alt="" width={16} height={16} aria-hidden className="hidden h-4 w-4 dark:block md:h-5 md:w-5" />
-      <span className="font-newsreader text-[11px] italic leading-none tracking-wide md:text-[13px]">by Noos</span>
+      <img src="/brand/noos-compact.svg" alt="" width={14} height={14} aria-hidden className="h-3.5 w-3.5 dark:hidden" />
+      <img src="/brand/noos-mark-negative.svg" alt="" width={14} height={14} aria-hidden className="hidden h-3.5 w-3.5 dark:block" />
+      <span>by Noos</span>
     </a>
   );
 }

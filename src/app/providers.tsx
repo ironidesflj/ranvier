@@ -23,7 +23,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
+      {/* Guia Noos v1.1 / patch §7: tema claro é o padrão ("tema escuro como padrão" é proibido);
+          o escuro permanece disponível como escolha explícita do estudante. */}
+      <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
         <LanguageProvider>
           <PwaProvider>
             {children}

@@ -3,18 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import {
-  AlarmClock,
-  ArrowLeft,
-  ArrowRight,
-  Flag,
-  LayoutGrid,
-  Loader2,
-  Send,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, Flag, Home, LayoutGrid, Loader2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -22,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { useLang } from "@/components/app/language-provider";
 import { useAppStore } from "@/store/app-store";
 import { api } from "@/lib/api-client";
+import { orderOptions } from "@/lib/option-order";
 import { QuestionCard } from "@/components/app/question-card";
 
 function formatClock(totalSec: number): string {
@@ -31,6 +22,49 @@ function formatClock(totalSec: number): string {
   return `${String(m).padStart(2, "0")}:${String(r).padStart(2, "0")}`;
 }
 
+/**
+ * Régua de tempo (patch Ranvier v1.0 §8 + v1.1 §10.2): de ponta a ponta,
+ * ticks a cada 2%, majors a cada 10%, dreno da direita para a esquerda.
+ * O número do relógio vive na barra de sessão (acima); aqui fica só o
+ * dreno decorativo (aria-hidden) — o tempo em texto é anunciado por marcos.
+ */
+function TimeRuler({ remainingSec, totalSec }: { remainingSec: number; totalSec: number }) {
+  const pct = totalSec > 0 ? Math.max(0, Math.min(100, (remainingSec / totalSec) * 100)) : 0;
+  return (
+    <div className="mx-auto w-full max-w-3xl px-4 pb-2" aria-hidden>
+      <div className="relative h-4">
+        {Array.from({ length: 51 }, (_, i) => {
+          const left = i * 2;
+          const major = left % 10 === 0;
+          return (
+            <span
+              key={i}
+              className="absolute bottom-0 w-px bg-[var(--noos-border-strong)]"
+              style={{ left: `${left}%`, height: major ? 12 : 6, opacity: major ? 1 : 0.6 }}
+            />
+          );
+        })}
+        <span className="absolute bottom-0 left-0 right-0 h-px bg-[var(--noos-border-strong)]" />
+        {/* dreno: o tempo decorrido cobre os ticks da direita para a esquerda */}
+        <div className="absolute inset-y-0 right-0 bg-card" style={{ width: `${100 - pct}%` }} />
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Exame (patch Ranvier v1.0 §7/§8 + v1.1 §10) — chrome-less: uma questão
+ * por tela. Barra de sessão PRESA ao topo (v1.1 §10.1 — feedback nº 4):
+ * Início, certificação · modo, posição 07/45 e relógio — o dreno do tempo
+ * (régua) continua visível com a questão rolada. Questão em 720 px com
+ * metadados QUESTÃO N/TOTAL e domínio · nível; alternativas com letra mono
+ * (ver QuestionCard).
+ *
+ * Alternativas embaralhadas por sessão com semente estável (attemptId) —
+ * nota B do patch v1.1 (feedback nº 5): o protocolo continua gravando
+ * índices canônicos; a UI traduz canônico ↔ exibido ao responder, retomar
+ * e revisar.
+ */
 export function ExamView() {
   const { t, f } = useLang();
   const { attemptId, navigate } = useAppStore();
@@ -103,7 +137,25 @@ export function ExamView() {
     return () => clearInterval(timer);
   }, []);
 
-  const remainingSec = deadline ? Math.floor((deadline - now) / 1000) : null;
+  const remainingSec = deadline ? Math.floor((deadline - now) / 1000) : 0;
+  const totalSec = (durationMin ?? 0) * 60;
+
+  /* Marcos de tempo em aria-live polite (guia Noos §06: "marcos, não ruído" —
+     o relógio visual atualiza a cada segundo sem anúncio; anunciamos só em
+     10 min e 1 min restantes). QA 3-a WARN-2. */
+  const [timeAnnouncement, setTimeAnnouncement] = useState("");
+  const announcedRef = useRef<{ ten: boolean; one: boolean }>({ ten: false, one: false });
+  useEffect(() => {
+    if (remainingSec <= 0) return;
+    if (remainingSec <= 600 && !announcedRef.current.ten) {
+      announcedRef.current.ten = true;
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- deliberate one-shot milestone announcement for screen readers (aria-live polite)
+      setTimeAnnouncement(t.exam.timeWarning);
+    } else if (remainingSec <= 60 && !announcedRef.current.one) {
+      announcedRef.current.one = true;
+      setTimeAnnouncement(t.exam.timeWarningMinute);
+    }
+  }, [remainingSec, t.exam.timeWarning, t.exam.timeWarningMinute]);
 
   const autoSubmit = useCallback(() => {
     if (!detail || submittedRef.current || submit.isPending) return;
@@ -113,8 +165,8 @@ export function ExamView() {
   }, [detail, submit, t.exam.autoSubmitted]);
 
   useEffect(() => {
-    if (remainingSec !== null && remainingSec <= 0) autoSubmit();
-  }, [remainingSec, autoSubmit]);
+    if (remainingSec <= 0 && deadline) autoSubmit();
+  }, [remainingSec, deadline, autoSubmit]);
 
   function persistFlags(next: string[]) {
     setFlags(next);
@@ -127,11 +179,12 @@ export function ExamView() {
     }
   }
 
-  async function handleSelect(questionId: string, selectedIndex: number) {
+  async function handleSelect(questionId: string, ordering: { toCanonical: (d: number) => number }, displayIndex: number) {
     if (!detail) return;
-    setAnswers((prev) => ({ ...prev, [questionId]: selectedIndex }));
+    const canonical = ordering.toCanonical(displayIndex);
+    setAnswers((prev) => ({ ...prev, [questionId]: canonical }));
     try {
-      await api.answer(detail.attemptId, questionId, selectedIndex);
+      await api.answer(detail.attemptId, questionId, canonical);
     } catch {
       toast.error(t.toast.error);
     }
@@ -168,60 +221,64 @@ export function ExamView() {
   const current = questions[index];
   const answeredCount = Object.keys(answers).length;
   const unanswered = questions.length - answeredCount;
-  const progressPercent = Math.round((answeredCount / questions.length) * 100);
-  const lowTime = remainingSec !== null && remainingSec <= 600;
+  const lowTime = remainingSec <= 600;
+  /* Ordem embaralhada estável por tentativa (nota B — feedback nº 5). */
+  const ordering = orderOptions(current, detail.attemptId, current.id);
+  const displaySelected = answers[current.id] !== undefined ? ordering.toDisplay(answers[current.id]) : null;
 
   return (
     <div className="flex flex-1 flex-col">
-      {/* Exam toolbar */}
-      <div className="sticky top-14 z-30 border-b bg-background/90 backdrop-blur">
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-2.5">
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="ghost" size="sm">
-                <ArrowLeft className="h-4 w-4" />
-                <span className="hidden sm:inline">{t.common.back}</span>
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>{t.exam.leaveTitle}</AlertDialogTitle>
-                <AlertDialogDescription>{t.exam.leaveDesc}</AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>{t.common.continue}</AlertDialogCancel>
-                <AlertDialogAction onClick={() => navigate("home")}>{t.exam.leaveCta}</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-
-          <div className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
-            <span className="hidden sm:inline">{f(t.exam.answeredCount, { answered: answeredCount, total: questions.length })}</span>
-            <span className="sm:hidden">
-              {answeredCount}/{questions.length}
-            </span>
-            <div className="hidden w-24 sm:block">
-              <Progress value={progressPercent} className="h-1" />
-            </div>
+      {/* Marcos de tempo para leitores de tela (polite) */}
+      <p className="sr-only" aria-live="polite">{timeAnnouncement}</p>
+      {/* Barra de sessão presa ao topo (v1.1 §10.1 — feedback nº 4): Início
+          (com confirmação — o relógio continua correndo), certificação · modo,
+          posição N/T e entrega. Relógio na própria barra; o dreno (régua)
+          logo abaixo, tudo fixo — nada some ao rolar a questão. */}
+      <div className="sticky top-0 z-30 border-b bg-card">
+        <div className="mx-auto flex h-[52px] max-w-3xl items-center justify-between gap-2 px-4 md:h-14">
+          <div className="flex min-w-0 items-center gap-2">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="ghost" size="sm" aria-label={t.nav.home}>
+                  <Home className="h-4 w-4" />
+                  <span className="hidden sm:inline">{t.nav.home}</span>
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{t.exam.leaveTitle}</AlertDialogTitle>
+                  <AlertDialogDescription>{t.exam.leaveDesc}</AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{t.common.continue}</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => navigate("home")}>{t.exam.leaveCta}</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+            <p className="hidden truncate font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-muted-foreground sm:block">
+              {detail.certShortName} · {t.exam.title}
+            </p>
           </div>
 
+          <p className="font-mono text-xs font-medium uppercase tracking-[0.08em] tabular-nums text-muted-foreground">
+            {f(t.study.questionOf, { current: index + 1, total: questions.length })}
+          </p>
+
           <div className="flex items-center gap-2">
-            <span
-              className={cn(
-                "inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-sm font-bold tabular-nums",
-                lowTime ? "animate-pulse bg-destructive/15 text-destructive" : "bg-primary/10 text-primary"
-              )}
+            {/* Relógio na barra (v1.1 §10.1): mono tabular, vermelho só no
+                aviso — nunca piscando. */}
+            <p
               role="timer"
               aria-live="off"
+              className={cn("font-mono text-sm font-medium tabular-nums tracking-[-0.01em]", lowTime ? "text-[var(--noos-danger)]" : "text-foreground")}
             >
-              <AlarmClock className="h-4 w-4" aria-hidden />
-              {formatClock(remainingSec ?? 0)}
-            </span>
+              {formatClock(remainingSec)}
+            </p>
 
-            {/* Mobile palette */}
+            {/* Navegador de questões (mobile) */}
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="outline" size="sm" className="lg:hidden">
+                <Button variant="outline" size="sm" className="lg:hidden" aria-label={t.exam.palette}>
                   <LayoutGrid className="h-4 w-4" />
                 </Button>
               </SheetTrigger>
@@ -242,7 +299,7 @@ export function ExamView() {
 
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button size="sm" disabled={submit.isPending}>
+                <Button size="sm" disabled={submit.isPending} aria-label={t.exam.submit}>
                   {submit.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                   <span className="hidden sm:inline">{t.exam.submit}</span>
                 </Button>
@@ -262,31 +319,41 @@ export function ExamView() {
             </AlertDialog>
           </div>
         </div>
-        {lowTime && (
-          <p className="bg-destructive/10 py-1 text-center text-xs font-medium text-destructive">{t.exam.timeWarning}</p>
-        )}
+
+        {/* Dreno do tempo — o tempo é a única coisa que se move */}
+        <TimeRuler remainingSec={remainingSec} totalSec={totalSec} />
+        {lowTime && <p className="py-1 text-center font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--noos-danger)]">{t.exam.timeWarning}</p>}
       </div>
 
-      {/* Body */}
-      <div className="mx-auto flex w-full max-w-5xl flex-1 gap-6 px-4 py-6">
+      {/* Corpo: questão em 720 px + navegador no desktop */}
+      <div className="mx-auto flex w-full max-w-5xl flex-1 gap-8 px-4 py-6">
         <div className="min-w-0 flex-1">
-          <p className="mb-3 text-sm text-muted-foreground">
-            {f(t.study.questionOf, { current: index + 1, total: questions.length })}
-          </p>
-          <Card>
-            <CardContent className="p-4 sm:p-6">
-              <QuestionCard
-                question={current}
-                selectedIndex={answers[current.id] ?? null}
-                onSelect={(i) => void handleSelect(current.id, i)}
-              />
-            </CardContent>
-          </Card>
+          {/* h1 semântico para leitores de tela (equipe UX 3-b FAIL-6) */}
+          <h1 className="sr-only">{f(t.study.questionOf, { current: index + 1, total: questions.length })} — {t.app.name}</h1>
+          {/* Metadados: QUESTÃO N/TOTAL à esquerda; domínio e nível à direita */}
+          <div className="mb-6 flex flex-wrap items-baseline justify-between gap-2 border-b pb-3">
+            <p className="font-mono text-sm font-medium uppercase tracking-[0.08em] text-muted-foreground">
+              {f(t.study.questionOf, { current: index + 1, total: questions.length })}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {current.domainName} · {t.study.difficulties[current.difficulty]}
+            </p>
+          </div>
 
-          <div className="mt-4 flex items-center justify-between gap-3">
-            <Button variant="outline" disabled={index === 0} onClick={() => setIndex((i) => Math.max(0, i - 1))}>
+          <QuestionCard
+            question={{ ...current, options: ordering.options }}
+            selectedIndex={displaySelected}
+            onSelect={(i) => void handleSelect(current.id, ordering, i)}
+          />
+
+          {/* Rodapé da questão: navegação + marcar para revisão */}
+          <div className="mt-6 flex items-center justify-between gap-3 border-t pt-4">
+            <Button variant="outline" size="sm" disabled={index === 0} aria-label={t.common.back} onClick={() => {
+              setIndex((i) => Math.max(0, i - 1));
+              window.scrollTo({ top: 0 });
+            }}>
               <ArrowLeft className="h-4 w-4" />
-              {t.common.back}
+              <span className="hidden sm:inline">{t.common.back}</span>
             </Button>
             <Button
               variant={flags.includes(current.id) ? "secondary" : "ghost"}
@@ -296,22 +363,23 @@ export function ExamView() {
               }
               aria-pressed={flags.includes(current.id)}
             >
-              <Flag className={cn("h-4 w-4", flags.includes(current.id) && "fill-amber-400 text-amber-500")} />
-              <span className="hidden sm:inline">
-                {flags.includes(current.id) ? t.exam.unflag : t.exam.flag}
-              </span>
+              <Flag className={cn("h-4 w-4", flags.includes(current.id) && "fill-[var(--noos-signal)] text-[var(--noos-signal)]")} />
+              <span className="hidden sm:inline">{flags.includes(current.id) ? t.exam.unflag : t.exam.flag}</span>
             </Button>
             {index < questions.length - 1 ? (
-              <Button onClick={() => setIndex((i) => i + 1)}>
+              <Button variant="outline" size="sm" onClick={() => {
+                setIndex((i) => i + 1);
+                window.scrollTo({ top: 0 });
+              }}>
                 {t.common.next}
                 <ArrowRight className="h-4 w-4" />
               </Button>
             ) : (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button>
+                  <Button size="sm">
                     <Send className="h-4 w-4" />
-                    {t.exam.submit}
+                    <span className="hidden sm:inline">{t.exam.submit}</span>
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
@@ -331,9 +399,9 @@ export function ExamView() {
           </div>
         </div>
 
-        {/* Desktop palette */}
+        {/* Navegador de questões (desktop) */}
         <aside className="hidden w-56 shrink-0 lg:block">
-          <div className="sticky top-32">
+          <div className="sticky top-40">
             <PaletteGrid
               questions={questions}
               answers={answers}
@@ -367,7 +435,7 @@ function PaletteGrid({
   const { t } = useLang();
   return (
     <div>
-      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.exam.palette}</p>
+      <p className="mb-2 font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-muted-foreground">{t.exam.palette}</p>
       <div className="grid grid-cols-6 gap-1.5 sm:grid-cols-7 lg:grid-cols-5">
         {questions.map((q, i) => {
           const answered = answers[q.id] !== undefined;
@@ -380,26 +448,26 @@ function PaletteGrid({
               aria-label={`Q${i + 1}${answered ? ` — ${t.exam.paletteLegend.answered}` : ` — ${t.exam.paletteLegend.unanswered}`}${flagged ? ` — ${t.exam.paletteLegend.flagged}` : ""}`}
               aria-current={i === index}
               className={cn(
-                "relative flex h-8 w-8 items-center justify-center rounded-lg border text-xs font-semibold transition-colors",
-                i === index && "ring-2 ring-ring ring-offset-1 ring-offset-background",
-                answered ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-muted-foreground hover:border-primary/50"
+                "relative flex h-11 w-11 items-center justify-center border font-mono text-xs font-medium tabular-nums transition-colors",
+                i === index && "outline-2 outline-offset-2 outline-[var(--app-ink)]",
+                answered ? "border-app bg-app text-white" : "border-border bg-card text-muted-foreground hover:border-[var(--noos-border-strong)]"
               )}
             >
               {i + 1}
-              {flagged && <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-amber-400" aria-hidden />}
+              {flagged && <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-[var(--noos-signal)]" aria-hidden />}
             </button>
           );
         })}
       </div>
       <div className="mt-3 space-y-1.5 text-[11px] text-muted-foreground">
         <p className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-sm bg-primary" aria-hidden /> {t.exam.paletteLegend.answered}
+          <span className="h-2.5 w-2.5 border border-app bg-app" aria-hidden /> {t.exam.paletteLegend.answered}
         </p>
         <p className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-sm border border-border bg-card" aria-hidden /> {t.exam.paletteLegend.unanswered}
+          <span className="h-2.5 w-2.5 border border-border bg-card" aria-hidden /> {t.exam.paletteLegend.unanswered}
         </p>
         <p className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-amber-400" aria-hidden /> {t.exam.paletteLegend.flagged}
+          <span className="h-2.5 w-2.5 rounded-full bg-[var(--noos-signal)]" aria-hidden /> {t.exam.paletteLegend.flagged}
         </p>
       </div>
     </div>

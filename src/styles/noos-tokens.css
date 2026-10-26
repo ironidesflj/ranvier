@@ -1,22 +1,26 @@
 /**
- * Noos identity tokens — v1.0 (Outubro de 2026)
- * Source: "Noos-Ranvier — Guia de Adaptação, Fase 1" (noos-tokens.css do manual).
+ * Noos · tokens de aplicação — v1.1 (Outubro de 2026)
+ * Fonte: "Noos — Guia de aplicação nos apps" v1.1 + patch de identidade Ranvier v1.0
+ * (espelho de assets/noos-app-tokens.css do manual, namespaced com `--noos-`).
  *
- * ADAPTATION NOTE: custom properties are namespaced with the `--noos-` prefix
- * (original names were `--bg`, `--surface`, `--muted`, `--border`, …) to avoid
- * collisions with the app's shadcn/ui theme variables. Values are verbatim
- * from the manual. The Ranvier domain color is consumed by the app theme
- * (see globals.css: --primary).
+ * Declaração: o elemento raiz carrega data-app="ranvier" (ver layout.tsx).
+ *  - --app: coloração de domínio — identidade e preenchimento (nunca texto pequeno).
+ *  - --app-ink: par acessível para texto, links e ação (#1b5285 no claro,
+ *    #8ab8e8 no escuro — 7,8:1 e 9,3:1 medidos sobre o papel de cada tema).
+ *  - --app-solid / --app-on-solid: preenchimento da ação primária e tinta sobre ele.
+ *  - --app-soft / --app-line: derivados de superfície (estados de seleção/realce).
  *
- * Rules from the manual (enforced by review):
- *  - One domain color per app: --noos-ranvier (#246cad) in fills and strokes,
- *    never in small text; the mother's accent (--noos-accent, #066755) never
- *    becomes a generic UI color.
- *  - Newsreader is reserved for the mother's wordmark (the "Noos" in "by Noos").
- *  - Instrument Sans for body, IBM Plex Mono for IDs and code.
+ * Regras (guia §03 + patch §3, aplicadas em revisão):
+ *  - Uma coloração por app; ela não muda por tela, tema ou campanha.
+ *  - O accent Noos (--noos-accent) pertence ao hub — nunca vira UI do app.
+ *  - Proibido: gradiente, sombra decorativa, segundo accent, azul como cor de
+ *    sucesso. Sucesso e perigo são os tokens globais abaixo.
+ *  - Newsreader é o display dos apps (H1, perguntas, títulos de tela); a
+ *    assinatura "by Noos" é mono (guia v1.1 substitui a regra "reservado à mãe").
  */
 
 :root {
+  /* Base — papel (patch Ranvier §3) */
   --noos-bg: #f7fbf9;
   --noos-surface: #ffffff;
   --noos-surface-2: #eef4f1;
@@ -24,21 +28,28 @@
   --noos-muted: #525d5e;
   --noos-border: #d9e0de;
   --noos-border-strong: #7f8b89;
-  --noos-accent: #066755;
+  --noos-accent: #066755; /* reservado ao hub — não entra na UI do app */
   --noos-accent-bright: #32a188;
-  --noos-signal: #d69643;
-  --noos-synapse: #7a55b2;
-  --noos-ranvier: #246cad;
-  --noos-myelin: #b5812f;
-  --noos-theta: #b4508c;
-  --noos-engram: #267b4c;
+  --noos-signal: #d69643; /* marcação de estado (ex.: flag de revisão), com legenda textual */
+  --noos-success: #1f7a4d;
+  --noos-danger: #9b2f24;
   --noos-font-display: "Newsreader", "Iowan Old Style", Georgia, serif;
   --noos-font-body: "Instrument Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --noos-font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Coloração de domínio — Ranvier (azul) */
+  --app: #246cad;
+  --app-ink: #1b5285;
+  --app-solid: #1b5285;
+  --app-on-solid: #ffffff;
+
+  /* Nó do símbolo (patch §4): azul no claro, azul claro no escuro */
+  --ranvier-node: #246cad;
+
+  color-scheme: light;
 }
 
 .dark {
-  /* Dark-mode tokens from the manual (night study). */
   --noos-bg: #0a0f10;
   --noos-surface: #121919;
   --noos-surface-2: #182020;
@@ -49,4 +60,41 @@
   --noos-accent: #69c1ae;
   --noos-accent-bright: #8fd6c5;
   --noos-signal: #e0a95c;
+  --noos-success: #7fd3a5;
+  --noos-danger: #f09383;
+
+  --app-ink: #8ab8e8;
+  --app-solid: #8ab8e8;
+  --app-on-solid: #07110f;
+
+  --ranvier-node: #8ab8e8;
+
+  color-scheme: dark;
+}
+
+/* Derivados de superfície (soft 9% no claro / 15% no escuro — espelho do manual) */
+:root {
+  --app-soft: color-mix(in oklab, var(--app) 9%, var(--noos-surface));
+  --app-line: color-mix(in oklab, var(--app) 38%, var(--noos-surface));
+}
+.dark {
+  --app-soft: color-mix(in oklab, var(--app) 15%, var(--noos-surface));
+  --app-line: color-mix(in oklab, var(--app) 40%, var(--noos-surface));
+}
+
+/* Estados de correção (fundador 2026-10-26 — "conforto do app antigo de volta"):
+   fundo PREENCHIDO sutil para alternativa correta/errada e para o bloco de
+   explicação com fonte. Intencionalmente mais discreto que a versão antiga
+   (emerald/destructive a 10%): 7–8% no claro, 12–13% no escuro. */
+:root {
+  --noos-success-soft: color-mix(in oklab, var(--noos-success) 8%, var(--noos-surface));
+  --noos-danger-soft: color-mix(in oklab, var(--noos-danger) 7%, var(--noos-surface));
+  --noos-success-line: color-mix(in oklab, var(--noos-success) 34%, var(--noos-surface));
+  --noos-danger-line: color-mix(in oklab, var(--noos-danger) 30%, var(--noos-surface));
+}
+.dark {
+  --noos-success-soft: color-mix(in oklab, var(--noos-success) 13%, var(--noos-surface));
+  --noos-danger-soft: color-mix(in oklab, var(--noos-danger) 12%, var(--noos-surface));
+  --noos-success-line: color-mix(in oklab, var(--noos-success) 40%, var(--noos-surface));
+  --noos-danger-line: color-mix(in oklab, var(--noos-danger) 36%, var(--noos-surface));
 }

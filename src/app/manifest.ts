@@ -10,12 +10,14 @@ import type { MetadataRoute } from "next";
  *
  * Notes:
  *  - start_url "/" + scope "/": the app is a single page with hash routing
- *    (/#/study, /#/exam…), so every entry point is the same document.
- *  - theme/background colors match the dark default (splash + Android bar).
+ *    (/#/estudar, /#/simulado…), so every entry point is the same document.
+ *  - theme/background colors match the light default (patch §3/§7): paper
+ *    #f7fbf9 splash + Android bar; the in-app theme toggle keeps dark mode
+ *    as an explicit student choice.
  *  - Shortcut labels are PT-BR (primary audience; the in-app language
  *    toggle keeps EN users fully served inside the app).
- *  - Maskable icons carry the check inside the 80% safe zone (see
- *    scripts/generate-icons.ts).
+ *  - Icons carry the Ranvier monograma R (patch §4) — tile #246cad, raio
+ *    26/120, compacto branco (see scripts/generate-icons.ts).
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
@@ -28,8 +30,8 @@ export default function manifest(): MetadataRoute.Manifest {
     scope: "/",
     display: "standalone",
     orientation: "any",
-    background_color: "#0B1424",
-    theme_color: "#0B1424",
+    background_color: "#f7fbf9",
+    theme_color: "#f7fbf9",
     lang: "pt-BR",
     dir: "ltr",
     categories: ["education"],
@@ -44,21 +46,21 @@ export default function manifest(): MetadataRoute.Manifest {
         name: "Modo Estudo",
         short_name: "Estudo",
         description: "Questões com feedback imediato, explicação e fontes oficiais.",
-        url: "/#/study",
+        url: "/#/estudar",
         icons: [{ src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }],
       },
       {
         name: "Simulado",
         short_name: "Simulado",
         description: "45 questões cronometradas no formato do exame real.",
-        url: "/#/exam",
+        url: "/#/certificacao",
         icons: [{ src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }],
       },
       {
         name: "Progresso",
         short_name: "Progresso",
         description: "Estatísticas, radar por domínio e fila de revisão de erros.",
-        url: "/#/progress",
+        url: "/#/progresso",
         icons: [{ src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }],
       },
     ],

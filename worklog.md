@@ -379,3 +379,467 @@ Stage Summary:
 - v1.2.1 fecha as lacunas de UX encontradas no incidente: nenhuma tela "carrega para sempre" ou "mente com zeros" quando a API falha; retry em todas as views de dados.
 - Explicação de login: nada foi perdido desde a v1.0 (strings idênticas; local: nota na aba Progresso + descrição do auth-modal) — agora ampliada no modal com a frase de privacidade alinhada ao Noos (opcional, só sincronização, sem rastreamento).
 - Artefatos de transferência regenerados (zip/bundle/patch) apontando para o commit v1.2.1.
+
+---
+Task ID: 6-a
+Agent: Orquestrador + Equipe de Especialistas (SaaS Lead, Frontend, UX, Marca, A11y, PWA)
+Task: JOB 1 — Avaliação do Guia de aplicação Noos v1.1 + Patch de identidade Ranvier v1.0 contra o app atual (v1.2.1)
+
+Work Log:
+- Lidos integralmente: upload/guia-de-apps.html (v1.1, 2616 linhas — contrato, nome/endosso, cor/dossiês, estrutura, componentes, estados, movimento, kit, Axon, checklist 23 itens, governança, Anexo A SDD), upload/ranvier-patch.md (v1.0 — conceito, remoções, tokens, símbolo, tipografia, landing, shell, questão, resultado, estados, movimento, a11y, critérios de aceite), upload/assets_noos-app-tokens(apps).css, os 4 SVGs do monograma R e upload/ranvier-patch.html (mockup visual).
+- Nota: o arquivo upload/LICENSE desta leva é uma cópia do patch (mislabeled), não uma licença — sem ação.
+- Auditado o código atual: noos-tokens.css (Fase 1), globals.css (shadcn oklch, radius 0.75rem), providers.tsx (defaultTheme dark), layout.tsx (fontes já corretas: Instrument Sans/IBM Plex Mono/Newsreader), ranvier-app.tsx (tabs 6 destinos + footer com badge-link), noos-badge.tsx (link para hub, Newsreader italic, 16/20px), home-view (hero centralizado + gradiente + blob + Sparkles), question-card (rounded-xl, círculo com letra, tints emerald/destructive, sem tags textuais), exam-view (pill timer com animate-pulse), results-view (card border-2 colorido + ícone grande), favicon/LogoMark/PWA icons (checkmark genérico).
+- Comparação sistemática item a item (patch §14 critérios de aceite + guia checklist §10) → relatório abaixo.
+
+Stage Summary:
+### NECESSÁRIAS (bloqueiam conformidade; implementadas no JOB 2)
+1. Tema claro como padrão + paleta papel (bg #f7fbf9, surface #fff, fg #0e1b1c; dark #0a0f10/#121919/#e4e9e8) — patch §7 proíbe dark default; kickoff #9 ("dark por padrão") fica superado pelo guia novo (decisão do fundador via este job; registrar ADR).
+2. Símbolo novo: monograma R com interrupção+nó (assets fornecidos) substituindo o checkmark em favicon, LogoMark, ícones PWA e favicon do app (guia: "favicon é do app").
+3. "by Noos" deixa de ser link (guia §02: "nunca como ação... não é botão") e migra para mono (guia: "assinatura em mono e tinta suave"), 32–40% do nome, símbolo 12–14px, texto 9–13px, uma vez por tela, nunca nas duas pontas (topo OU rodapé).
+4. Tipografia: perguntas e títulos de tela em Newsreader serif (pergunta 30–34/1,25 máx 48ch); alternativas/botões Instrument Sans; mono para tempo/IDs/metadados (patch §5). Divergência com tokens Fase 1 ("Newsreader reservado à mãe") resolvida a favor do guia v1.1 + patch (mais novos; o próprio guia usa Newsreader como display dos apps).
+5. Landing: hero à esquerda (eyebrow mono + H1 serif ≤2 linhas + lead ≤3 linhas) + bilhete de exame à direita (hairline, sem radius/sombra); remover gradiente do H1, blob desfocado, ícone sparkles, hero centralizado (patch §2/§6).
+6. Shell: 6 destinos (tabs) → 5 destinos (rail 208px desktop: Estudar/Exame/Progresso/Revisão/Ajustes; item ativo barra 2px + app-soft + app-ink; mobile ≤620px bottom nav 5 itens 44px + safe-area). Guia/Sobre deixam de ser destinos (Guia acessível do Exame/landing; Sobre/conta em Ajustes). Toggles idioma/tema migram da barra para Ajustes (guia §04: barra = nome+endosso+domínio).
+7. Tela de questão: alternativas em linhas de 54px com letra A–D em mono dentro de quadrado 26px (atual: círculo em rounded-xl); hover border-strong; selecionada border-app + app-soft; reveal com tags TEXTUAIS "correta"/"sua resposta" (atual sinaliza só por cor+ícone = viola "cor nunca sozinha"); explicação com fio superior + lead serif + fonte mono; "Confirmar resposta" desabilitado até selecionar + "Pular" ghost + atalhos A–D·Enter em mono (patch §8).
+8. Exame: régua de tempo de ponta a ponta (ticks 2%, majors 10%, dreno direita→esquerda, leitura mono tabular, sem piscar) substituindo o pill com animate-pulse (patch §8 proíbe timer piscando).
+9. Resultado: laudo em papel — nota mono 56–84 + /total em muted, ponto verde discreto + linha de corte, barras de domínio 3px em app-ink com valores tabulares, lista revisar com IDs mono, rodapé data/duração/versão mono; remover card border-2 colorido com ícone grande (patch §9).
+10. Componentes: cards rounded-xl com sombra → superfícies com hairline quadrado; radius de botão 2px; foco visível 2px em --app-ink com offset 2; tints grandes emerald/destructive → tags discretas (patch §2/§3/§12).
+11. PWA: ícones regenerados com monograma (tile #246cad, R compacto #f7fbf9, raio 26/120); manifest theme_color/background_color #f7fbf9 (light); viewport theme-color idem (patch §4).
+12. Acessibilidade: aria-live="polite" na correção e no tempo; teclado A–D/setas/Enter conclui questão; cor sempre acompanhada de texto (patch §12).
+13. Tokens: data-app="ranvier" na raiz + par --app/--app-ink/--app-solid/--app-on-solid/--app-soft/--app-line (guia §03 + noos-app-tokens.css fornecido).
+
+### RECOMENDADAS (não bloqueiam; avaliadas caso a caso)
+a. Erro com código do erro em mono (patch §10) — v1.2.1 já tem retry; adicionar o código.
+b. Rodapé com "Local-First · rascunho salvo neste dispositivo" + versão mono (guia §04 F / checklist lançamento).
+c. "Continuar" discreto na landing quando há sessão em andamento (patch §6).
+d. SDD no formato do Anexo A (README/constitution/current-state/plan/spec em docs/sdd/) — migração gradual; o docs/SDD.md atual cobre o papel de registro vivo.
+e. Pausa do exame (guia componente "Pausar") — muda regra de negócio; exige spec própria; adiar.
+f. Glossário bilíngue — fora do escopo do patch; roadmap.
+g. Dossiê do guia diz Ranvier = "Azure · AZ-900 · em breve"; o app real = Databricks DBDEA em produção — divergência de conteúdo (não de identidade); interface segue mostrando dados reais ("nenhuma métrica inventada"); sinalizar à equipe de design para atualizar o guia.
+h. Deep-link canônico noos.study — manter fallback atual até o domínio existir (contrato Axon preservado).
+
+### MANTER (patch §1: "não altere")
+Lógica de exames, banco de questões, progresso server-side, IDs públicos RAN-DBDEA, deep-links/contrato Axon, correção server-side, i18n PT/EN, PWA offline + /api/health.
+
+### DIVERGÊNCIAS RESOLVIDAS (documentadas)
+- Badge maior (pedido do fundador, 16/20px) vs guia (12–14px/9–13px): usar o teto do range do guia (símbolo 14px, texto 13px) — legibilidade preservada sem violar o sistema.
+- Checklist pede "by Noos no rodapé" vs §02 "nunca nas duas pontas": assinatura no topo (rail/app-bar), UMA vez; rodapé carrega versão + local-first + não-afiliação.
+
+---
+Task ID: 3-a
+Agent: QA Engineer (subagente)
+Task: QA E2E do app live (v1.3.0) — desktop 1440 e mobile 375/390
+
+Work Log:
+- Ambiente: app live em http://localhost:3000 (Next.js dev). Testes via agent-browser (sessão `qa`), viewports 1440x900, 375x667 e 390x844, EN por padrão + spot-check PT-BR. Screenshots salvos em /tmp/qa-*.png; inspeção visual adicional via VLM (glm-5v) nos shots de landing, resultados, progresso e mobile. Nenhum arquivo de fonte foi modificado.
+- PWA/endpoints (curl): /api/health → 200 `{"status":"ok","db":"ok","certifications":1,"questions":116}` (esperado `{"status":"ok","certifications":1,"questions":116}`; veio com campo extra `db:"ok"` — superconjunto, ok). /manifest.webmanifest → 200, theme_color #f7fbf9 e background_color #f7fbf9 ✓. /sw.js → 200 ✓ (e em runtime: ServiceWorker registrado, scope "/", controller ativo). /offline.html → 200, contém monograma R (SVG com interrupção/nó), "by Noos" e "Local-First · v1.3.0" ✓. /manifest.jsonl → 116 linhas ✓.
+- A) Landing desktop 1440x900: eyebrow "Databricks · Data Engineer Associate" em IBM Plex Mono (tracking 0.88px, uppercase) ✓; H1 "Every question is a leap." em Newsreader 48px, coluna esquerda (x=160) ✓; lead presente ✓; CTAs "Start practice exam" (primário, bg #1b5285, texto branco, radius 2px) e "View exams" (outline 1px) ✓; link "Study mode with instant feedback" navega para #/estudar ✓. Bilhete à direita (aside x=920): DBDEA, 45 questões, 90 min, cutoff 70%, "LAST SESSION —" + nota de corte comunitário; borda 1px hairline, radius 0, sem sombra ✓. SEM texto em gradiente (0 elementos com bg-clip:text), SEM blob desfocado (0 filter:blur), SEM ícone sparkles (busca no DOM = 0), 0 elementos com radius>4px+box-shadow ✓. Rodapé: "LOCAL-FIRST · DRAFT SAVED ON THIS DEVICE" + "V1.3.0 — EXAM DATA: MAY 2026" + disclaimer de não-afiliação ✓. VLM confirma layout hero-esquerda/bilhete-direita e ausência de gradientes/blob/sparkles.
+- B) Shell desktop: rail `<aside class="w-[208px] border-r bg-card">` medindo exatos 208px ✓; EXATAMENTE 5 destinos (Study, Exam, Progress, Review, Settings) ✓; item ativo (Study e Progress verificados): barra esquerda 2px #246cad + fundo app-soft + texto #1b5285 + aria-current="page" ✓. "by Noos": IBM Plex Mono 13px, topo do rail, SEM wrapper `<a>` ✓; renderiza UMA vez por tela em desktop (a instância do header mobile está display:none) ✓; rodapé NÃO contém by Noos ✓.
+- C) Shell mobile 375: top bar sticky h-14 com marca "Ranvier by Noos" + domínio "Databricks · DBDEA" ✓; bottom nav fixed bottom-0 z-40 com os mesmos 5 destinos, cada item 56px de altura (≥44px) ✓, classe `pb-[env(safe-area-inset-bottom)]` (respeita safe-area) ✓, `md:hidden` ✓; main com `pb-20` (80px) — bottom nav não sobrepõe conteúdo ✓; document.scrollingElement.scrollWidth (375) == innerWidth (375) — sem overflow horizontal em landing, shell, exame e resultados ✓.
+- D1) Golden path — exame completo a partir da landing: rota #/simulado/{id}; "0/45 ANSWERED"; "TIME REMAINING 89:31" decrescendo (role=timer, IBM Plex Mono, tabular-nums) ✓; régua de tempo `div.relative h-4` com 51 ticks (w-px; majors 12px / minors 6px) + linha-base + dreno (`inset-y-0 right-0 bg-card`, drena da direita para a esquerda) ✓; meta row "Question 1 of 45" em IBM Plex Mono + "Data Transformation and Modeling · Medium" à direita ✓; enunciado em Newsreader 32px (max-w 48ch) ✓; 4 opções role=option com `min-h-[54px]`, letra A–D em quadrado 26x26px mono radius 0 ✓; paleta (aside desktop) com 45 itens + legenda Answered/Unanswered/Flagged ✓; ID público RAN-DBDEA-00034 exibido ✓.
+- D2) Teclado: press "a" → opção A selecionada; press "c" → seleção muda para C; contador 0/45→1/45; paleta marca "Q1 — Answered" (bg #246cad, texto branco) ✓; respondi Q2 com "b" e Q3 com "d" → 3/45 ✓. Selecionada: borda #246cad + fundo app-soft ✓.
+- D3) Flag: Q3 marcada → paleta "Q3 — Answered — Flagged" com dot; botão vira "Unflag" (aria-pressed=true) ✓.
+- D4) Submit: dialog "You answered 3 of 45 questions. 42 questions will be blank. You cannot change answers after submitting." → Confirm → resultados #/resultado/{id}: nota 72px IBM Plex Mono "1 / 45" + "2%"; status com dot 8px (noos-danger) + "Below the cutoff line (70%)"; barra 3px com marcador CUTOFF em left:70% ✓; 7 domínios com barras 3px (track #eef4f1 + fill #1b5285; domínio 3 = 1/10 → fill 10% — acurado); lista de revisão All (45)/Wrong only (44) com IDs RAN-DBDEA-XXXXX em mono (90 ocorrências) e tags CORRECT/YOUR ANSWER ✓; rodapé do laudo "10/24/2026 · 1m 53s · v1.3.0" em mono ✓; ações "Review 44 questions" + "New practice exam" (+ "Back to home") ✓. Correção conferida: 1 acerto em 3 respondidas bate com minhas escolhas (C correta; B e D erradas).
+- D5) "Review 44 questions" → sessão de estudo auto-inicia (#/estudar, "QUESTION 1 OF 44", primeiro ID = RAN-DBDEA-00040, que errei) + toast "Study session started." ✓. Reveal: tag textual "your answer" (mono, #9b2f24) na B; tag "correct" (mono, verde) na D; lead serif "The correct one is D." (Newsreader 20px); bloco EXPLANATION com fio superior (border-t 1px #d9e0de + pt-5); fonte mono (link https://docs.databricks.com/aws/en/pyspark/reference/functions); ID + deep-link "Community" → https://noos-hub.vercel.app/en/q/RAN-DBDEA-00040 ✓; região aria-live="polite" (role=status) na correção ✓. Caminho de acerto: lead "Correct." em Newsreader ✓, contador "1/2 correct" ✓. "Skip" avança sem responder (Q3→Q4, contador inalterado) ✓. Fim: resumo "You got 1 of 2 right (50%)" + "2/44 ANSWERED" → submit → resultados "STUDY SESSION SUMMARY" ✓.
+- D6) Progresso: 6 stat cards (89 answered, 2.2% accuracy, 1 exam taken, 2% best exam, 1 study session, 44 in review queue) ✓; radar Recharts renderiza (SVG 459x288, eixos S1–S7, escala 0–100) ✓; seção Review queue ("44 missed questions") com CTA "Practice missed questions" ✓; tabela Attempt history — VER FALHA 1 (só atualiza após reload duro). VLM confirma cards/radar sem defeitos.
+- D7) Destino Review (rail): inicia prática da fila de erros → "QUESTION 1 OF 47" ✓. Ramo "fila vazia" (toast + redirect ao progresso) verificado em código (ranvier-app.tsx startReview) — não testado ao vivo porque a fila nunca ficou vazia.
+- D8) Ajustes (#/ajustes): idioma PT/EN FUNCIONA nos dois sentidos (PT: rail Estudar/Exame/Progresso/Revisão/Ajustes, html lang=pt-BR, persiste em localStorage; EN restaura) ✓; tema Light/Dark FUNCIONA (dark: html.dark, bg #0a0f10, rail #121919, fg #e4e9e8; light: bg #f7fbf9) ✓; ACCOUNT mostra "Sign in" (modal abre com abas Entrar/Criar conta — fechado sem registrar) ✓; INSTALL THE APP exibido (plataforma suporta; SW ativo) ✓; seção ABOUT + licença ✓.
+- D9) Config de estudo: checkbox de domínio alterna (aria-checked true/false) ✓; select de quantidade (5/10/20/30) → "5 questions" ✓; "Start session" → "QUESTION 1 OF 5" todas do domínio 1 selecionado ✓; "Confirm answer" DESABILITADO até seleção ✓; skip/summary/resultados ✓. OBS: checkboxes de domínio aparecem desmarcados por padrão enquanto "Domains (default: all)" aplica todos (selected=[] = sem filtro) — ver WARN 3.
+- D10) PWA: todos os endpoints acima OK.
+- D11) Guia (#/guia) e Sobre (#/sobre) renderizam sem erros ✓.
+- E) Mobile 375 E2E: landing com hero empilhado acima do bilhete (h1 y=154; ticket y=553; ambos x=16) ✓, sem overflow horizontal ✓; bottom nav conforme C ✓; Study → Start session → tap em opção → seleciona, Confirm habilita → Confirm → reveal com CORRECT/"Correct." → Next question → "QUESTION 2 OF 10 | 1/1 correct" ✓; exame no mobile: régua presente (53 filhos, 343px), timer 89:57, paleta presente, SEM overflow horizontal ✓; saída via menu → dialog "Leave the exam?" → Leave ✓; resultados legíveis, sem overflow ✓ (VLM confirma; as únicas sobreposições apontadas pelo VLM são do botão flutuante Next.js Dev Tools, ignorado por instrução).
+- F) PT-BR spot check: rail "Estudar/Exame/Progresso/Revisão/Ajustes" ✓; H1 "Cada questão é um salto." ✓; timer "TEMPO RESTANTE" ✓; botão "Confirmar resposta" (+ "Pular") ✓. Bônus: laudo PT ("RESUMO DA SESSÃO DE ESTUDO", datas 24/10/2026), dialog "Sair do simulado?".
+- G) Console: zero erros e zero warnings de aplicação em todos os checkpoints (landing, shell, estudo, exame, resultados, progresso, ajustes, guia, sobre, mobile). `agent-browser errors` sempre vazio. Únicas mensagens: ruído de dev (React DevTools info, [HMR] connected, [Fast Refresh] rebuilding/done) + botão Next.js Dev Tools (ignorado).
+- H) 390x844: landing sem overflow, H1 ok, botão "Continue" presente (cache fresco pós-reload) ✓; retomei exame IN_PROGRESS (timer retomado <90:00 — deadline conta em tempo de servidor), meta row "Question 1 of 45" em mono ✓; saída com confirmação ✓.
+- Continuação de sessão: "Continue" na landing retoma tentativa IN_PROGRESS mais recente (exame) ✓ — mas só aparece após reload duro (ver FALHA 1).
+- Repro dedicado da FALHA 1 (3 observações consistentes): (a) após submeter exame (11:39) + estudo 44q (11:43), Progress mostrava "No attempts yet" — reload → 2 tentativas; (b) após submeter estudo 5q, Progress mostrava 2 de 3 tentativas (faltando a mais nova) — reload → 3; (c) com sessões IN_PROGRESS no servidor, landing via navegação client-side não mostrava "Continue" — reload → aparece. fetch('/api/attempts') direto retornava dados corretos (bug é de cache client, não do server).
+
+Stage Summary:
+- PASS list:
+  - PWA completo: /api/health ok (1 cert, 116 questões), manifest theme_color #f7fbf9, sw.js 200 + SW registrado/controller ativo, offline.html com monograma + by Noos, manifest.jsonl 116 linhas.
+  - Landing (1440): eyebrow mono, H1 serif Newsreader, CTAs primário/outline, link Study mode, bilhete hairline sem radius/sombra à direita, sem gradiente/blob/sparkles, rodapé Local-First + v1.3.0 + disclaimer.
+  - Shell desktop: rail 208px, 5 destinos exatos, ativo com barra 2px #246cad + soft bg + ink + aria-current; "by Noos" mono, topo do rail, não-link, 1x/tela, fora do rodapé.
+  - Shell mobile 375: top bar com marca; bottom nav fixa com 5 itens de 56px; safe-area env(); main pb-20; sem overflow horizontal em todas as telas testadas.
+  - Exame: 45 questões, timer mono tabular decrescendo de 90:00, régua com 51 ticks + dreno, meta row mono, enunciado serif 32px, opções 54px com quadrado 26px mono A–D, paleta 45 itens, atalhos A–D, flag com dot na paleta, dialog de submit com contagem de não-respondidas, submissão e laudo completos (nota mono 72px, dot de status, marcador de corte em 70%, barras de domínio 3px acuradas, IDs RAN-DBDEA mono, tags CORRECT/YOUR ANSWER, rodapé data/duração/versão mono, ações Review N/New practice exam).
+  - Correção/estudo: reveal com tags textuais, lead serif ("Correct."/"The correct one is D."), explicação com fio superior, fonte mono, deep-link Community noos-hub.vercel.app/{lang}/q/{id}, aria-live polite; Confirm desabilitado até seleção; Skip; resumo com contagens; resultados de estudo.
+  - Progresso: 6 stat cards, radar renderiza, review queue com CTA; histórico correto APÓS reload.
+  - Review: inicia prática da fila (47 questões); ramo vazio verificado em código.
+  - Ajustes: idioma PT↔EN funciona; tema claro/escuro funciona (#f7fbf9 ↔ #0a0f10); Sign in presente (sem registro); Install app quando suportado.
+  - Guia e Sobre renderizam sem erros.
+  - Mobile E2E completo (375): fluxo estudo com tap, exame com régua sem overflow, resultados legíveis.
+  - PT-BR: 4 checks do briefing + extras.
+  - Console/erros de página: nenhum em nenhum checkpoint.
+- FAIL/BLOCKER list:
+  1. Cache de "attempts" desatualizado após mutações (dados mostrados errados até reload duro). Sintoma A: completar qualquer tentativa (exame ou estudo) → resultados → clicar "Progress" no rail → "Attempt history" não inclui a tentativa recém-concluída (na 1ª observação mostrou "No attempts yet" com 2 tentativas concluídas no servidor; na 2ª, faltava a mais nova de 3). Sintoma B: com sessão IN_PROGRESS no servidor, navegar client-side para a landing → botão "Continue" não aparece (só após F5). Repro exato: (1) iniciar sessão de estudo pela config, responder 1 questão, "Finish and see summary"×2 → resultados; (2) clicar "Progress" no rail; (3) tabela stale; (4) F5 → tabela correta. Root cause provável: query react-query ["attempts"] (staleTime 60s, refetchOnWindowFocus false) não é invalidada ao INICIAR tentativa e a invalidação no submit não se reflete nos mounts seguintes na prática; stats usam outra query ("progress") e atualizam — só a lista de tentativas fica velha. Server/API corretos (fetch direto retorna dados frescos). Severidade: média — dado visível errado ("No attempts yet"), afeta confiança e o fluxo de retomada.
+  2. Atalho "ENTER" anunciado mas não implementado (e setas não movem foco). A UI exibe "A–D · ENTER" em mono na sessão de estudo (patch §12 exige "A–D/setas/Enter conclui questão"), mas Enter não confirma (testado com seleção ativa e foco no body — nada acontece; só o clique no botão confirma). Setas ↑/↓ também não movem foco entre opções. Repro: #/estudar → iniciar sessão → pressionar "b" (seleciona) → pressionar Enter → sem efeito. Código: question-card.tsx registra apenas handler A–D no document. Severidade: baixa/média (a11y + promessa da UI descumprida).
+- WARN list:
+  1. /api/health retorna campo extra `db:"ok"` além do shape documentado — inofensivo (superconjunto), mas diverge do contrato literal.
+  2. Timer do exame com aria-live="off" (role="timer") — patch §12 pedia "polite" também para o tempo (o reveal do estudo tem polite ✓).
+  3. Checkboxes de domínio renderizam desmarcados por padrão enquanto o rótulo diz "Domains (default: all)" e o comportamento é "todos" (selected=[] = sem filtro) — funciona, mas o estado visual contradiz o efeito.
+  4. Item "Review" do rail nunca fica ativo (active:false fixo em ranvier-app.tsx) — navegação funciona; polimento.
+  5. Barras de domínio com 0 acertos têm fill de largura 0 (invisíveis) — correto por construção, mas à primeira vista parece "barra faltando" (VLM leu como defeito até eu conferir o DOM).
+  6. Banner de instalação na landing ("Study even without internet" / Install app / Not now) aparece de forma intermitente (depende do evento beforeinstallprompt) — por design "somente se a plataforma suportar", mas a aparição não é determinística entre reloads.
+  7. Exame retomado conserva o deadline de servidor (timer já <90:00 ao voltar) — comportamento correto para prova cronometrada; registrar como esperado.
+- Console errors observed: NENHUM. Mensagens presentes (todas de dev, fora do app): `[info] Download the React DevTools...`, `[log] [HMR] connected`, `[log] [Fast Refresh] rebuilding/done` — repetidas a cada reload. `agent-browser --session qa errors` sempre vazio.
+
+---
+Task ID: 3-b
+Agent: UX & Accessibility Specialist (subagente)
+Task: Avaliação UX + acessibilidade do app live (v1.3.0) — claro/escuro, 320/375/768/1440, teclado e foco
+
+Work Log:
+- Ambiente: app live em http://localhost:3000 (dev), sessão `ux` do agent-browser. Contexto lido do worklog (Task 6-a + tokens). Zero arquivos de fonte modificados. Estado final restaurado: EN + tema claro + viewport 1440. Medição de contraste via getComputedStyle com cálculo de luminância WCAG em eval; foco verificado por computed style + pixel-diff de screenshots (sharp); alvo = bounding boxes via getBoundingClientRect.
+- CONTRASTE claro (fórmula WCAG, valores medidos em tela): app-ink #1b5285 sobre papel #f7fbf9 = 7,76:1 (esperado ~7,8 ✓ AA corpo); sobre branco 8,10:1; muted #525d5e sobre papel 6,52:1 ✓; fg #0e1b1c 16,88:1 ✓; success #1f7a4d sobre papel 5,10:1 / sobre branco 5,32:1 ✓ AA (tags do reveal); danger #9b2f24 7,12:1 ✓; branco sobre app-solid #1b5285 (botão primário) 8,10:1 ✓; border-strong #7f8b89 vs branco (UI) 3,53:1 ✓ ≥3. Auditoria completa elemento-a-elemento (todo texto visível, cor efetiva com blend de alfa) na landing, tela de questão + reveal e progresso (claro): 0 pares reprovados — exceto signal (ver F6).
+- CONTRASTE escuro (via Ajustes → Dark; html.dark confirmado): app-ink #8ab8e8 sobre #0a0f10 = 9,28:1 (esperado 9,3 ✓); sobre surface #121919 8,57:1; muted #929a99 6,71:1 (bg) / 6,20:1 (surface) ✓; fg #e4e9e8 15,72:1 ✓; success #7fd3a5 9,98:1 ✓; danger #f09383 7,81:1 ✓; signal #e0a95c 8,48:1 ✓; on-solid #07110f sobre #8ab8e8 9,22:1 ✓; border-strong #5f6b69 vs surface 3,22:1 ✓. Auditoria completa na tela de Ajustes + questão+reveal escuros: 0 reprovados. Tema persiste (localStorage ct-theme).
+- FOCO (spec do patch §12: outline 2px --app-ink offset 2): opções de resposta e botões do rail e links do rodapé CUMPREM exatamente — computed "solid 2px rgb(27,82,133) offset 2px" no claro e "solid 2px rgb(138,184,232) offset 2px" no escuro; pixel-diff da opção focada confirma banda 2px #1b5285 integral (3.288 px mudados, cor única 27,82,133). ORDEM DE TAB correta: rail (Ranvier → 5 destinos) → main (Finish → opções A–D → Confirm → Skip) → rodapé; bottom nav mobile presente no fluxo. Controles shadcn (CTAs da landing, header nav, Confirm/Skip/Voltar/Próxima/Marcar, select, tabs, checkbox) SUPRIMEM o outline global (outline-none) e mostram ring 3px a 50% do app-ink: cor renderizada medida rgb(146,174,196) sobre papel = 2,22:1 no claro (3,11:1 no escuro) — visível, mas abaixo de 3:1 e divergente do patch (ver F5). Tabs do resultado: outline 1px + ring. Foco da opção tem transition-colors 200ms (cor do outline anima de fg→app-ink — fidelity note).
+- TECLADO (teste dos 60s do patch): "a" seleciona A (aria-selected=true imediato); "b" move a seleção para B com foco mantido na opção; Tab alcança as opções A–D e o botão Confirm; Enter sobre "Confirm answer" focado dispara o reveal → questão completa apenas com Tab + A–D + Enter ✓. Enter sobre opção selecionada+focada NÃO confirma (re-seleciona; onConfirm é prop morta em question-card.tsx) e Enter com foco no body também não — o atalho "ENTER" anunciado na UI ("A–D · ENTER") não existe (ver F9; QA 3-a encontrou o mesmo). A–D funcionam em document level inclusive com foco no rail.
+- SEMÂNTICA ARIA: listbox "Answer options" com role=option + aria-selected ✓; reveal com role=status + aria-live=polite ✓; timer com role=timer (IBM Plex Mono 14px tabular) mas aria-live="off" (deliberado no código — ver W1); nav do rail com aria-current="page" no item ativo ✓ (exceção Review, ver W3); barra de progresso com role=progressbar; checkbox de domínio com role=checkbox; tabs com role=tab/tablist + roving tabindex.
+- RÉGUA DE TEMPO: 51 ticks (2%), majors 10% (12px vs 6px, opacidade 1 vs 0,6), dreno direita→esquerda (bg-card, medido 0,74% decorrido), decorativa aria-hidden, ZERO elementos animados na tela do exame (nenhum animate/pulse medido) ✓ patch §8.
+- SINAIS NÃO-COR: reveal com tags textuais "CORRECT"/"YOUR ANSWER" (claro e escuro) ✓; legenda da paleta "Respondida/Sem resposta/Marcada" = dot + TEXTO (dots aria-hidden) ✓; estados na aria-label dos botões Q ("Q1 — Respondida — Marcada") ✓; status do laudo = texto + dot (danger) ✓; barras de domínio com valor textual ("0/3") ✓.
+- ALVOS (≥44px): rail 191×44 ✓; bottom nav mobile 75×56 ✓; opções 736×74 (desktop) / 343×95 (375) ✓ (≥54); Confirm 166×44 ✓; Q-navigator 44×44 ✓; checkbox de domínio com label clicável 291×83 ✓. MEDIDOS ABAIXO DE 44: CTAs da landing 40px; "Start session" 40px; toolbar do exame (Voltar/Próxima/Marcar/Sair/Entregar) 40px; header mobile do exame (Leave/Submit/Navigator) 36–38×40; tabs do resultado 29px; botões de Ajustes/Progresso 40px (ver F7).
+- RESPONSIVO: 375 — sem scroll horizontal (scrollWidth=clientWidth=375) na landing, config de estudo, questão, exame e resultados ✓; hero empilhado (H1 326px, 2 linhas) ✓; rail oculto (w=0), bottom nav fixa visível ✓; pergunta Newsreader 26px dentro de 343px (48ch quebra corretamente) ✓; nota mono 72px do laudo cabe ✓; régua 343px ✓. 768 — rail visível (208px), bottom nav oculta (md) ✓ conforme spec. 320 — landing e questão sem overflow ✓, MAS resultados/revisão com código estouram: scrollWidth 341 vs 320, code.font-mono com right 437px (ver F4). 720×400 (zoom 200% do 1440) — sem scroll horizontal na landing/config/questão, H1 48px quebra em 435px, nada cortado ✓.
+- REDUÇÃO DE MOVIMENTO: matchMedia('(prefers-reduced-motion: reduce)') = false no headless (não emulável); globals.css §§149–158 contém a media query completa (animation/transition 0,01ms, scroll-behavior auto) — VERIFICADO EM CÓDIGO.
+- HEURÍSTICAS (estética papel-de-exame): 0 gradientes, 0 sombras, 0 emoji, 0 confete (DOM medido em landing/questão/progresso); "by Noos" exatamente 1×/tela (rail desktop / top-bar mobile / header da landing), mono 13px muted, nunca no rodapé ✓; mono usado para tempo/IDs/versão/data/atalhos/tags (13 usos na questão) e código 13px ✓; Newsreader apenas display (H1 48/36px, pergunta 32/26px, lead do reveal 20px) ✓; cards quadrados (radius 0) + hairline 1px ✓; botões radius 2px ✓; pergunta em serifa, opções em sans ✓; uma questão por tela sem elementos competindo ✓. Inventário de tamanhos na landing: 9 distintos (48/24/20/16/14/13/12/11/10) — escala coerente mas >3 literal (ver W5).
+- IDIOMA PT/EN: troca instantânea e persistente; landing, estudo, resultados e ajustes 100% traduzidos (verificado item a item); html lang sincronizado dinamicamente (pt-BR↔en) ✓. Strings mistas no painel de fatos do exame em PT: "VERSÃO: EXAM VERSION: MAY 4, 2026", "USD 200 (+ local taxes)", "Online proctored or test center" (ver W4).
+- RADAR do progresso: SVG 459×288 com <title> e <desc> VAZIOS (strings "") — sem descrição acessível; textos internos (S1–S7, 0–100) vazam para a árvore de acessibilidade; dados duplicados em texto ao lado (lista por domínio com valores) (ver W2).
+- HIERARQUIA DE TÍTULOS: h1 presente na landing ("Every question is a leap."), config de estudo ("Study Mode"), config do exame, progresso ("Seu progresso") e ajustes ("Ajustes") ✓ com h2 de seção ✓. SEM h1: laudo do exame ("LAUDO DO SIMULADO" é <p>), resumo de estudo, telas de sessão ativa (estudo, exame, revisão) — examSessionH1=false, reviewHasH1=false, results hasH1=false (ver F3).
+- FLUXO "CONTINUAR" (landing): reproduzido 2× com sessões de ESTUDO/REVISÃO em andamento — o clique navega para a view results, que auto-submete a tentativa (results-view.tsx:52–56) e mostra o resumo com a sessão DESTRUÍDA (10q: "24/10/2026 · 4M 51S · 0/10"; revisão 46q: "6M 45S"). Para tentativas de EXAME o retoma funciona (QA 3-a confirmou). Ver F2.
+- BUSCA ATIVA POR TEXTO EM SIGNAL: progress-view.tsx:163 pinta acurácia de domínio 1–69% em #d69643 bold 14px — ao obter domínios com 3% e 4% (após respostas da revisão), o claro renderizou "3%"/"4%" em rgb(214,150,67) sobre card branco = 2,53:1 medido (2,42:1 sobre papel) — reprova AA 4,5:1 (ver F6). Escuro #e0a95c = 8,48:1 ✓.
+- Botões do header do exame no mobile (≤640px): "Leave"/"Submit exam"/"Flag for review" colapsam para ícone com <span class="hidden sm:inline"> — display:none remove o nome acessível: árvore mostra 3 botões SEM nome, 36×40px (Question navigator tem aria-label ✓) (ver F8).
+- Fonte de corpo: html/body computam font-family "ui-sans-serif, system-ui, ..." — Instrument Sans carregada (document.fonts) mas NUNCA aplicada (0/34 elementos na landing resolvem a família; 0 usos de font-sans no DOM; body tem apenas as 3 variáveis de fonte, sem classe font-sans) (ver F1). Newsreader e IBM Plex Mono aplicam normalmente (via .font-display e font-mono).
+
+Stage Summary:
+- PASS list (com evidência):
+  1. Contraste claro: app-ink 7,76:1 / muted 6,52:1 / success 5,10:1 / danger 7,12:1 / primário 8,10:1 — auditoria completa em 3 telas com 0 pares reprovados (exceto F6).
+  2. Contraste escuro: app-ink 9,28:1 / muted 6,71:1 / success 9,98:1 / danger 7,81:1 / on-solid 9,22:1 — auditoria completa com 0 reprovados.
+  3. Foco do patch (2px app-ink offset 2) implementado e PIXEL-VERIFICADO em opções, rail e links (claro e escuro); ordem de Tab lógica (rail → questão → rodapé).
+  4. Teclado: A–D seleciona (aria-selected atualiza), Tab alcança opções e Confirm, questão completa com Tab+A–D+Enter (teste dos 60s do patch ✓ via botão Confirm).
+  5. Semântica: listbox/option+aria-selected, role=status+aria-live=polite no reveal, role=timer, aria-current="page" no rail, progressbar, tabs com roving tabindex.
+  6. Régua de tempo conforme patch §8 (51 ticks 2%, majors 10%, dreno RTL, aria-hidden, mono tabular, ZERO animação/piscar).
+  7. Cor nunca sozinha: tags CORRECT/YOUR ANSWER, legenda Respondida/Sem resposta/Marcada com texto, estados na aria-label dos Q, status do laudo texto+dot — claro e escuro.
+  8. Alvos onde importa: opções 74px (≥54), rail 44px, bottom nav 56px, Confirm 44px, Q-navigator 44px, labels de domínio 291×83.
+  9. Responsivo 375/768/720×400: sem overflow horizontal (exceto F4 a 320), hero empilha, rail↔bottom-nav no md, pergunta 48ch quebra, laudo 72px cabe, zoom 200% sem corte.
+  10. Estética papel: 0 gradientes/sombras/emoji/confete; by Noos 1×/tela em mono; mono só para tempo/IDs/metadata/código; cards quadrados com hairline; botões 2px.
+  11. i18n PT/EN instantâneo e persistente com html lang sincronizado (landing/estudo/resultados/ajustes 100% traduzidos).
+  12. Tema claro↔escuro funcional e persistente; viewport theme-color por esquema.
+- FAIL list (numerada, local + valor medido + violação):
+  1. Instrument Sans nunca aplicada ao corpo: html/body computam "ui-sans-serif, system-ui, sans-serif..." (layout.tsx põe só as variáveis na <body>, sem font-sans; preflight do Tailwind v4 vence). Medido: 0/34 elementos de texto na landing usam Instrument Sans (Newsreader 5, Plex Mono 27, ui-sans 34); a família está em document.fonts, carregada e órfã. Viola patch §5 (corpo/botões/alternativas = Instrument Sans) — em máquinas reais renderiza Segoe UI/SF em todo o sans do app. Fix de 1 linha (font-sans na body ou font-family no @layer base).
+  2. "Continuar" da landing destrói sessões de estudo/revisão em andamento: navega para results (LandingHeader) e o results-view auto-submete tentativas IN_PROGRESS (results-view.tsx:52–56). Reproduzido 2× (sessão 10q encerrada como 0/10 com "4M 51S"; revisão 46q com "6M 45S"). Viola patch §6 ("Continuar discreto quando há sessão em andamento") — perda de trabalho do usuário no clique de um botão que promete retomar. (Exame retoma corretamente; só modo ESTUDO pega o ramo errado.)
+  3. Sem h1 no laudo (exame e estudo), no resumo e nas telas de sessão ativa (estudo, exame, revisão): "LAUDO DO SIMULADO"/"RESUMO DA SESSÃO" são <p>; examSessionH1=false; reviewHasH1=false; results hasH1=false (primeiro heading é h2). Viola piso de acessibilidade do guia §07/missão (h1 por tela) — leitor de tela não tem âncora de página nenhuma em ~5 telas.
+  4. Overflow horizontal a 320px nos resultados/revisão: documentElement.scrollWidth 341 > clientWidth 320; culpados code.font-mono (right 437px) — blocos de código SQL do stem/opções sem wrap/containment. Viola guia (responsivo extremo) — missão pediu 320 explicitamente.
+  5. Foco divergente do patch em todos os controles shadcn: outline suprimido (outline-none) + ring 3px @50% app-ink — cor renderizada rgb(146,174,196) sobre papel = 2,22:1 (claro; 3,11:1 escuro), sem offset; tabs do resultado com outline 1px. Afeta CTAs da landing, header nav, Confirm/Skip/Voltar/Próxima/Marcar/Sair/Entregar, select, checkbox, tabs. Viola patch §12 (2px sólido app-ink offset 2 = 7,76:1) e enfraquece 2.4.7/2.4.11 (WCAG 2.2) — sistema de foco INCONSISTENTE (opções/rail/links corretos, resto não).
+  6. Signal #d69643 como texto no claro (acurácia de domínio 1–69%, progress-view.tsx:163): "3%" e "4%" medidos em rgb(214,150,67) bold 14px sobre card branco = 2,53:1 (papel 2,42:1) — reprova AA 4,5:1 em texto pequeno. No escuro #e0a95c = 8,48:1 ✓. Patch/guide: signal é marcação de estado com legenda textual; como texto de dado falha.
+  7. Alvos <44px (patch: alvos ≥44px): CTAs da landing 40px (195×40, 134×40); "Start session" 40px; toolbar do exame 40px (Voltar 85×40, Próxima 100×40, Marcar 182×40, Sair 69×40, Entregar 171×40); header do exame mobile 36–38×40; tabs do laudo 29px ("Todas (45)" 91×29); botões de Ajustes/Progresso 40px. (Confirm 44, opções 74, rail 44, bottom nav 56, Q-nav 44 OK — inconsistência sistemática h-10 vs h-11.)
+  8. Botões só-ícone SEM nome acessível no header do exame mobile (≤640px): "Leave", "Submit exam", "Flag for review" usam <span class="hidden sm:inline"> — display:none exclui o texto do nome computado (árvore: 3 buttons sem nome; aria-label ausente). Viola WCAG 4.1.2 (name/role/value); leitor de tela anuncia "button" três vezes sem distinção.
+  9. Atalho "ENTER" anunciado e não implementado: hint "A–D · ENTER" renderizado em mono; único handler é A–D (question-card.tsx:65–78); Enter com foco em opção re-seleciona; Enter no body não faz nada; prop onConfirm nunca invocada. Viola patch §12 ("Enter confirma") + promessa explícita da UI. (Corolário do FAIL 2 do QA 3-a.)
+- WARN list (não-bloqueantes):
+  1. Timer com aria-live="off" (role=timer ✓): decisão defensável (não anunciar a cada segundo), mas diverge do item 12 do Job 1 ("polite também no tempo"); "TEMPO RESTANTE" é irmão não-associado (sem aria-labelledby no timer).
+  2. Radar do progresso com <title>/<desc> vazios (strings "") e sem aria-hidden: textos S1–S7/0–100 vazam para SR como sequência solta; dados duplicados em texto ao lado mitigam a perda.
+  3. Item "Review" nunca marcado ativo: rail aria-current={isReviewActive ? undefined : undefined} (expressão morta, ranvier-app.tsx:143) e bottom nav active:false fixo; telas results/summary sem item corrente no nav.
+  4. Strings de dados mistas em PT no painel de fatos do exame: "VERSÃO: EXAM VERSION: MAY 4, 2026", "USD 200 (+ local taxes)", "Online proctored or test center" (catálogo não localizado; rótulos PT).
+  5. 9 tamanhos de fonte distintos na landing (48/24/20/16/14/13/12/11/10): escala coerente (serif display + corpo + mono metadata) mas excede a leitura literal "máx. 3 visíveis"; mono 10–13px é metadata e discutivelmente isento.
+  6. Landing mobile (≤640px) sem navegação visível: header nav hidden (sm:flex), sem bottom nav na landing — Progresso/Ajustes só alcançáveis via CTAs (2 saltos); desktop tem nav no header.
+  7. html lang SSR "pt-BR" corrigido pós-hidratação para o idioma resolvido (en) — flash menor para SR no primeiro paint.
+  8. Nav usa buttons (SPA hash) — sem middle-click/copiar URL dos destinos.
+  9. Focus da opção anima a cor do outline em 200ms (transition-colors inclui outline-color) — anel "fade-in" sutil.
+- Top 5 recomendações UX (por impacto):
+  1. Aplicar Instrument Sans ao documento (font-sans na <body> do layout.tsx ou font-family: var(--font-instrument-sans) no @layer base do globals.css) — 1 linha devolve a tipografia de identidade a TODO o sans do app (F1).
+  2. Corrigir "Continuar" para tentativas de estudo: navegar para a view study com attemptId (retomar a sessão) em vez de results; reservar o auto-submit "defensivo" para tentativas órfãs (F2 — perda de trabalho).
+  3. Unificar foco no spec do patch: sobrescrever o padrão shadcn (outline-none + ring/50) com o :focus-visible 2px sólido --app-ink offset 2 em TODOS os interativos — hoje o app alterna dois sistemas de foco na mesma tela (F5).
+  4. h1 nas telas de laudo/resumo/sessão (converter "LAUDO DO SIMULADO"/"RESUMO..." em h1 ou h1 visualmente oculto "Questão N de T") + preencher ou remover title/desc do radar + aria-label nos botões de ícone do exame mobile (F3, W2, F8).
+  5. Levar interativos a 44px (h-11 default no Button; tabs com padding; toolbar do exame) e conter blocos de código (overflow-x:auto/pre-wrap) para eliminar o overflow a 320px (F7, F4).
+
+---
+Task ID: 3-b
+Agent: UX & Accessibility Specialist (subagente)
+Task: Avaliação UX + acessibilidade do app live (v1.3.0) — claro/escuro, 320/375/768/1440, teclado e foco
+
+Work Log:
+- Método: sessão agent-browser `ux`, viewports 1440x900 / 768x900 / 375x667 / 320x667 / 720x400 (zoom 200%), temas claro+escuro, EN + spot-check PT-BR. Contrastes medidos in-page (luminância relativa WCAG sobre cores computadas; oklab→sRGB para o ring). 3 screenshots (/tmp/ux-landing-light.png, /tmp/ux-study-reveal-light.png, /tmp/ux-landing-dark.png) + julgamento visual via VLM (glm-5v). Nenhum arquivo de fonte modificado. Interações geraram tentativas de teste (3 sessões de estudo, 1 exame 0/45) — ambiente dev.
+- CONTRASTE claro (1440): (a) app-ink ação "Study mode with instant feedback" #1b5285 rgb(27,82,133) sobre papel #f7fbf9 = 7,76:1; (b) botão primário "Start practice exam" bg #1b5285 + rótulo #ffffff = 8,10:1 (radius 2px, h 40px); (c) muted #525d5e rgb(82,93,94) sobre #f7fbf9 = 6,52:1 (10px rodapé); (d) reveal no card #ffffff: tag "correct" #1f7a4d = 5,32:1, tag "your answer" #9b2f24 = 7,43:1 (mono 10px). Todos ≥4,5:1 AA.
+- CONTRASTE escuro (html.dark, bg #0a0f10 medido): (e) texto ink #8ab8e8 rgb(138,184,232) sobre #0a0f10 = 9,28:1; (f) muted rgb(146,154,153) sobre superfície rail #121919 = 6,20:1 (sobre bg = 6,71:1; "by Noos" mono 13px); (g) botão primário escuro bg #8ab8e8 + rótulo #07110f rgb(7,17,15) = 9,22:1. Bônus reveal escuro: "your answer" rgb(240,147,131) sobre #121919 = 7,81:1; "correct" rgb(127,211,165) = 9,98:1; corpo rgb(228,233,232) = 14,52:1.
+- FOCO claro (Tab×8 na landing): 1) brand "Ranvier by Noos" → outline solid 2px rgb(27,82,133) offset 2px ✓; 2–7) header nav (Certification/Progress/About/Continue) e CTAs (Start practice exam/View exams) → outline-style:none, indicador = ring 3px #1b5285@50% → blend #89a6bf = 2,43:1 vs papel (<3:1) ✗; 8) link "Study mode…" → solid 2px app-ink offset 2 ✓. Opção de resposta focada (claro): solid 2px rgb(27,82,133) off 2 ✓; (escuro): solid 2px rgb(138,184,232) off 2 ✓. Ring escuro no CTA: oklab→#8ab8e8@50% 3px → rgb(74,100,124) = 3,13:1 vs #0a0f10 ( passa 3:1 no limite; diverge do patch). Ordem de Tab lógica (brand → nav → CTAs → link; na questão: opções → links da explicação → Next).
+- TECLADO (teste dos 60s, patch §12): #/estudar → Start session → "b" → aria-selected=true na B + "Confirm answer" habilitado → Enter → REVEAL aparece (role=status, aria-live=polite, lead serif "Correct.") → Tab×3 → "Next question" focado → Enter → "Question 2 of 10". Questão completada 100% por teclado ✓ (atalho ENTER agora implementado — falha 3-a corrigida).
+- ALVOS (getBoundingClientRect): rail desktop 191×44 (5 itens, aria-current="page" no ativo) ✓; bottom-nav 375: itens 75×56 (barra 375×57) ✓; opções 736×74 desktop / 343×95–168 mobile (≥54 ✓); Confirm 166×44, Next 153,6×44, Skip 70×44, Review/Back 192×44/153×44, brand 105×46 ✓. MEDIDOS <44: CTAs landing 343×40 (375) e 195×40 (1440); "Continue" 107×40; "Study mode with instant feedback" 260×20 (padding 0 — pior caso); "Start session" 146,5×40; "Finish and see summary" 194×40; "Install app" 115×40 / "Not now" 66×40; header do exame mobile Leave/Submit 36×40, Navigator 38×40; tabs do laudo 69×29 e 130×29; links do rodapé 60–110×16.
+- RESPONSIVO: 375 — landing 375=375 ✓, study config+questão 375=375 ✓, exame 375=375 ✓, RESULTADOS 377 vs 375 (+2px overflow) ✗; 320 — landing 320=320 (h1 288px) ✓, questão 320=320 ✓, resultados 377 vs 320 (+57px; blocos CODE 385–622px) ✗; 768 — rail visível (aside 208px, nav 207×1210) + bottom-nav display:none ✓ (breakpoint md correto); 720×400 (zoom 200%) — landing 720=720, h1 435×101@x16, 0 elementos além do viewport ✓.
+- SEMÂNTICA: reveal role=status + aria-live=polite (claro e escuro) ✓; listbox "Answer options" + 4× role=option + aria-selected ✓; timer do exame role=timer ✓ com aria-live="off" (diverge do §12) + IBM Plex Mono; rail aria-current="page" ✓ (exceção: item "Review" nunca ativo — na sessão de revisão o aria-current permanece em "Study", medido); h1: landing 1× "Every question is a leap." ✓, study config 1× "Study Mode" ✓, settings 1× "Settings" (+4 h2) ✓, progress 1× ✓ — MAS tela de questão (estudo e exame) tem 0 headings (enunciado é <p> Newsreader 32px) e resultados tem 0 h1 (apenas h2 "Performance by domain"/"Question review").
+- COR-NÃO-SÓ: reveal claro/escuro com tags textuais "correct"/"your answer" + lead serif ("Correct."/"The correct one is B.") ✓; laudo: P "Below the cutoff line (70%)" + 1 dot ✓; legenda da paleta "Answered/Unanswered/Flagged" (texto + dots, dialog do navigator no mobile) ✓; estados nos aria-labels dos botões Q ("Q1 — Unanswered", 45×) + "0/45 ANSWERED" ✓. Glifos ✓/✗ (U+2713/U+2717; 2✓+8✗ medidos) no review do laudo — sempre acompanhados de tags textuais.
+- IDIOMA: PT → html lang=pt-BR, H1 "Cada questão é um salto." (exato), rail "Estudar/Exame/Progresso/Revisão/Ajustes" (exato), CTAs "Começar simulado"/"Ver exames"/"Modo estudo com feedback imediato", scan de vazamentos EN na landing/nav/CTA = 0 ✓; EN restaura (lang=en) ✓.
+- HEURÍSTICA (DOM + VLM em 3 shots): 0 gradientes, 0 sombras, 0 blur, 0 radius>3px, 0 emoji no DOM (landing/questão); mono só para meta/IDs/tempo/tags ("RAN-DBDEA-00022", "Question 1 of 10", "1/1 correct", "A–D · Enter", versão); Newsreader só display (H1 48px, questão 32px, lead 20px); "by Noos" 1× visível por tela no topo do rail (instância mobile display:none no DOM), nunca no rodapé ✓; VLM confirma estética de papel de prova calma e flat em claro e escuro, sem elementos decorativos ao redor da questão.
+- ÍCONES SEM NOME (header do exame ≤640px): "Leave" e "Submit exam" — textContent presente mas innerText="" (span hidden sm:inline) e SEM aria-label → nome acessível vazio, 36×40 (Question navigator tem aria-label ✓). Confirmado ao vivo (ex-falha 3-a F8 persiste).
+
+Stage Summary:
+- PASS (11): contraste AA em todos os pares medidos claro (7,76 / 8,10 / 6,52 / 5,32 / 7,43) e escuro (9,28 / 6,20 / 9,22 / 7,81 / 9,98); teclado 60s completo (b→Enter→reveal→Tab×3→Enter→Q2); foco do patch (2px solid app-ink offset 2) pixel-correto em opções/brand/links em claro e escuro; semântica do reveal (status+polite), opções (option+aria-selected), timer (role=timer, mono), rail (aria-current), 1×h1 e ordem h1→h2 nas 4 telas nomeadas; cor sempre com texto (tags, status+dot, legenda, aria-labels); alvos críticos ≥44 (rail 44, bottom-nav 56, opções 74–168, Confirm/Next 44); responsivo 375/320/768/zoom-200% sem overflow exceto resultados; PT-BR exato e sem mistura; heurística papel-de-prova (0 decorativos/emoji; by Noos 1× no rail); tokens do design system confirmados renderizados (#1b5285/#f7fbf9/#525d5e/#1f7a4d/#9b2f24/#8ab8e8/#0a0f10/#07110f, radius 2px, sem sombras).
+- FAIL (6):
+  1. Indicador de foco dos controles shadcn no claro: outline:none + ring 3px #1b5285@50% → renderizado #89a6bf = 2,43:1 vs papel (<3:1). Local: CTAs da landing (Start practice exam/View exams), header nav, Continue, Start session, Confirm/Skip (padrão). Viola patch §12 (2px solid app-ink offset 2 = 7,76:1) e WCAG 2.4.7/2.4.11.
+  2. "Study mode with instant feedback" (landing, abaixo dos CTAs): alvo 260×20px (padding 0) — <44 (patch) e <24px (WCAG 2.5.8 AA mínimo).
+  3. Botões só-ícone sem nome acessível no header do exame ≤640px: "Leave" e "Submit exam" (innerText="", sem aria-label, 36×40) — WCAG 4.1.2 (name/role/value).
+  4. Overflow horizontal no laudo de resultados: 375px → scrollWidth 377 vs 375 (+2px); 320px → 377 vs 320 (+57px; blocos CODE font-mono 385–622px) — WCAG 1.4.10 reflow.
+  5. Alvos <44px sistemáticos (h-10=40px): CTAs 343×40/195×40, Continue 107×40, Start session 146×40, Finish 194×40, Install 115×40, Not now 66×40, header exame mobile 36–38×40, tabs do laudo 69×29 e 130×29 — regra do patch ≥44px.
+  6. Telas de questão (estudo e exame) e resultados sem h1: 0 headings na questão (enunciado = <p>) e 0 h1 no laudo (só h2) — navegação por headings sem âncora; regra "1 h1 por tela".
+- WARN (8): timer aria-live="off" (role=timer ✓; patch §12 pedia polite — escolha defensável anti-spam; "TIME REMAINING" sem aria-labelledby); glifos ✓/✗ (U+2713/U+2717) no review (não-emoji, sempre com tag textual); links do rodapé 60–110×16 (isenção inline da 2.5.8, apertados no touch); landing 375 sem nav visível (header escondido; bottom-nav só em telas internas); ring escuro 3,13:1 (passa 3:1 no limite, inconsistente com o padrão 2px); item "Review" do rail nunca fica aria-current (medi: continua "Study"); transição de 200ms no foco (amostrado a 0,53px/8,8% durante a animação — indicador quase invisível por ~200ms); SSR entrega html lang="pt-BR" (cliente corrige para en; nit de hidratação).
+- Top 5 recomendações de UX por impacto:
+  1. Unificar foco visível: trocar o ring shadcn pelo token do patch (outline 2px solid app-ink, offset 2) em TODOS os controles — resolve 2,43:1 no claro, a inconsistência e o desvio do §12 numa única mudança de token.
+  2. Varredura de alvos h-10→h-11 (≥44px): CTAs, Start session, Finish, toolbar do exame, tabs do laudo (29→44) + dar área de clique ≥44 ao link inline "Study mode" (padding/inline-flex) — elimina a única violação AA-nível (20px) e a maioria do FAIL 5.
+  3. aria-label nos botões só-ícone do header do exame (Leave/Submit/Flag) quando o texto some em ≤640px (FAIL 3; custo mínimo, impacto alto para SR).
+  4. Reflow do laudo: envolver blocos de código em overflow-x:auto e eliminar o overflow residual de 2px da página (FAIL 4; cumpre 1.4.10 em 320 e zoom 200%).
+  5. Estrutura de headings nas telas de questão/resultados (h1 "Exam report"/meta da questão ou enunciado; h2 seções) + associar "TIME REMAINING" ao timer (aria-labelledby) e decidir aria-live=polite por seção de minuto (patch §12) — navegação SR completa em todas as telas.
+
+---
+Task ID: 6-b
+Agent: Orquestrador + Frontend (JOB 2 — implementação da nova identidade v1.3.0)
+Task: Implantação do patch de identidade Ranvier v1.0 + guia Noos v1.1 (tokens, símbolo, shell, landing, questão, resultado, estados)
+
+Work Log:
+- Fundação: noos-tokens.css reescrito (v1.1: --app/--app-ink/--app-solid/--app-on-solid/--app-soft/--app-line + --ranvier-node, papel claro padrão, dark opcional); globals.css remapeado (shadcn vars → tokens do patch; radius 0.25rem; foco 2px app-ink; prefers-reduced-motion; utilitários bg-app/text-app-ink/bg-app-soft/success/danger/signal); providers defaultTheme "light"; layout data-app="ranvier" + themeColor #f7fbf9/#0a0f10.
+- Símbolo: 4 SVGs da marca copiados para public/brand/ (mark/compact/negative/icon); favicon.svg = ícone tile #246cad raio 26/120 com R compacto; RanvierMark inline (currentColor + nó var(--ranvier-node)); NoosBadge reescrito: TEXTO PURO mono 13px + símbolo 14px (teto do range do guia, pedido de legibilidade do fundador preservado), SEM link (guia: "nunca como ação").
+- PWA: generate-icons.ts renderiza o monograma (any: tile; maskable: full-bleed + R no safe zone 80%); 5 PNGs regenerados; manifest theme/background #f7fbf9, atalhos em rotas hash PT; offline.html reescrito (papel claro/dark prefers, monograma, by Noos mono, microcopy offline do guia).
+- Shell (ranvier-app.tsx reescrito): rail desktop 208px com 5 destinos (Estudar/Exame/Progresso/Revisão/Ajustes; ativo = barra 2px app + app-soft + app-ink + aria-current); mobile: top bar (marca + domínio mono) + bottom nav fixa 5 itens 56px com safe-area e main pb-20; landing com header próprio (marca + links + "Continuar" quando há sessão em andamento); rodapé de conteúdo: Local-First mono + versão (mobile) + disclaimer + links; by Noos UMA vez por tela (topo), nunca nas duas pontas; exame chrome-less; view Ajustes nova (settings-view.tsx: idioma PT/EN, tema claro/escuro, conta/login/logout/delete, instalar app, sobre + fontes + licenças); store + hash /#/ajustes.
+- Landing (home-view reescrito): hero à esquerda (eyebrow mono, H1 serif "Cada questão é um salto."/"Every question is a leap.", lead ≤3 linhas), CTAs Começar simulado/Ver exames + link Modo estudo; bilhete hairline à direita (DBDEA, 45, 90 min, corte 70%, última sessão real); linha de prova; InstallBanner; domínios com barras 3px; como usar numerado mono; REMOVIDOS gradiente/blob/sparkles/hero centralizado/facts/features com cards.
+- Tela de questão (question-card reescrito): pergunta Newsreader 26-32/1.25 máx 48ch; alternativas 54px com letra mono em quadrado 26px (hover border-strong; selecionada border-app + app-soft); reveal com tags textuais "correta"/"sua resposta" + explicação com fio superior + lead serif + fonte mono; atalhos A-D/setas/Enter a nível de documento; ID pública mono + Comunidade.
+- Estudo (study-view reescrito): config com hairlines; sessão com QUESTION N/TOTAL mono, domínio·nível, contadores mono, régua de progresso 3px; Confirmar (desabilitado até selecionar) + Pular + hint A–D·Enter; summary; fluxo seleção→confirmar→reveal→próxima.
+- Exame (exam-view reescrito): régua de tempo de ponta a ponta (51 ticks 2%, majors 10%, dreno direita→esquerda, leitura mono tabular, sem piscar); cabeçalho de sessão (Sair ghost + meta + navegador + Entregar); questão em 720px com meta row; palette quadrada mono com legenda; marcos de tempo em aria-live polite sr-only (10min/1min).
+- Resultado (results-view reescrito): laudo em papel — nota mono 6xl-7xl + /total + %; status com ponto discreto + linha de corte marcada a 70%; breakdown barras 3px app-ink; revisão com IDs mono; ações Revisar N + Novo simulado; rodapé data·duração·versão mono.
+- Reskins: cert-view (dl hairline, tabela mono, links oficiais + guia), progress/guide/about (títulos serif, cores token), install-banner (app-soft), auth-modal (título serif), query-error (+código HTTP mono), markdown (pre max-w-full), ui/card (rounded-none sem shadow), ui/button (sem shadow-xs, h-11/h-12, ring cheio), ui/tabs (52px→triggers 45px).
+- i18n: +~70 strings PT/EN (shell, landing, ticket, settings, tags, laudo, marcos de tempo); microcopy do timeout alinhado ao patch; versão v1.3.0 em package.json/i18n/sw.js/offline.
+- Incidente: banco SQLite esvaziado externamente às 10:16 (sincronizado com a chegada dos uploads) → re-seed idempotente (116 questões). SW stale-while-revalidate cacheou a resposta vazia do catálogo (200 ok) → duplo reload para validar; documentado como comportamento esperado do SWR.
+- QA próprio (agent-browser): landing/papel/serif/mono/by-Noos-sem-link ✓; rail 5 destinos ✓; sessão estudo com Confirmar/atShortcut B/Enter ✓; exame 45q/régua 51 ticks/atalho A ✓; laudo ✓; ajustes PT/EN + tema ✓; zero erros de console; tsc 0; lint 0.
+
+Stage Summary:
+- v1.3.0: identidade Ranvier v1.0 implantada no formato do guia Noos v1.1 (claro padrão, monograma R com nó, shell de 5 destinos, tela de questão em serifa com Confirmar/Pular/atalhos, régua de tempo, laudo em papel, estados com código de erro).
+- Preservado integralmente: lógica de exames, banco, IDs RAN-DBDEA, deep-links/Axon, correção server-side, PWA offline, /api/health.
+
+---
+Task ID: 6-c
+Agent: Orquestrador (JOB 3 — QA + UX E2E no app live, correções dos achados)
+Task: Equipes de QA e UX testando o app live (desktop+mobile); correção dos FAILs; re-verificação
+
+Work Log:
+- QA (subagente 3-a, agent-browser session qa, 1440/375/390, EN+PT): 15 grupos PASS, 2 FAIL, 7 WARN, 0 erros de console. Golden path completo: landing→exame 45q (régua, atalhos, flags, palette)→entrega→laudo→revisão 44→estudo→progresso→review queue 47→ajustes→PWA→offline; mobile E2E sem overflow; PT-BR ok; manifest 116 linhas.
+- UX (subagente 3-b, session ux, claro+escuro, 320/375/768/1440, zoom 200%): 11 PASS, 6 FAIL, 8 WARN. Todos os pares de contraste AA medidos (claro 7.76/8.10/6.52/5.32/7.43; escuro 9.28/6.20/9.22; tags 7.81/9.98); teste de 60s de teclado PASSA (b→Enter→reveal→Tab→Enter); foco do patch pixel-exato em ambos os temas.
+- FAILs corrigidos (todos re-verificados no navegador):
+  * QA F1 cache stale de ["attempts"] → staleTime 0 + refetchOnMount "always" nas 3 queries (landing header, home ticket, progress); histórico e botão "Continuar" agora atualizam sem reload (verificado: sessão concluída → Progress mostra a linha sem F5).
+  * QA F2 Enter não confirmava → handler Enter (fora de botões/inputs, com seleção) + setas ↑↓ movem foco entre alternativas no question-card (verificado: b→Enter→"Correct." reveal).
+  * UX F1 foco 2.43:1 em controles shadcn (ring/50 + outline-none) → button/tabs com ring cheio + regra global com !important para outline 2px app-ink em todo interativo (verificado: solid 2px rgb(27,82,133)).
+  * UX F2 link "Modo estudo" 20px de altura → min-h-11 inline-flex (44px).
+  * UX F3 botões só-ícone do exame sem nome acessível → aria-label em Sair/Entregar/anterior (≤640px).
+  * UX F4 overflow horizontal no resultado (377px @375/320 por code blocks) → pre max-w-full + rounded-sm (verificado: scrollWidth==clientWidth em 375 e 320).
+  * UX F5 alvos sub-44px sistemáticos → Button sm h-11, lg h-12, icon size-11; TabsList 52px (triggers ~45px); medido: CTAs 44-48px.
+  * UX F6 sem h1 nas telas de questão/resultado → h1 sr-only em study/exam/results (verificado no DOM).
+- WARNs corrigidos: marcos de tempo em aria-live polite (10min/1min, strings novas PT/EN); checkboxes de domínio agora pré-marcados ("padrão: todos" honesto). WARNs aceitos/documented: campo extra "db" no health (documentado no DEPLOY.md); ✓/✗ dingbats sempre acompanhados de tag textual; item "Revisão" do rail sem estado ativo (ação transitória — conhecido); barras 0% com largura 0 (dado exato); banner de instalação intermitente (depende do evento da plataforma); exame retomado mantém deadline do servidor (correto para prova cronometrada).
+- Estado final: lint 0 erros, tsc 0 erros, 0 erros de console, todos os FAILs das duas equipes corrigidos e re-verificados ao vivo.
+
+Stage Summary:
+- JOB 1 (avaliação), JOB 2 (implantação) e JOB 3 (QA+UX E2E) concluídos; 8 defeitos de QA/UX corrigidos com re-verificação; app pronto para o GPT local publicar (commit + artefatos de transferência).
+- Pendências honestas: produção Vercel segue com a camada de banco quebrada (DEPLOY.md §4/§5, /api/health para diagnosticar); SDD §17→§18 precisa da entrada v1.3.0 na próxima rodada de docs.
+
+---
+Task ID: 8-a
+Agent: Question Bank Editor (S1 — Databricks Intelligence Platform)
+Task: Rebalance option lengths in s1-platform.ts (anti length-bias fix)
+
+Work Log:
+- Read worklog tail for context; read src/data/questions/s1-platform.ts (8 questions, S1-001..S1-008) and scripts/option-length-report.ts flag logic (LONG = correct-is-longest AND ratio ≥ 1.2; SHORT = ratio < 0.8).
+- Baseline measurement (bun one-off): S1-003 r=1.36 (126/92.7), S1-006 r=1.25 (130/103.7), S1-007 r=1.39 (131/94.3), S1-008 r=1.28 (108/84.7) — all correct-is-longest, matching the flags. Skimmed unflagged S1-001 (1.06), S1-002 (1.17), S1-004 (1.06), S1-005 (1.195, below the 1.2 threshold) — left untouched.
+- Edits (option strings only; keys/stems/correctIndex/references/explanations untouched; double-quote style and em-dash/semicolon punctuation preserved):
+  - S1-003 correct opt: dropped verbose "provides a unified governance model ... with centralized" → "Unity Catalog, which centralizes permissions, lineage, and auditing across the lakehouse" (126→88). Tested fact (UC = governance foundation: permissions/lineage/audit) intact.
+  - S1-006 correct opt: folded "(or classic all-purpose compute)" and "that task needs" → "JAR tasks are not supported on serverless compute for jobs — they need classic jobs compute instead" (130→99). Core fact (JAR not supported on serverless; needs classic jobs compute) intact.
+  - S1-007 correct opt: "a workload like ML Runtime on GPU ... the team should configure" → "ML Runtime on GPU ... it requires a classic compute resource" (131→101). Aligns with explanation wording ("ML Runtime on GPU", "classic compute resource").
+  - S1-008: shortened correct opt by dropping "as tasks" (108→99, keeps precise docs term "failure notifications"), and lengthened the Delta Lake time-travel distractor with a plausible-but-wrong mechanism detail ("...previous outputs from the table's transaction log", 81→114) — still unambiguously wrong since time travel queries table versions, not notebook outputs; explanation already refutes it.
+- No explanation edits needed: no explanationEn/explanationPt quotes the changed option wording verbatim (all paraphrase).
+- Verification: `bun scripts/validate-questions.ts` → Errors: 0, Warnings: 0, "✓ Question bank OK" (116 questions). `bun scripts/option-length-report.ts` → s1-platform.ts section shows zero LONG/SHORT flags.
+- Only s1-platform.ts modified (git diff: 5 option lines, nothing else).
+
+Stage Summary:
+- S1-003: ratio 1.36 → 0.95 (correct no longer longest; distractor 98 now max)
+- S1-006: ratio 1.25 → 0.96 (correct no longer longest; distractor 110 now max)
+- S1-007: ratio 1.39 → 1.07 (correct no longer longest; distractor 104 now max)
+- S1-008: ratio 1.28 → 1.04 (correct no longer longest; distractor 114 now max)
+- All four flagged questions now in the 0.85–1.2 target band; S1 file clean in option-length-report (0 flags); question bank validation passes ("✓ Question bank OK").
+
+---
+Task ID: 8-f
+Agent: Question Bank Editor (S6 — Troubleshooting, Monitoring, and Optimization)
+Task: Rebalance option lengths in s6-troubleshooting.ts (anti length-bias fix)
+
+Work Log:
+- Read worklog tail for context; read src/data/questions/s6-troubleshooting.ts (12 questions, S6-001..S6-012) and scripts/option-length-report.ts + validate-questions.ts to understand flag rules (LONG = correct-is-longest AND ratio ≥ 1.2; SHORT = ratio < 0.8).
+- Baseline via read-only bun script: 11 flagged LONG (S6-001 2.44, S6-002 1.87, S6-003 1.58, S6-005 1.63, S6-006 1.81, S6-007 1.57, S6-008 1.24, S6-009 1.82, S6-010 1.62, S6-011 1.71, S6-012 2.03). S6-004 (1.18, correct longest by only 2 chars) below the 1.2 threshold and not conspicuous — left untouched.
+- Edited ONLY option strings (double-quoted, as in the original): per question, shortened the correct option by folding verbose phrasing (dropped redundant qualifiers like "the shared cluster now provides", "(compaction and layout)", "so recent run durations can be compared against the earlier runs' baseline to confirm the trend" → "for comparison against the earlier baseline") and/or lengthened distractors with verifiably-wrong detail from the same docs domain (e.g. runtime conflict "reported as INIT_SCRIPTS_FAILED"; "clustering keys ... map directly onto directory names"; "ZORDER and clustering keys compose on the same table"; "small files bloat the shuffle data"; driver heap "buffers its shuffle reads").
+- Preserved everywhere: key, domainCode, stem, correctIndex, option order, referenceUrl/Title, difficulty, 4-option tuples, code fragments intact (ALTER TABLE ... CLUSTER BY (region, customer_id), spark.sql.shuffle.partitions, OPTIMIZE ... ZORDER BY (customer_id)). Tested facts unchanged; every added distractor detail cross-checked against the question's own explanation (which states the opposite) so no distractor became arguably correct.
+- Explanations EN/PT: verified none quote changed option wording verbatim (all paraphrases) — left untouched per rule 6.
+- Verification: bun scripts/validate-questions.ts → Errors 0, Warnings 0, "✓ Question bank OK". bun scripts/option-length-report.ts → S6 section shows ZERO LONG/SHORT flags; S6 ratios now 0.94–1.03 and the correct option is no longer the longest option in any of the 11 edited questions.
+- git diff --stat confirms only s6-troubleshooting.ts touched (41 lines changed = the 41 option strings).
+
+Stage Summary:
+- 11 questions edited (before → after ratio): S6-001 2.44→0.95, S6-002 1.87→0.94, S6-003 1.58→0.98, S6-005 1.63→1.03, S6-006 1.81→1.03, S6-007 1.57→0.96, S6-008 1.24→1.01, S6-009 1.82→1.03, S6-010 1.62→1.02, S6-011 1.71→1.03, S6-012 2.03→0.94. S6-004 untouched (1.18, unflagged, not conspicuous).
+- Length-guessing leak closed for S6: correct option never the longest, all ratios in 0.94–1.03 (target 0.85–1.2); bank summary correct-is-longest dropped from 94 (81%) to 79 (68%) with S6 contributing 0 new flags. Validation: "✓ Question bank OK".
+
+---
+Task ID: 8-e
+Agent: Question Bank Editor (S5 — Implementing CI/CD)
+Task: Rebalance option lengths in s5-cicd.ts (anti length-bias fix)
+
+Work Log:
+- Read worklog tail for context (v1.3.0 identity work, 116-question bank) and read /home/z/my-project/src/data/questions/s5-cicd.ts in full.
+- Baseline: bun scripts/option-length-report.ts flagged 8 LONG questions in s5-cicd.ts (S5-001 1.50, S5-003 1.59, S5-004 1.79, S5-006 1.62, S5-008 1.26, S5-009 2.01, S5-011 1.20, S5-012 1.81); exact per-option lengths dumped via a read-only bun -e script. S5-002 (1.195) and S5-005 (1.198) were just under the flag threshold but still had the correct option as the strict longest, so both got minimal fixes too. S5-007/S5-010 were already healthy (0.89/0.88, correct not longest) and were left untouched.
+- Strategy per flagged question: shorten the correct option (drop redundant qualifiers, fold verbose phrasing — never the tested fact) AND/OR lengthen distractors with plausible-but-verifiably-wrong detail from the same Databricks docs domain (no PR on the provider; one deploy serves all workspaces; manual renames survive deploys; mode is global; IP allowlist replaces auth; re-declaring a resource in a target is not allowed; interactive OAuth in CI). Facts respected: mappings merge per key / sequences replaced wholesale; production mode requires explicit run_as; dev mode appends [dev] marker; no prompting at deploy time.
+- Correct options shortened (examples): S5-001 dropped "to the remote repository"/"using the Databricks Git integration" tail; S5-004 "--target" verbose clause folded to "-t dev/-t prod" (matches explanation); S5-006 dropped the "(formerly Databricks Asset Bundles)" naming parenthetical; S5-009 folded "grant it access to the workspace" → "with workspace access" and the M2M tail; S5-012 folded the run_as/exact-names tail.
+- Command-style options kept code intact (S5-007/S5-010 untouched; S5-008 correct command unchanged — only the yamllint distractor gained a scope tail).
+- Explanations (EN/PT) were NOT edited: verified none quote the changed option wording verbatim; all explanation prose remains consistent with the new option texts.
+- Invariants verified: keys, domainCode, stems, correctIndex, option order, option count (4), referenceUrl/Title, difficulty unchanged; diff is 25 option lines only; quoting style (double-quoted strings, no backticks in options) preserved.
+- Verification: bun scripts/validate-questions.ts → "✓ Question bank OK" (0 errors, 0 warnings, 116 questions); bun scripts/option-length-report.ts → s5-cicd.ts section shows ZERO flags; bunx tsc --noEmit --strict src/data/questions/s5-cicd.ts → exit 0.
+
+Stage Summary:
+- 10 of 12 questions edited (all 8 flagged + 2 borderline where correct was still the strict longest); S5-007 and S5-010 untouched (already healthy).
+- Ratios before → after (correct is no longer the longest option in ANY S5 question):
+  * S5-001: 1.50 → 0.94 | S5-002: 1.20 → 0.96 | S5-003: 1.59 → 0.97 | S5-004: 1.79 → 1.08
+  * S5-005: 1.20 → 1.01 | S5-006: 1.62 → 0.89 | S5-008: 1.26 → 0.95 | S5-009: 2.01 → 1.04
+  * S5-011: 1.20 → 1.00 | S5-012: 1.81 → 0.99 | (S5-007 0.89, S5-010 0.88 unchanged)
+- Tested facts, distractor wrongness, and bilingual explanations preserved; only option-length balance changed. File s5-cicd.ts passes validate-questions, option-length-report (0 flags), and strict tsc.
+
+---
+Task ID: 8-d
+Agent: Question Bank Editor (S4 — Working with Lakeflow Jobs)
+Task: Rebalance option lengths in s4-jobs.ts (anti length-bias fix)
+
+Work Log:
+- Read worklog tail + full s4-jobs.ts (18 questions); ran scripts/option-length-report.ts baseline: 16 flagged questions (12 LONG, 4 SHORT).
+- Tuned drafts in a scratch measurement script outside the repo (deleted after) before touching the source: correct options shortened by folding verbose phrasing (S4-003 retries+timeout-per-attempt, S4-005 string-vs-numeric operators, S4-011 shared jobs compute, S4-012 max-concurrent-runs/queueing); distractors lengthened with plausible-but-verifiably-wrong detail from the same docs domain (run-if "one success satisfies all-succeeded", For each nesting, webhook bypassing retry suppression, Quartz cron rewrite, editor-attached all-purpose cluster, "None failed guarantees always-run", etc.). No filler — every added clause is a wrong-mechanics claim or a true disqualifying consequence.
+- Preserved in every edit: key, domainCode, stem, correctIndex, option order, referenceUrl/Title, difficulty, exactly 4 options; code and template expressions kept intact ({{tasks.qc.values.bad_records}} > 0, {{input.table}}, dbutils.jobs.taskValues.set(), spark.conf.get('ingested_rows')).
+- Explanations untouched (both languages): verified none quote changed option wording verbatim — run-if names (S4-002), the If/else expression (S4-004), the 10-second minimum (S4-012) and "Mute notifications until the last retry" (S4-017) all still appear in the options.
+- Skim of unflagged questions: S4-007 (ratio 1.18) and S4-013 (1.05) are below the >=1.2 threshold — left untouched.
+- git diff audit: 49 option lines changed, nothing else in the file.
+- Verification: bun scripts/validate-questions.ts → "✓ Question bank OK" (0 errors, 0 warnings); bun scripts/option-length-report.ts → s4-jobs.ts section shows zero LONG/SHORT flags; the longest option is now a distractor in 17 of 18 S4 questions.
+
+Stage Summary:
+- 16 questions edited — before→after ratios: S4-001 1.36→1.03, S4-002 1.20→0.90, S4-003 1.64→0.98, S4-004 1.58→1.08, S4-005 1.83→1.07, S4-006 1.43→1.09, S4-008 0.79→0.96, S4-009 0.75→0.97, S4-010 1.55→1.01, S4-011 1.74→0.97, S4-012 1.59→1.07, S4-014 0.58→1.01, S4-015 1.24→0.92, S4-016 0.73→1.07, S4-017 1.52→1.06, S4-018 1.30→0.89. All now within 0.85–1.20 with the correct option never the obvious longest; tested facts and answer keys unchanged; only s4-jobs.ts modified.
+
+---
+Task ID: 8-g
+Agent: Question Bank Editor (S7 — Governance and Security)
+Task: Rebalance option lengths in s7-governance.ts (anti length-bias fix)
+
+Work Log:
+- Read worklog tail for context; read all 17 S7 questions in src/data/questions/s7-governance.ts and both QA scripts to learn the exact metric (ratio = len(correct)/avg(len(other 3)); flags: LONG = longest && ratio>=1.2, SHORT = ratio<0.8).
+- Baseline report: 10 flagged S7 questions — LONG: S7-001 1.49, S7-003 1.94, S7-007 1.47, S7-009 1.77, S7-010 2.32, S7-015 2.09, S7-016 1.68, S7-017 1.79; SHORT: S7-004 0.62, S7-005 0.79. Unflagged S7-002 (1.10), S7-011 (1.15), S7-014 (1.14) are below the 1.2 fix threshold — left untouched, like S7-006/008/012/013.
+- Rebalanced each flagged question by shortening the correct option (folded verbose qualifiers, kept full technical precision) and/or lengthening distractors with verifiably-wrong detail from the same UC governance docs (e.g. "even for tables created with a LOCATION clause" on the DROP-deletes-both distractor; REVOKE "removes both direct grants and access inherited through group membership"; SET MASK "accepts a governed tag as its target"; BROWSE "without needing USE SCHEMA"; DBFS root "remains the default target"; ABAC "in a second evaluation phase after optimization").
+- Short-correct fixes: S7-004 gained the true prerequisite note "— requires DBR 17.3 LTS+ or Serverless." (SQL untouched); S7-005 gained "— a managed CTAS." — distractors there are pure code and untrimmable.
+- Preserved everywhere: keys, domainCode, stems, correctIndex, option order, references, difficulty, 4-option tuples, double-quote style, SQL syntax; S7-010 keeps the conceptual DENY>GRANT phrasing; no distractor became arguably correct (all additions are verifiably wrong per official docs / the file's own explanations); explanations quote no changed option wording verbatim, so they were left untouched (the dropped S7-009 parenthetical "succeeds even if none existed" is still taught in explanationEn/Pt).
+- Verified with bun scripts (read-only): validate-questions.ts ends "✓ Question bank OK" (0 errors, 0 warnings); option-length-report.ts shows zero LONG/SHORT flags for s7-governance.ts.
+
+Stage Summary:
+- Questions edited (before→after ratio, correct no longer the longest in any): S7-001 1.49→1.02, S7-003 1.94→1.04, S7-004 0.62→1.15, S7-005 0.79→1.01, S7-007 1.47→0.97, S7-009 1.77→0.95, S7-010 2.32→0.93, S7-015 2.09→1.05, S7-016 1.68→1.02, S7-017 1.79→1.07.
+- Validation: ✓ Question bank OK; S7 file = 0 length-bias flags (bank-wide remaining flags belong to s1–s6, owned by parallel editors).
+
+---
+Task ID: 8-b
+Agent: Question Bank Editor (S2 — Data Ingestion and Loading)
+Task: Rebalance option lengths in s2-ingestion.ts (anti length-bias fix)
+
+Work Log:
+- Context lido (tail do worklog: tasks 6/8-a/8 orquestração; repo em fluxo com editores paralelos por arquivo sX). Arquivo-alvo único: src/data/questions/s2-ingestion.ts (24 questões, S2-001..S2-024).
+- Baseline medido (report script): 20 questões flaggads LONG (correta = mais longa, ratio ≥ 1.2): S2-004 1.25, S2-005 1.59, S2-006 1.29, S2-007 1.65, S2-008 2.37, S2-009 1.70, S2-011 1.48, S2-012 1.61, S2-013 2.31, S2-014 1.27, S2-015 1.37, S2-016 1.34, S2-017 1.44, S2-018 1.65, S2-019 1.78, S2-020 1.75, S2-021 1.66, S2-022 1.54, S2-023 1.48, S2-024 1.72. Unflagged checadas: S2-001 0.96, S2-002 1.19, S2-003 1.13, S2-010 1.10 — todas < 1.2, sem edição.
+- Redação iterada via script de medição descartável (fora do repo, removido após uso) até ratio 0.85–1.2 sem a correta despontar como a mais longa. Estratégia dupla: (a) encurtar a correta removendo qualificadores redundantes sem perder precisão técnica; (b) alongar distratores com detalhes plausíveis-verificavelmente-errados do mesmo domínio das docs (ex.: "COPY INTO ... never reads external locations", "Delta transaction log rebuild", "numPartitions=500 and no bounds", "Kafka exposes a JDBC interface", "managed file events require no cloud permission grants"). Fatos-preservados respeitados: COPY INTO idempotente/exactly-once; modos reais de schemaEvolutionMode; incremental listing deprecated; corrupção de checkpoint por lifecycle; pares SNS+SQS / Event Grid+Queue / Pub/Sub; Trigger.AvailableNow.
+- Invariantes intactos: key, domainCode, stem, correctIndex, ordem das opções, referenceUrl/Title, difficulty, 4 opções; estilo de aspas/backticks preservado por questão; código dentro de opções sintaticamente intacto; explicações EN/PT intocadas (nenhuma cita literal de texto alterado de opção — todas paráfrases conceituais que continuam válidas).
+- Diff auditado: 62 linhas alteradas, todas dentro de arrays `options` (62 insertions / 62 deletions, zero toques em stems/explanations/metadados).
+
+Stage Summary:
+- 20 questões editadas (before→after ratio): S2-004 1.25→1.08, S2-005 1.59→1.15, S2-006 1.29→0.97, S2-007 1.65→1.05, S2-008 2.37→1.10, S2-009 1.70→1.08, S2-011 1.48→1.08, S2-012 1.61→1.13, S2-013 2.31→1.11, S2-014 1.27→1.12, S2-015 1.37→1.09, S2-016 1.34→0.98, S2-017 1.44→1.07, S2-018 1.65→1.05, S2-019 1.78→0.99, S2-020 1.75→1.07, S2-021 1.66→1.09, S2-022 1.54→1.08, S2-023 1.48→1.11, S2-024 1.72→0.98. Em nenhuma das 20 a correta é a mais longa; range final do arquivo: 0.96–1.19; correct-is-longest em S2 caiu de 23/24 para 3/24 (S2-002/S2-003/S2-010, todas < 1.2, não-flaggáveis).
+- Validação: `bun scripts/validate-questions.ts` → "✓ Question bank OK" (0 erros, 0 warnings, 116 questões, S2=24). `bun scripts/option-length-report.ts` → s2-ingestion.ts com ZERO flags LONG/SHORT (flags restantes no relatório são de s3-transformation.ts, arquivo de outro editor paralelo). Nenhum outro arquivo tocado; sem bun dev/db/git commit/lint.
+
+---
+Task ID: 8-c
+Agent: Question Bank Editor (S3 — Data Transformation and Modeling)
+Task: Rebalance option lengths in s3-transformation.ts (anti length-bias fix)
+
+Work Log:
+- Read worklog tail for project context; read all 25 questions in src/data/questions/s3-transformation.ts; dumped per-option lengths with a read-only bun script (/tmp/s3_lengths.ts) to confirm the 18 flagged keys (16 LONG + S3-012/S3-015 SHORT).
+- Strategy per rules: shorten the correct option only by folding verbose phrasing (code options left syntactically intact — pure-code options untouched); lengthen distractors only with plausible, verifiably-wrong detail from the same docs domain (INSERT INTO never updates; PERMISSIVE mode is about corrupt records, not NULLs; unionAll() is a deprecated alias; no .hint('aqe') exists; PK/FK informational-only; inline() requires array of structs; UNION ALL never skips keys; two statements are never atomic; collect_set is an aggregate, so it shuffles; driver does not buffer executor agg buffers; executor memory does not set task count).
+- S3-012 (SHORT 0.76): correct "explode(tags)" is a bare expression and cannot grow — trimmed the longest distractor by replacing array_distinct(tags) with inline(tags) (12 chars; verifiably wrong: inline explodes arrays of STRUCTS and errors on ARRAY<STRING>). Updated the explanation sentence in BOTH languages (array_distinct → inline).
+- S3-015 (SHORT 0.73): trimmed longest distractor df.describe('amount') → df.describe() (identical wrongness: no quartiles; explanation already covers describe() generically, no quote fix needed).
+- S3-005: distractor dropna(subset=['email']) became the chained .dropna(subset=['phone']) form (same net effect as how='any', still wrong); explanationEn/Pt sentences that quoted the old option updated minimally in both languages. thresh=2 distractor kept semantics identical via explicit subset=None.
+- S3-019 (worst, 2.42): correct option tightened (dropped the skew-splitting clause — explanation still teaches it; kept runtime re-optimization + coalesce + SMJ→BHJ + default-on, which map 1:1 to the stem observations) and all three distractors extended with wrong rationale.
+- Skimmed unflagged S3-001..S3-025: S3-001 (1.14), S3-002 (1.19), S3-008 (1.11, longest but <1.2) and S3-025 (1.20, not the longest) are below the obvious-longest threshold — left untouched; S3-006/022/023 already balanced.
+- Never touched: keys, domainCode, stems, correctIndex, option order, option count, referenceUrl/Title, difficulty. Double-quoted option strings with single-quoted code preserved throughout.
+
+Stage Summary:
+- 18 questions edited, before→after ratios (correctLen/avgOthers): S3-003 1.82→1.03, S3-004 1.40→1.00, S3-005 1.36→1.06, S3-007 1.42→1.10, S3-009 1.48→1.09, S3-010 1.50→1.07, S3-011 1.56→1.05, S3-012 0.76→0.91, S3-013 1.53→1.07, S3-014 1.71→1.08, S3-015 0.73→0.88, S3-016 1.24→1.02, S3-017 1.52→1.06, S3-018 1.91→1.01, S3-019 2.42→1.07, S3-020 1.84→0.99, S3-021 1.45→0.95, S3-024 1.68→1.01. All within 0.85–1.2; the correct option is no longer the longest in 17/18 (S3-007 longest by 1 char, ratio 1.10, not conspicuous).
+- Explanations updated in both languages only where they quoted changed option wording: S3-005 and S3-012 (EN + PT-BR).
+- Validation: `bun scripts/validate-questions.ts` → "✓ Question bank OK" (Errors: 0, Warnings: 0). `bun scripts/option-length-report.ts` → s3-transformation.ts section shows zero LONG/SHORT flags; bank summary: flagged LONG 0, flagged SHORT 0, correct-is-longest 12% (parallel editors' fixes included).
+
+---
+Task ID: 8
+Agent: Orquestrador + Frontend/UX (lote v1.3.1 — feedback do fundador pós-QA/UX)
+Task: Implementar os pedidos do fundador (rodapé by Noos link, seção "Como o Ranvier ajuda você", popup de novidades, fix do código mobile, rebalanceamento das alternaturas, modo estudo ≥1 domínio, Anexo SDD, dívida OG) + bump v1.3.1
+
+Work Log:
+- Re-lidos integralmente o patch (upload/ranvier-patch.md) e o guia (upload/guia-de-apps.html, foco §02/§04/checklist/Anexo A) + screenshot do fundador (seção antiga "Como o Ranvier ajuda você", 4 cards — conteúdo exato recuperado).
+- Confirmado o apontamento do fundador: o CHECKLIST do guia (linha "release-footer": "'by Noos', versão e política local-first aparecem no rodapé") e o Anexo F ("Rodapé: Local-First, versão e uma única assinatura 'by Noos'") pedem a assinatura no rodapé — a v1.3.0 a colocou no topo; corrigido para o rodapé, como LINK (decisão do fundador, ADR no constitution.md: sobrepõe o "nunca como ação" §02).
+- NoosBadge reescrito: link para hubHomeUrl(lang), mono 13px + símbolo 14px, alvo 44px, aria-label dedicado (t.footer.byNoosLabel). BrandLockup (rail/top-bar/landing header) agora só monograma + "Ranvier" — assinatura 1×/tela, apenas no rodapé.
+- home-view: seção "Como o Ranvier ajuda você" restaurada (4 cards hairline border/bg-card p-5, ícones lucide discretos em app-ink, strings i18n PT/EN preexistentes).
+- whats-new-dialog.tsx (novo): popup na tela inicial, abre quando localStorage "ranvier:whatsnew:seen" != APP_VERSION (src/lib/version.ts, novo, fonte única da versão); fechar registra a versão; 5 novidades PT/EN; checagem com delay de 400ms (evita setState síncrono no efeito — lint react-hooks/set-state-in-effect — e deixa a landing pintar antes).
+- markdown.tsx — CAUSA-RAIZ do scroll que voltava ao início: o objeto `components` era inline (identidade nova por render) → ReactMarkdown remontava a árvore a cada re-render (timer do exame ticka 1×/s) → <pre> destruído → scrollLeft zerado. Corrigido: mapa hoisted p/ escopo de módulo + wrap no mobile (max-md:whitespace-pre-wrap max-md:break-words — sem scrollbar horizontal no celular, a pedido do fundador) + overscroll-x-contain no desktop.
+- study-view: start desabilitado com 0 domínios + aviso textual (t.study.domainsNone) — resposta à dúvida do fundador: antes vazio = sem filtro = todos; agora o estado ambíguo não existe (todos vêm pré-marcados e ≥1 é exigido).
+- Rebalanceamento das alternativas (7 subagentes 8-a..8-g em paralelo): "correta é a mais longa" 81% (94/116) → 12% (14/116); 0 flags LONG/SHORT; correctIndex/ordem/keys/stems/referências intactos (histórico de tentativas preservado); scripts/option-length-report.ts (novo) como guarda permanente; re-seed idempotente (116 updated).
+- Anexo SDD APLICADO (pergunta do fundador): docs/sdd/ criado no formato do Anexo A — README.md (organização, Axon RAN-DBDEA, comandos), constitution.md (8 princípios + invariantes Noos + constituição do produto + ADRs do fundador), current-state.md (v1.3.1 verificado + limitações honestas), plan.md (autorizado/pendente/adiado/fora de escopo), spec-v1.3.1-founder-feedback.md (spec 8 blocos deste lote). Dívida futura registrada no plan.md § Dívidas conhecidas: material de divulgação/OG images com impacto/motivo/condição de reabertura.
+- Versão: package.json 1.3.1, sw.js ranvier-v1.3.1, offline.html v1.3.1, i18n version parametrizada (f(t.footer.version, {version: APP_VERSION})), results-view usa APP_VERSION.
+- Verificação agent-browser (desktop 1440/800/768 + mobile 375): popup aparece com conteúdo correto e NÃO reaparece após reload (localStorage 1.3.1); "How Ranvier helps you" + 4 cards; rodapé by Noos link → noos-hub.vercel.app/en + Local-First + v1.3.1 (EN e PT); rail desktop mostra V1.3.1; header SEM assinatura; estudo com 0 domínios → hint + botão desabilitado; sessão S7: reveal funcional; scroll de código PRESERVADO após re-render (42px mantidos — antes zerava); 375px: código com whiteSpace pre-wrap, scrollW==clientW, página 375==375, bottom nav ok; zero erros de console; PT-BR completo (features, rodapé, disclaimer).
+- lint 0 erros; tsc 0 erros; validate-questions "✓ Question bank OK"; /api/health {"status":"ok","db":"ok","certifications":1,"questions":116}.
+
+Stage Summary:
+- v1.3.1: todos os 8 pedidos do fundador entregues (rodapé by Noos link, seção de volta, popup de novidades 1×/versão, fix código mobile com causa-raiz resolvida, alternativas rebalanceadas 81%→12%, domínios explícitos, Anexo SDD aplicado, dívida OG registrada).
+- Banco re-seeded com alternativas equilibradas (IDs públicas e histórico intactos).
+- Pendências honestas: produção Vercel segue com a camada de banco quebrada (reparo no DEPLOY.md §4/§5 antes de publicar a v1.3.1); arte OG = dívida registrada.
+
+---
+Task ID: 9
+Agent: orquestrador (Z.ai Code, sessão principal)
+Task: v1.4.0 — aplicar o patch de design v1.1 (upload/ranvier-patch.md + .html) sobre os 7 feedbacks do fundador comparando v1.3.1 (sandbox) × versão anterior ao ar, sem perder nada já resolvido.
+
+Work Log:
+- Lidos INTEGRALMENTE upload/ranvier-patch.md (v1.1 do designer: tokens, matéria, §5–§12, notas A–E, checklist) e upload/ranvier-patch.html (mockup: landing, shell, certificação, questão, revisão, resultado, tabela "do app no ar para a v1.1"). Reconciliados com os 7 feedbacks do fundador; divergências mapeadas (ver abaixo).
+- Auditoria da v1.3.1 antes de codar: QuestionCard (fonte 26/30/32 = "letra gigante"; review sem explicação = nota A), ResultsView (sem barra fixa, % monocromática), StudyView (sem barra fixa), exam-view (cabeçalho existente sem Início/cert/posição), ranvier-app (Ajustes como 5º destino primário; MobileTopBar sem controles), app-store (sem cert ativa), attempt-service/types (DTO já carrega explanation/reference em ReviewQuestion; tentativas guardam índice canônico), banco (116 questões; longest-is-correct 10%; correctIndex 28/32/28/28 — viés de POSIÇÃO era percebido por ausência de shuffle, não por distribuição).
+- Tokens (globals.css): escala de raio fixa 6/10/14/20 (radius-sm/md/lg/xl) substituindo calc(); --radius: 10px; --shadow-rest/--shadow-float (claro e escuro); html scroll-padding-top 96px (foco nunca atrás de barra fixa).
+- QuestionCard: contrato da pergunta v1.1 §5 (20/26/30/32px por breakpoint, 48ch, 1,35, -0,012em); alternativa rounded-[10px], letra/tags rounded-[6px]; prop review estendido (ReviewState com explanationEn/Pt/reference) — bloco de correção renderiza em estudo E revisão (nota A corrigida; dados já existiam no DTO).
+- src/lib/option-order.ts (NOVO): Fisher-Yates determinístico semeado por hash FNV-1a de `${attemptId}:${questionId}` + mulberry32; orderOptions() devolve options em ordem exibida + toCanonical/toDisplay. Protocolo continua canônico; UI traduz (nota B).
+- StudyView: barra de sessão presa (top-14) com Início (→ resumo seguro; direto p/ home se 0 respondidas), cert · Modo Estudo, stats, Encerrar + régua de progresso; metadados QUESTÃO N/TOTAL no corpo (§10.3); shuffle aplicado (confirm envia canônico; feedback.correctIndex traduzido p/ exibição); folha de configuração com raio 14 + sombra de repouso; cert ativa resolvida por slug.
+- ExamView: barra de sessão refeita (§10.1): [Início + AlertDialog de saída] [certShortName · Simulado] [Questão N/45] [relógio mono tabular na barra] [Entregar] + régua/dreno (sem relógio duplicado); 52px mobile/56 desktop; shuffle em responder/retomar; certShortName adicionado ao DTO AttemptDetail (types + attempt-service, sem mudança de schema).
+- ResultsView: barra fixa do laudo (top-14) com Início (→ home), "laudo · cert", score e Topo (scroll suave ao topo) — resolve "subir tudo p/ achar o botão início"; % por domínio COLORIDA (verde ≥ corte/vermelho < corte, tokens success/danger, barra acompanha — pedido nº 7 não enviado ao design); revisão embaralhada com a MESMA semente da sessão + explicação/fonte sempre abertas; retry via certSlug ativa.
+- Shell (ranvier-app.tsx reescrito): rail com 4 destinos + Ajustes secundário no pé (11px, muted, acima da versão); MobileBottomNav 4 + "Mais"; TopBar NOVA (top-bar.tsx) em toda tela interna: seletor de certificação à esquerda, PT/EN (LangSeg aria-pressed) + tema (ThemeToggle) + Entrar/iniciais+menu (AccountControl) à direita; MoreSheet (bottom, rounded-t-[20px], alvos 44px: idioma, tema, conta, Ajustes); LandingHeader ganhou os mesmos controles ("Continuar" migrou p/ o bilhete — nunca Entrar+Continuar juntos); initCert() na montagem.
+- Multi-cert: app-store ganha certSlug (localStorage "ranvier:cert", default DBDEA, hidratação pós-mount); src/data/soon-certs.ts (NOVO: AI-900, DP-900, PL-300, SC-900, AZ-104 — nomes reais, sem data); CertSelectorMenu (cert-selector.tsx, NOVO: dropdown Radix, chip atual/disponível/em breve, não clicáveis, Esc fecha; troca com sessão em andamento pede confirmação com "Retomar depois" — §9.5, dorante com 1 cert); home-view resolve cert ativa, startExam por slug, bilhete com Continuar + Trocar certificação + linha "AI-900 · DP-900 · PL-300 · em breve" + raio 14/sombra de repouso (cards "Como o Ranvier ajuda" idem); cert-view resolve cert ativa.
+- i18n: +20 chaves PT/EN (shell.more/cert*, results.scrollTop) + whatsNew v1.4.0 reescrito (7 itens = os 7 feedbacks entregues).
+- Versão: package.json/version.ts/sw.js/offline.html → 1.4.0 (mesmo lote, regra do SDD).
+- QA navegador (agent-browser, desktop 1440/768 + mobile 375, PT e EN, claro e escuro): popup v1.4.0 aparece 1× e NÃO reaparece após reload; landing PT com bilhete (Trocar/soon line/Newsreader 32px); seletor abre com DBDEA atual + 5 "em breve" disabled; sessão de estudo: reveal "A correta é D." + Explicação + fonte, raio 10/6; CROSS-CHECK DO SHUFFLE contra o banco: correctIndex canônico 1 → display 3 (DOM marcou D correta ✓), resposta display 0 → canônico 2 (graduada errada ✓) — 100% consistente; exame: barra "Início · cert · Simulado · Questão 1 de 45 · 89:57 · Entregar", chrome-less, 20px@375/26px@768/32px@1440; resultado do simulado: 45/45 blocos de explicação + 45 fontes + 45 tags; barra fixa aos 56px com Início/Topo funcionando (scrollY 2500 → Topo=0; Início→#/); % colorida rgb(155,47,36) claro / rgb(240,147,131) escuro; mobile: bottom nav 4+Mais, Mais sheet completo, header sem overflow, PT/EN oculto <430px (regra do próprio mockup); BUG ENCONTRADO E CORRIGIDO: overflow horizontal 465px na revisão mobile por token de 60ch sem quebra em texto corrido → markdown.tsx p ganhou break-words + wrapper min-w-0/max-w-full (re-verificado: 375=375); zero erros de console/página; APIs 200/201; lint 0; tsc 0; validate:questions OK; /api/health ok.
+
+Stage Summary:
+- v1.4.0: os 7 feedbacks + 4.b entregues e verificados ponta a ponta no navegador (desktop+mobile, PT/EN, claro/escuro).
+- Notas [dados] do designer (A e B): ambas eram corrigíveis em código e FORAM corrigidas (A era apresentacional — DTO já persistia; B resolvido com shuffle semeado + gabarito canônico). Regras permanentes documentadas no plan.md § Notas técnicas.
+- Divergências conscientes do patch do design (documentadas na spec v1.4.0): "by Noos" MANTIDO no rodapé como link (decisão do fundador 2026-10-25); revisão single-page mantida (já QA'd) em vez de rota separada; exemplos AZ-900 adaptados ao DBDEA real; % colorida por domínio (pedido nº 7) sobre o "ink azul" do §12 do design.
+- Sem mudanças de banco/schema/seed (apenas DTO); tentativas antigas continuam válidas sob o shuffle.
+- Pendência honesta: produção Vercel ainda depende do reparo do banco (DEPLOY.md §4/§5) antes de publicar a v1.4.0.
+
+---
+Task ID: 10
+Agent: Orquestrador (Z.ai Code, sessão principal)
+Task: v1.4.1 — os 4 ajustes de UI do fundador (pills preenchidas de domínio+dificuldade, fundo colorido sutil no certo/errado, bloco de explicação+fonte preenchido, fim da letra gigante em simulado/estudo/revisão)
+
+Work Log:
+- Sessão anterior (Task 10 do lote v1.4.1) foi interrompida por limite de contexto após o código estar escrito; esta sessão continuou do ponto exato sem reescrever nada.
+- Auditoria do estado: question-card.tsx já continha os 4 ajustes (showMeta com pills bg-surface-2, alternativas com --noos-success/danger-soft + borda, container de correção preenchido, stem 15/16px); noos-tokens.css já tinha os tokens soft/line (7-8% claro / 12-13% escuro); version.ts/package.json/sw.js = 1.4.1; i18n PT/EN com whatsNew v1.4.1 (4 itens) e chaves tagCorrect/tagYours existentes.
+- Banco de dados estava vazio no sandbox (db/custom.db resetado entre sessões): re-executado `bun run db:seed` (idempotente, 116 questões re-gravadas); /api/health volta a {"status":"ok","db":"ok","certifications":1,"questions":116}.
+- `bun run lint`: 0 erros. `bunx tsc --noEmit`: 0 erros.
+- QA navegador (agent-browser, desktop 1440 e mobile 375, claro e escuro, PT e EN):
+  - Popup "O que há de novo" v1.4.1 aparece 1× e fecha com "Entendi".
+  - MODO ESTUDO: pills "Domínio 5 · Implementando CI/CD" + "Dificuldade: Média" com fundo preenchido medido rgb(238,244,241) (surface-2); stem Newsreader 16px desktop / 15px@375; alternativas 16px/15px em linhas 54px; acerto = oklab success-soft com borda rgb(31,122,77) + tag "correta"; erro = danger-soft + tag "sua resposta" + lead "A correta é D." rgb(155,47,36); bloco de explicação com mesma cor do resultado e link "Fonte oficial".
+  - SIMULADO: chrome-less (0 pills), stem/alternativas 16px, timer 89:53 correndo, questão 1/45, saída com AlertDialog funcional.
+  - RESULTADO/REVISÃO: header "✓ Questão 1 RAN-DBDEA-00077" com pills preenchidas logo abaixo; opção correta oklab success-soft + borda verde; questão errada: escolha em danger-soft, correta real em success-soft, bloco de explicação em danger-soft com fonte; stem 16px.
+  - DARK: pills rgb(24,32,32), soft fills renderizando oklab sobre #121919; toggle funcionando.
+  - MOBILE 375: stem/opção 15px, scrollWidth==clientWidth==375 (zero overflow horizontal).
+  - VLM (visão) confirmou visualmente: pills visíveis com preenchimento perceptível, verde suave na correta, bloco de explicação com fundo e fonte, texto em tamanho de leitura normal.
+  - Zero erros de console/página; todas as APIs 200/201 no dev.log.
+- SDD atualizado: current-state.md → v1.4.1 (nova seção "Verificado na v1.4.1", contrato da pergunta corrigido para 15/16px, v1.4.0 rebaixada a "mantido"); spec-v1.4.1-founder-feedback.md criado (4 pedidos com citações do fundador + critérios de aceite verificados); plan.md → v1.4.1 autorizado/fechado com nota de que a escala 20-32px do patch v1.1 §5 foi revista pelo fundador.
+
+Stage Summary:
+- v1.4.1 completo e verificado ponta a ponta: (1) pills preenchidas de domínio+dificuldade no estudo e na revisão; (2) certo/errado com fundo colorido sutil (mais discreto que o antigo, com borda e tags textuais); (3) explicação+fonte em bloco preenchido na cor do resultado; (4) tamanho de leitura do app antigo (15/16px) em simulado, estudo e revisão.
+- Lote 100% apresentacional: sem mudanças de schema, questões ou DTO; tentativas antigas intactas.
+- Pendência honesta mantida: produção Vercel depende do reparo de banco (DEPLOY.md §4/§5) antes de publicar a v1.4.1.

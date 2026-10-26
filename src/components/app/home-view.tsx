@@ -2,37 +2,58 @@
 
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import {
-  Award,
-  BadgeCheck,
-  BookOpenCheck,
-  Clock,
-  DollarSign,
-  GraduationCap,
-  LineChart,
-  Loader2,
-  Play,
-  ShieldCheck,
-  Sparkles,
-  Target,
-} from "lucide-react";
+import { ArrowRight, Award, BookOpenCheck, History, LineChart, Loader2, Play, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLang } from "@/components/app/language-provider";
 import { useAppStore } from "@/store/app-store";
 import { api } from "@/lib/api-client";
 import { AdSlot } from "@/components/app/ad-slot";
 import { InstallBanner } from "@/components/app/install-banner";
+import { WhatsNewDialog } from "@/components/app/whats-new-dialog";
+import { CertSelectorMenu } from "@/components/app/cert-selector";
+import { SOON_LINE_CODES } from "@/data/soon-certs";
 
+/**
+ * Landing (patch Ranvier v1.0 §6 + v1.1 §7).
+ *
+ *  - Hero à esquerda: eyebrow mono com o exame, H1 serif de até 2 linhas,
+ *    lead de até 3 linhas. Sem gradiente no título, sem blob, sem sparkles.
+ *  - Bilhete de exame à direita (v1.1 §7.4): código, nome, questões,
+ *    duração, última sessão, "Continuar" (retomar sessão), "Trocar
+ *    certificação" e a linha "em breve" — raio 14, fio de 1px, sombra de
+ *    repouso (v1.1 §6 "objeto sobre a mesa").
+ *  - Linha de prova: questões comentadas com fonte; progresso no dispositivo.
+ *  - Seções de apoio: pesos oficiais por domínio (barras de 3 px),
+ *    "Como o Ranvier ajuda você" (restaurada a pedido do fundador
+ *    2026-10-25) e como usar.
+ *
+ * O aviso de novidades (1× por versão) também vive aqui — só na tela
+ * inicial, nunca durante questão ou simulado (patch §8).
+ *
+ * Os dados do bilhete vêm do catálogo (fonte única de verdade — nenhuma
+ * métrica inventada); "última sessão" vem do histórico real do estudante.
+ * A certificação exibida é a ATIVA (multi-cert — patch v1.1 §9).
+ */
 export function HomeView() {
-  const { t, lang } = useLang();
-  const { navigate } = useAppStore();
+  const { t, f, lang } = useLang();
+  const { navigate, certSlug } = useAppStore();
   const { data, isLoading } = useQuery({ queryKey: ["catalog", lang], queryFn: () => api.catalog(lang) });
-  const cert = data?.certifications[0] ?? null;
+  const cert = data?.certifications.find((c) => c.slug === certSlug) ?? data?.certifications[0] ?? null;
+  /* Lista de tentativas: sempre fresca ao montar a landing — o botão
+     "Continuar" do bilhete depende dela e o cache stale escondia sessões
+     em andamento (QA 3-a FAIL-1). */
+  const { data: attemptsData } = useQuery({
+    queryKey: ["attempts"],
+    queryFn: api.listAttempts,
+    staleTime: 0,
+    refetchOnMount: "always",
+  });
+  const lastAttempt = attemptsData?.attempts.find((a) => a.status === "COMPLETED") ?? null;
+  const inProgress = attemptsData?.attempts.find((a) => a.status === "IN_PROGRESS") ?? null;
 
   const startExam = useMutation({
-    mutationFn: () => api.startAttempt({ certSlug: "databricks-data-engineer-associate", mode: "EXAM" }),
+    mutationFn: () => api.startAttempt({ certSlug: cert?.slug ?? certSlug, mode: "EXAM" }),
     onSuccess: (res) => {
       toast.success(t.toast.started);
       navigate("exam", { attemptId: res.attemptId });
@@ -40,13 +61,15 @@ export function HomeView() {
     onError: () => toast.error(t.toast.error),
   });
 
-  const facts = [
-    { icon: BadgeCheck, value: String(cert?.questionCount ?? 45), label: t.home.facts.questions },
-    { icon: Clock, value: `${cert?.durationMin ?? 90} ${t.common.minutes}`, label: t.home.facts.duration },
-    { icon: Target, value: `${cert?.passingScore ?? 70}%`, label: t.home.facts.passing },
-    { icon: DollarSign, value: "$200", label: t.home.facts.fee },
+  const steps = [
+    { title: t.home.how.step1Title, desc: t.home.how.step1Desc },
+    { title: t.home.how.step2Title, desc: t.home.how.step2Desc },
+    { title: t.home.how.step3Title, desc: t.home.how.step3Desc },
   ];
 
+  /* "Como o Ranvier ajuda você" — seção restaurada (pedido do fundador
+     2026-10-25), no idioma da interface. Cards hairline do patch: sem raio,
+     sem sombra, ícone discreto na tinta do app. */
   const features = [
     { icon: Award, title: t.home.features.examTitle, desc: t.home.features.examDesc },
     { icon: BookOpenCheck, title: t.home.features.studyTitle, desc: t.home.features.studyDesc },
@@ -54,127 +77,153 @@ export function HomeView() {
     { icon: ShieldCheck, title: t.home.features.originalTitle, desc: t.home.features.originalDesc },
   ];
 
-  const steps = [
-    { title: t.home.how.step1Title, desc: t.home.how.step1Desc },
-    { title: t.home.how.step2Title, desc: t.home.how.step2Desc },
-    { title: t.home.how.step3Title, desc: t.home.how.step3Desc },
-  ];
-
   return (
     <div className="flex-1">
-      {/* Hero */}
-      <section className="relative overflow-hidden border-b">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/15 via-transparent to-transparent"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -top-24 right-[-10%] h-72 w-72 rounded-full bg-primary/10 blur-3xl"
-        />
-        <div className="relative mx-auto max-w-6xl px-4 py-14 sm:py-20">
-          <div className="mx-auto max-w-3xl text-center">
-            <p className="mb-4 inline-flex items-center gap-1.5 rounded-full border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
-              <Sparkles className="h-3.5 w-3.5 text-primary" />
-              {t.home.badge}
+      {/* Aviso de novidades — 1× por usuário a cada versão */}
+      <WhatsNewDialog />
+
+      {/* Hero + bilhete */}
+      <section className="border-b">
+        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:py-20 lg:grid-cols-[1fr_360px] lg:gap-14">
+          {/* Hero à esquerda */}
+          <div className="flex flex-col justify-center">
+            <p className="mb-4 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+              {t.home.landing.eyebrow}
             </p>
-            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
-              {t.home.heroTitle}{" "}
-              <span className="bg-gradient-to-r from-primary to-chart-2 bg-clip-text text-transparent">
-                {t.home.heroTitleHighlight}
-              </span>
+            <h1 className="max-w-[16ch] font-display text-4xl font-light leading-[1.05] tracking-[-0.03em] sm:text-5xl">
+              {t.home.landing.h1}
             </h1>
-            <p className="mx-auto mt-4 max-w-2xl text-balance text-muted-foreground sm:text-lg">
-              {t.home.heroSubtitle}
-            </p>
-            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Button size="lg" className="w-full sm:w-auto" onClick={() => startExam.mutate()} disabled={startExam.isPending || isLoading}>
+            <p className="mt-5 max-w-[62ch] text-base leading-relaxed text-muted-foreground">{t.home.landing.lead}</p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Button size="lg" onClick={() => startExam.mutate()} disabled={startExam.isPending}>
                 {startExam.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
-                {t.home.ctaExam}
+                {t.home.landing.ctaExam}
               </Button>
-              <Button size="lg" variant="outline" className="w-full sm:w-auto" onClick={() => navigate("study")}>
-                <BookOpenCheck className="h-4 w-4" />
-                {t.home.ctaStudy}
+              <Button size="lg" variant="outline" onClick={() => navigate("cert")}>
+                {t.home.landing.ctaExams}
               </Button>
             </div>
-            <Button variant="link" className="mt-2" onClick={() => navigate("guide")}>
-              <GraduationCap className="h-4 w-4" />
-              {t.home.ctaSecondary}
-            </Button>
+            <button
+              type="button"
+              onClick={() => navigate("study")}
+              className="mt-4 inline-flex min-h-11 w-fit items-center gap-1.5 text-sm font-medium text-app-ink underline-offset-4 hover:underline"
+            >
+              {t.home.landing.ctaStudy}
+              <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+            </button>
           </div>
+
+          {/* Bilhete de exame — v1.1 §7.4: raio 14, fio de 1px, sombra de
+              repouso ("objeto sobre a mesa"). Continuar, Trocar certificação
+              e a linha "em breve" — multi-cert (feedback nº 6). */}
+          <aside
+            className="self-start rounded-[14px] border bg-card p-5 shadow-[var(--shadow-rest)]"
+            aria-label={t.home.ticket.label}
+          >
+            <p className="font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+              {t.home.ticket.label}
+            </p>
+            {isLoading || !cert ? (
+              <div className="mt-3 space-y-3">
+                <Skeleton className="h-7 w-4/5" />
+                <Skeleton className="h-4 w-2/3" />
+                <Skeleton className="h-4 w-1/2" />
+              </div>
+            ) : (
+              <>
+                <h2 className="mt-2 font-display text-xl leading-snug tracking-[-0.02em]">{cert.name}</h2>
+                <dl className="mt-4 space-y-2.5 text-sm">
+                  <div className="flex items-baseline justify-between gap-3">
+                    <dt className="text-xs uppercase tracking-wide text-muted-foreground">{t.home.ticket.code}</dt>
+                    <dd className="font-mono text-sm font-medium">{cert.shortName}</dd>
+                  </div>
+                  <div className="flex items-baseline justify-between gap-3">
+                    <dt className="text-xs uppercase tracking-wide text-muted-foreground">{t.home.ticket.questions}</dt>
+                    <dd className="font-mono text-sm font-medium tabular-nums">{cert.questionCount}</dd>
+                  </div>
+                  <div className="flex items-baseline justify-between gap-3">
+                    <dt className="text-xs uppercase tracking-wide text-muted-foreground">{t.home.ticket.duration}</dt>
+                    <dd className="font-mono text-sm font-medium tabular-nums">{cert.durationMin} min</dd>
+                  </div>
+                  <div className="flex items-baseline justify-between gap-3">
+                    <dt className="text-xs uppercase tracking-wide text-muted-foreground">{t.home.ticket.cutoff}</dt>
+                    <dd className="font-mono text-sm font-medium tabular-nums">{cert.passingScore}%</dd>
+                  </div>
+                  <div className="flex items-baseline justify-between gap-3 border-t pt-2.5">
+                    <dt className="text-xs uppercase tracking-wide text-muted-foreground">{t.home.ticket.lastSession}</dt>
+                    <dd className="font-mono text-sm font-medium tabular-nums">
+                      {lastAttempt && lastAttempt.percent != null
+                        ? f(t.home.ticket.sessionScore, { percent: Math.round(lastAttempt.percent), mode: lastAttempt.mode === "EXAM" ? t.exam.title : t.study.title })
+                        : t.home.ticket.noSession}
+                    </dd>
+                  </div>
+                </dl>
+
+                {/* Retomar sessão em andamento (v1.1 §7.1: o "Continuar"
+                    vive no bilhete — a barra fica com Entrar, nunca ambos) */}
+                {inProgress && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-4 w-full"
+                    onClick={() => navigate(inProgress.mode === "EXAM" ? "exam" : "results", { attemptId: inProgress.id })}
+                  >
+                    <History className="h-4 w-4" />
+                    {t.home.landing.continueSession}
+                    <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+                  </Button>
+                )}
+
+                {/* Trocar certificação — seletor com foco total (v1.1 §9) */}
+                <div className="mt-2">
+                  <CertSelectorMenu variant="button" />
+                </div>
+
+                {/* Próximas certificações — estado "em breve", sem data
+                    prometida, sem clique falso (v1.1 §9.6) */}
+                <p className="mt-4 border-t pt-3 font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+                  {SOON_LINE_CODES.join(" · ")} · {t.shell.certSoon}
+                </p>
+
+                <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">{t.home.passingNote}</p>
+              </>
+            )}
+          </aside>
+        </div>
+
+        {/* Linha de prova */}
+        <div className="border-t">
+          <p className="mx-auto max-w-6xl px-4 py-3 text-sm text-muted-foreground">{t.home.landing.proofLine}</p>
         </div>
       </section>
 
-      {/* Install as app (PWA) — browser install, works offline */}
+      {/* Instalar como app (PWA) */}
       <InstallBanner />
 
-      {/* Official exam facts */}
+      {/* Domínios e pesos oficiais */}
       <section className="mx-auto max-w-6xl px-4 py-10">
-        <div className="mb-6 text-center">
-          <h2 className="text-xl font-semibold sm:text-2xl">{t.home.factsTitle}</h2>
-          <p className="mt-1 text-sm text-muted-foreground">{t.home.factsSubtitle}</p>
-        </div>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {facts.map((fact) => (
-            <Card key={fact.label} className="text-center">
-              <CardContent className="flex flex-col items-center gap-1 p-4 sm:p-6">
-                <fact.icon className="mb-1 h-5 w-5 text-primary" aria-hidden />
-                <p className="text-2xl font-bold tracking-tight">{fact.value}</p>
-                <p className="text-xs text-muted-foreground">{fact.label}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-        <p className="mt-3 text-center text-xs text-muted-foreground">{t.home.passingNote}</p>
-      </section>
-
-      {/* Features */}
-      <section className="border-y bg-card/30">
-        <div className="mx-auto max-w-6xl px-4 py-10">
-          <h2 className="mb-6 text-center text-xl font-semibold sm:text-2xl">{t.home.featuresTitle}</h2>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {features.map((feature) => (
-              <Card key={feature.title} className="transition-shadow hover:shadow-md">
-                <CardHeader>
-                  <div className="mb-1 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                    <feature.icon className="h-5 w-5" aria-hidden />
-                  </div>
-                  <CardTitle className="text-base">{feature.title}</CardTitle>
-                  <CardDescription>{feature.desc}</CardDescription>
-                </CardHeader>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Domains & weights */}
-      <section className="mx-auto max-w-6xl px-4 py-10">
-        <div className="mb-6 text-center">
-          <h2 className="text-xl font-semibold sm:text-2xl">{t.home.domainsTitle}</h2>
-          <p className="mt-1 text-sm text-muted-foreground">{t.home.domainsSubtitle}</p>
-        </div>
+        <h2 className="mb-1 font-display text-2xl font-light tracking-[-0.02em]">{t.home.domainsTitle}</h2>
+        <p className="mb-6 text-sm text-muted-foreground">{t.home.domainsSubtitle}</p>
         {isLoading ? (
-          <div className="mx-auto max-w-3xl space-y-3">
+          <div className="max-w-3xl space-y-3">
             {Array.from({ length: 5 }).map((_, i) => (
-              <Skeleton key={i} className="h-12 w-full" />
+              <Skeleton key={i} className="h-10 w-full" />
             ))}
           </div>
         ) : (
-          <div className="mx-auto max-w-3xl space-y-3">
+          <div className="max-w-3xl space-y-4">
             {cert?.domains.map((d) => (
-              <div key={d.code} className="rounded-xl border bg-card p-3.5">
-                <div className="mb-2 flex items-baseline justify-between gap-3">
-                  <p className="text-sm font-medium">
-                    <span className="mr-2 inline-flex h-5 w-5 items-center justify-center rounded-md bg-secondary text-[11px] font-bold text-secondary-foreground">
-                      {d.code}
-                    </span>
+              <div key={d.code}>
+                <div className="mb-1 flex items-baseline justify-between gap-3 text-sm">
+                  <p className="min-w-0 font-medium">
+                    <span className="mr-2 font-mono text-xs text-muted-foreground">{d.code}</span>
                     {lang === "pt" ? d.namePt : d.name}
                   </p>
-                  <p className="shrink-0 text-sm font-bold text-primary">{d.weightPercent}%</p>
+                  <p className="shrink-0 font-mono text-sm font-medium tabular-nums text-app-ink">{d.weightPercent}%</p>
                 </div>
-                <div className="h-2 overflow-hidden rounded-full bg-secondary" role="img" aria-label={`${d.weightPercent}%`}>
-                  <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${Math.max(d.weightPercent * 3.5, 6)}%` }} />
+                {/* barra de 3 px — patch §9 */}
+                <div className="h-[3px] w-full bg-surface-2" role="img" aria-label={`${d.weightPercent}%`}>
+                  <div className="h-full bg-app-ink" style={{ width: `${Math.max(d.weightPercent * 3.5, 6)}%` }} />
                 </div>
               </div>
             ))}
@@ -182,33 +231,48 @@ export function HomeView() {
         )}
       </section>
 
-      {/* How to use */}
-      <section className="border-y bg-card/30">
+      {/* Como o Ranvier ajuda você (restaurada a pedido do fundador) —
+          v1.1 §6: raio 14 + sombra de repouso ("objeto sobre a mesa") */}
+      <section className="border-t">
         <div className="mx-auto max-w-6xl px-4 py-10">
-          <h2 className="mb-6 text-center text-xl font-semibold sm:text-2xl">{t.home.howTitle}</h2>
-          <ol className="grid gap-4 sm:grid-cols-3">
+          <h2 className="mb-6 font-display text-2xl font-light tracking-[-0.02em]">{t.home.featuresTitle}</h2>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {features.map((feature) => (
+              <div key={feature.title} className="rounded-[14px] border bg-card p-5 shadow-[var(--shadow-rest)]">
+                <div className="flex items-center gap-2.5">
+                  <feature.icon className="h-4 w-4 shrink-0 text-app-ink" aria-hidden />
+                  <p className="font-medium">{feature.title}</p>
+                </div>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{feature.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Como usar */}
+      <section className="border-t">
+        <div className="mx-auto max-w-6xl px-4 py-10">
+          <h2 className="mb-6 font-display text-2xl font-light tracking-[-0.02em]">{t.home.howTitle}</h2>
+          <ol className="grid gap-8 sm:grid-cols-3">
             {steps.map((step, i) => (
               <li key={step.title}>
-                <Card className="h-full">
-                  <CardContent className="p-5">
-                    <p className="mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
-                      {i + 1}
-                    </p>
-                    <p className="font-semibold">{step.title}</p>
-                    <p className="mt-1 text-sm text-muted-foreground">{step.desc}</p>
-                  </CardContent>
-                </Card>
+                <p className="font-mono text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">
+                  {String(i + 1).padStart(2, "0")}
+                </p>
+                <p className="mt-2 font-medium">{step.title}</p>
+                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{step.desc}</p>
               </li>
             ))}
           </ol>
         </div>
       </section>
 
-      {/* Disclaimer strip */}
-      <section className="mx-auto max-w-6xl px-4 py-6">
-        <p className="mx-auto max-w-3xl rounded-xl border border-dashed bg-muted/30 p-4 text-center text-xs leading-relaxed text-muted-foreground">
-          {t.home.disclaimer}
-        </p>
+      {/* Aviso de não-afiliação */}
+      <section className="border-t">
+        <div className="mx-auto max-w-6xl px-4 py-6">
+          <p className="mx-auto max-w-3xl text-center text-xs leading-relaxed text-muted-foreground">{t.home.disclaimer}</p>
+        </div>
       </section>
 
       <AdSlot placement="home" className="py-6" />

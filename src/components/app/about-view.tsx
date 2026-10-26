@@ -27,7 +27,7 @@ export function AboutView() {
   return (
     <div className="mx-auto w-full max-w-3xl flex-1 px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight">{t.about.title}</h1>
+        <h1 className="font-display text-3xl font-light tracking-[-0.03em] sm:text-4xl">{t.about.title}</h1>
       </div>
 
       {/* Mission */}
@@ -78,7 +78,7 @@ export function AboutView() {
           <ul className="space-y-2.5">
             {t.about.methodology.map((item) => (
               <li key={item} className="flex gap-2.5 text-sm">
-                <BadgeCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" aria-hidden />
+                <BadgeCheck className="mt-0.5 h-4 w-4 shrink-0 text-[var(--noos-success)]" aria-hidden />
                 <span className="text-muted-foreground">{item}</span>
               </li>
             ))}

@@ -44,10 +44,10 @@ export function InstallBanner() {
   };
 
   return (
-    <section aria-label={t.pwa.installTitle} className="border-b bg-primary/5">
+    <section aria-label={t.pwa.installTitle} className="border-b bg-app-soft">
       <div className="mx-auto flex max-w-6xl flex-col items-center gap-3 px-4 py-4 sm:flex-row sm:justify-between sm:py-3.5">
         <div className="flex flex-col items-center gap-3 text-center sm:flex-row sm:text-left">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-app-line bg-app-soft text-app-ink">
             <WifiOff className="h-5 w-5" aria-hidden />
           </div>
           <div>
@@ -56,11 +56,11 @@ export function InstallBanner() {
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-1.5">
-          <Button size="sm" className="h-8" onClick={install}>
+          <Button size="sm" onClick={install}>
             <MonitorSmartphone className="h-4 w-4" aria-hidden />
             {t.pwa.installButton}
           </Button>
-          <Button size="sm" variant="ghost" className="h-8 px-2 text-xs text-muted-foreground" onClick={dismiss}>
+          <Button size="sm" variant="ghost" className="px-2 text-xs text-muted-foreground" onClick={dismiss}>
             {t.pwa.dismiss}
           </Button>
         </div>

@@ -2,39 +2,27 @@
 
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useTheme } from "next-themes";
 import { toast } from "sonner";
 import {
-  CheckCircle2,
-  Github,
-  Globe,
-  Home,
-  LogIn,
-  LogOut,
-  Menu,
-  MonitorSmartphone,
-  Moon,
   BookOpen,
   GraduationCap,
+  Github,
+  Globe,
   LineChart,
-  Info,
-  Sun,
-  Trash2,
-  UserRound,
-  Award,
+  MoreHorizontal,
+  RotateCcw,
+  Settings2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import { useLang } from "@/components/app/language-provider";
-import { usePwa } from "@/components/app/pwa-provider";
 import { useAppStore, type View } from "@/store/app-store";
 import { api } from "@/lib/api-client";
-import { AuthModal } from "@/components/app/auth-modal";
+import { APP_VERSION } from "@/lib/version";
 import { AdSenseScript } from "@/components/app/ad-slot";
 import { NoosBadge } from "@/components/app/noos-badge";
+import { RanvierMark } from "@/components/app/ranvier-mark";
+import { TopBar, MoreSheet, LangSeg, ThemeToggle, AccountControl } from "@/components/app/top-bar";
 import { HomeView } from "@/components/app/home-view";
 import { CertView } from "@/components/app/cert-view";
 import { StudyView } from "@/components/app/study-view";
@@ -43,285 +31,251 @@ import { ResultsView } from "@/components/app/results-view";
 import { ProgressView } from "@/components/app/progress-view";
 import { GuideView } from "@/components/app/guide-view";
 import { AboutView } from "@/components/app/about-view";
+import { SettingsView } from "@/components/app/settings-view";
 
-function LogoMark({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 64 64" className={className} aria-hidden focusable="false">
-      <rect width="64" height="64" rx="14" fill="currentColor" />
-      <path d="M18 33.5 28 43.5 46 22" fill="none" stroke="var(--background)" strokeWidth="6.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
+/**
+ * Shell do app (guia Noos v1.1 §04 + patch Ranvier v1.0 §7 + v1.1 §8).
+ *
+ *  - Rail lateral de 208 px no desktop: marca no topo (monograma + Ranvier),
+ *    QUATRO destinos principais (Estudar, Exame, Progresso, Revisão) e
+ *    Ajustes como item secundário no pé, em 11 px, muted, acima da versão
+ *    (v1.1 §8 — feedback nº 4.b: Ajustes nunca é destino principal).
+ *  - Barra superior em TODAS as telas (v1.1 §8): certificação atual à
+ *    esquerda; PT · EN, tema e conta à direita — os controles voltaram da
+ *    barra (feedback nº 4.b), inclusive o Entrar.
+ *  - Mobile (≤ 767 px): barra superior idem + navegação inferior de CINCO
+ *    posições (quatro destinos + "Mais"); Ajustes e configurações profundas
+ *    vivem no sheet de Mais (v1.1 §8.6).
+ *  - A landing (view "home") tem header próprio com os mesmos controles
+ *    (patch §7.1) e não exibe rail.
+ *  - O exame é chrome-less (uma questão por tela; a barra de sessão da
+ *    própria view substitui a barra superior).
+ *  - Assinatura "by Noos" (decisão do fundador 2026-10-25 + guia §04-F e
+ *    checklist de lançamento): vive no RODAPÉ de conteúdo, como LINK para
+ *    o hub do ecossistema — uma vez por tela, nunca nas duas pontas. O
+ *    topo (rail/barra) mostra apenas a marca do app.
+ */
 
-function LangToggle() {
-  const { lang, setLang } = useLang();
-  return (
-    <div className="flex items-center rounded-full border p-0.5" role="group" aria-label="Language">
-      <button
-        type="button"
-        onClick={() => setLang("pt")}
-        aria-pressed={lang === "pt"}
-        className={cn(
-          "rounded-full px-2.5 py-1 text-xs font-semibold transition-colors",
-          lang === "pt" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-        )}
-      >
-        PT
-      </button>
-      <button
-        type="button"
-        onClick={() => setLang("en")}
-        aria-pressed={lang === "en"}
-        className={cn(
-          "rounded-full px-2.5 py-1 text-xs font-semibold transition-colors",
-          lang === "en" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-        )}
-      >
-        EN
-      </button>
-    </div>
-  );
-}
+const RAIL_W = "w-[208px]";
 
-function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
-  const { t } = useLang();
-  return (
-    <Button
-      variant="ghost"
-      size="icon"
-      aria-label={t.common.theme}
-      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-    >
-      <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-      <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-    </Button>
-  );
-}
+/* ------------------------------------------------------------------ */
+/* Marca (lockup do topo)                                             */
+/* ------------------------------------------------------------------ */
 
-function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
-  const { t } = useLang();
-  const { view, navigate } = useAppStore();
-  const navItems: { view: View; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
-    { view: "home", label: t.nav.home, icon: Home },
-    { view: "cert", label: t.nav.cert, icon: Award },
-    { view: "study", label: t.nav.study, icon: BookOpen },
-    { view: "progress", label: t.nav.progress, icon: LineChart },
-    { view: "guide", label: t.nav.guide, icon: GraduationCap },
-    { view: "about", label: t.nav.about, icon: Info },
-  ];
-  return (
-    <nav aria-label="Main navigation" className="flex flex-col md:flex-row md:items-center gap-1 md:gap-0.5">
-      {navItems.map((item) => (
-        <button
-          key={item.view}
-          type="button"
-          onClick={() => {
-            navigate(item.view);
-            onNavigate?.();
-          }}
-          aria-current={view === item.view ? "page" : undefined}
-          className={cn(
-            "flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors md:px-3 md:py-1.5",
-            view === item.view
-              ? "bg-primary/10 text-primary"
-              : "text-muted-foreground hover:bg-accent hover:text-foreground"
-          )}
-        >
-          <item.icon className="h-4 w-4" />
-          {item.label}
-        </button>
-      ))}
-    </nav>
-  );
-}
-
-function Header() {
+function BrandLockup({ size = "md" }: { size?: "md" | "sm" }) {
   const { t } = useLang();
   const { navigate } = useAppStore();
-  const [authOpen, setAuthOpen] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const mark = size === "md" ? "h-5 w-5" : "h-[18px] w-[18px]";
+  return (
+    <button
+      type="button"
+      onClick={() => navigate("home")}
+      className="flex items-center gap-2.5 text-left"
+      aria-label={t.app.name}
+    >
+      <RanvierMark className={cn(mark, "text-foreground")} />
+      <span
+        className={cn("font-display font-normal leading-none tracking-[-0.03em]", size === "md" ? "text-xl" : "text-lg")}
+      >
+        {t.app.name}
+      </span>
+    </button>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Rail (desktop) — 4 destinos + Ajustes secundário no pé             */
+/* ------------------------------------------------------------------ */
+
+function Rail() {
+  const { t, f } = useLang();
+  const { view, navigate } = useAppStore();
   const queryClient = useQueryClient();
-  const { data } = useQuery({ queryKey: ["me"], queryFn: api.me });
-  const user = data?.user ?? null;
 
-  async function handleLogout() {
-    await api.logout();
-    await queryClient.invalidateQueries();
-    toast.message(t.toast.loggedOut);
-  }
+  const items: { view: View; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+    { view: "study", label: t.shell.study, icon: BookOpen },
+    { view: "cert", label: t.shell.exam, icon: GraduationCap },
+    { view: "progress", label: t.shell.progress, icon: LineChart },
+  ];
 
-  async function handleDeleteAccount() {
+  /* Revisão: entra na fila de revisão (questões erradas) — se vazia,
+     orienta e leva ao progresso (o guia manda o vazio oferecer o próximo passo). */
+  async function startReview() {
     try {
-      await api.deleteAccount();
-      await queryClient.invalidateQueries();
-      toast.message(t.toast.accountDeleted);
+      const progress = await queryClient.fetchQuery({ queryKey: ["progress"], queryFn: api.progress });
+      const ids = progress?.reviewQuestionIds ?? [];
+      if (ids.length > 0) {
+        navigate("study", { questionIds: ids });
+      } else {
+        toast.info(t.shell.reviewEmpty);
+        navigate("progress");
+      }
     } catch {
       toast.error(t.toast.error);
     }
   }
 
+  const isReviewActive = view === "study"; // a sessão de revisão roda dentro de Estudar
+
   return (
-    <header className="sticky top-0 z-40 border-b bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/70">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4">
+    <aside className={cn("hidden shrink-0 flex-col border-r bg-card md:flex", RAIL_W)} aria-label={t.nav.menu}>
+      <div className="border-b px-4 py-4">
+        <BrandLockup />
+      </div>
+
+      <nav className="flex flex-1 flex-col gap-0.5 p-2" aria-label="Main navigation">
+        {items.map((item) => {
+          const active = view === item.view;
+          return (
+            <button
+              key={item.view}
+              type="button"
+              onClick={() => navigate(item.view)}
+              aria-current={active ? "page" : undefined}
+              className={cn(
+                "flex h-11 items-center gap-3 border-l-2 px-3 text-sm font-medium transition-colors",
+                active
+                  ? "border-app bg-app-soft text-app-ink"
+                  : "border-transparent text-muted-foreground hover:bg-accent hover:text-foreground"
+              )}
+            >
+              <item.icon className="h-4 w-4" aria-hidden />
+              {item.label}
+            </button>
+          );
+        })}
+
         <button
           type="button"
-          onClick={() => navigate("home")}
-          className="flex items-center gap-2 font-bold tracking-tight"
-          aria-label={t.app.name}
-        >
-          <LogoMark className="h-7 w-7 text-primary" />
-          <span className="text-lg">{t.app.name}</span>
-        </button>
-
-        <div className="hidden md:block">
-          <NavLinks />
-        </div>
-
-        <div className="flex items-center gap-1.5">
-          <LangToggle />
-          <ThemeToggle />
-
-          {user ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" aria-label={t.auth.accountMenu}>
-                  <UserRound className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel className="font-normal">
-                  <p className="text-sm font-medium">{user.name ?? user.email}</p>
-                  <p className="text-xs text-muted-foreground truncate">{user.email}</p>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => void handleLogout()}>
-                  <LogOut className="h-4 w-4" />
-                  {t.auth.logout}
-                </DropdownMenuItem>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive focus:text-destructive">
-                      <Trash2 className="h-4 w-4" />
-                      {t.auth.deleteAccount}
-                    </DropdownMenuItem>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>{t.auth.deleteConfirmTitle}</AlertDialogTitle>
-                      <AlertDialogDescription>{t.auth.deleteConfirmDesc}</AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
-                      <AlertDialogAction
-                        className="bg-destructive text-white hover:bg-destructive/90"
-                        onClick={() => void handleDeleteAccount()}
-                      >
-                        {t.auth.deleteAccount}
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <Button variant="outline" size="sm" className="hidden sm:inline-flex" onClick={() => setAuthOpen(true)}>
-              <LogIn className="h-4 w-4" />
-              {t.auth.loginTitle}
-            </Button>
+          onClick={() => void startReview()}
+          className={cn(
+            "flex h-11 items-center gap-3 border-l-2 px-3 text-sm font-medium transition-colors",
+            isReviewActive
+              ? "border-app bg-app-soft text-app-ink"
+              : "border-transparent text-muted-foreground hover:bg-accent hover:text-foreground"
           )}
+        >
+          <RotateCcw className="h-4 w-4" aria-hidden />
+          {t.shell.review}
+        </button>
+      </nav>
 
-          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden" aria-label={t.nav.menu}>
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-72 p-4" aria-describedby={undefined}>
-              <SheetTitle className="sr-only">{t.nav.menu}</SheetTitle>
-              <div className="mt-2 flex flex-col gap-4">
-                <NavLinks onNavigate={() => setMobileOpen(false)} />
-                {!user && (
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setMobileOpen(false);
-                      setAuthOpen(true);
-                    }}
-                  >
-                    <LogIn className="h-4 w-4" />
-                    {t.auth.loginTitle}
-                  </Button>
-                )}
-              </div>
-            </SheetContent>
-          </Sheet>
-
-          <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
-        </div>
+      {/* Ajustes: item secundário no pé do rail (v1.1 §8.2) — 11px, muted,
+          acima da versão. Nunca destino principal. */}
+      <div className="border-t p-2">
+        <button
+          type="button"
+          onClick={() => navigate("settings")}
+          aria-current={view === "settings" ? "page" : undefined}
+          className={cn(
+            "flex h-9 items-center gap-2.5 rounded-[10px] px-3 text-[11px] font-medium transition-colors",
+            view === "settings"
+              ? "bg-app-soft text-app-ink"
+              : "text-muted-foreground hover:bg-accent hover:text-foreground"
+          )}
+        >
+          <Settings2 className="h-3.5 w-3.5" aria-hidden />
+          {t.shell.settings}
+        </button>
+        <p className="mt-2 px-3 font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+          {f(t.footer.version, { version: APP_VERSION })}
+        </p>
       </div>
-    </header>
+    </aside>
   );
 }
 
-function Footer() {
-  const { t } = useLang();
-  const { navigate } = useAppStore();
-  const { showInstallEntry, install } = usePwa();
-  return (
-    <footer className="mt-auto border-t bg-card/40">
-      <div className="mx-auto max-w-6xl px-4 py-8 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
-        <div className="flex flex-col items-center gap-6 text-center md:flex-row md:justify-between md:text-left">
-          <div className="space-y-2.5">
-            {/* App name — maximum hierarchy: the title is always Ranvier. */}
-            <div className="flex items-center justify-center gap-2.5 md:justify-start">
-              <LogoMark className="h-6 w-6 text-primary" />
-              <span className="text-2xl font-bold tracking-tight">{t.app.name}</span>
-            </div>
-            {/* Signature row: "by Noos" endorsement badge + Install + Contact, side by side. */}
-            <div className="flex flex-wrap items-center justify-center gap-2.5 md:justify-start">
-              <NoosBadge />
-              {showInstallEntry && (
-                <>
-                  <span className="text-muted-foreground/40" aria-hidden>
-                    ·
-                  </span>
-                  <button
-                    type="button"
-                    className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
-                    onClick={install}
-                  >
-                    <MonitorSmartphone className="h-3.5 w-3.5" aria-hidden />
-                    {t.pwa.installButton}
-                  </button>
-                </>
-              )}
-              <span className="text-muted-foreground/40" aria-hidden>
-                ·
-              </span>
-              <button
-                type="button"
-                className="text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
-                onClick={() => navigate("about")}
-              >
-                {t.footer.contact}
-              </button>
-            </div>
-            <div className="flex flex-wrap items-center justify-center gap-2 md:justify-start">
-              <span className="rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-                {t.home.notAffiliated}
-              </span>
-              <p className="max-w-xl text-xs text-muted-foreground">{t.footer.disclaimer}</p>
-            </div>
-          </div>
+/* ------------------------------------------------------------------ */
+/* Navegação inferior (mobile) — quatro destinos + Mais               */
+/* ------------------------------------------------------------------ */
 
-          <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs" aria-label="Footer">
-            <button type="button" className="text-muted-foreground hover:text-foreground" onClick={() => navigate("about")}>
-              {t.footer.about}
-            </button>
-            <button type="button" className="text-muted-foreground hover:text-foreground" onClick={() => navigate("guide")}>
-              {t.footer.guide}
-            </button>
+function MobileBottomNav({ onMore }: { onMore: () => void }) {
+  const { t } = useLang();
+  const { view, navigate } = useAppStore();
+  const queryClient = useQueryClient();
+
+  async function startReview() {
+    try {
+      const progress = await queryClient.fetchQuery({ queryKey: ["progress"], queryFn: api.progress });
+      const ids = progress?.reviewQuestionIds ?? [];
+      if (ids.length > 0) {
+        navigate("study", { questionIds: ids });
+      } else {
+        toast.info(t.shell.reviewEmpty);
+        navigate("progress");
+      }
+    } catch {
+      toast.error(t.toast.error);
+    }
+  }
+
+  const items: { key: string; label: string; icon: React.ComponentType<{ className?: string }>; onClick: () => void; active: boolean }[] = [
+    { key: "study", label: t.shell.study, icon: BookOpen, onClick: () => navigate("study"), active: view === "study" },
+    { key: "cert", label: t.shell.exam, icon: GraduationCap, onClick: () => navigate("cert"), active: view === "cert" },
+    { key: "progress", label: t.shell.progress, icon: LineChart, onClick: () => navigate("progress"), active: view === "progress" },
+    { key: "review", label: t.shell.review, icon: RotateCcw, onClick: () => void startReview(), active: false },
+  ];
+
+  return (
+    <nav
+      aria-label={t.nav.menu}
+      className="fixed inset-x-0 bottom-0 z-40 flex border-t bg-card pb-[env(safe-area-inset-bottom)] md:hidden"
+    >
+      {items.map((item) => (
+        <button
+          key={item.key}
+          type="button"
+          onClick={item.onClick}
+          aria-current={item.active ? "page" : undefined}
+          className={cn(
+            "flex min-h-[56px] flex-1 flex-col items-center justify-center gap-1 pt-1.5 text-[10px] font-medium transition-colors",
+            item.active ? "text-app-ink" : "text-muted-foreground"
+          )}
+        >
+          <span className={cn("h-0.5 w-8", item.active ? "bg-app" : "bg-transparent")} aria-hidden />
+          <item.icon className="h-5 w-5" aria-hidden />
+          {item.label}
+        </button>
+      ))}
+      {/* "Mais" — Ajustes e configurações profundas no sheet (v1.1 §8.6) */}
+      <button
+        type="button"
+        onClick={onMore}
+        aria-label={t.shell.moreTitle}
+        className="flex min-h-[56px] flex-1 flex-col items-center justify-center gap-1 pt-1.5 text-[10px] font-medium text-muted-foreground transition-colors"
+      >
+        <span className="h-0.5 w-8 bg-transparent" aria-hidden />
+        <MoreHorizontal className="h-5 w-5" aria-hidden />
+        {t.shell.more}
+      </button>
+    </nav>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Rodapé de conteúdo                                                 */
+/* ------------------------------------------------------------------ */
+
+function ContentFooter() {
+  const { t, f } = useLang();
+  const { navigate } = useAppStore();
+  return (
+    <footer className="mt-auto border-t">
+      <div className="mx-auto max-w-6xl px-4 py-6">
+        {/* Assinatura "by Noos" no rodapé — link para o hub (decisão do
+            fundador 2026-10-25; guia §04-F: rodapé = assinatura + Local-First
+            + versão). Alvo de 44 px. */}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <NoosBadge />
+          <div className="flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+            <span>{t.shell.localFirst}</span>
+            {/* versão: no desktop vive no pé do rail — nunca duplicado */}
+            <span className="md:hidden">{f(t.footer.version, { version: APP_VERSION })}</span>
+          </div>
+        </div>
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+          <p className="max-w-xl text-xs leading-relaxed text-muted-foreground">{t.footer.disclaimer}</p>
+          <nav className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs" aria-label="Footer">
             <a
               href="https://github.com/ironidesflj"
               target="_blank"
@@ -340,59 +294,142 @@ function Footer() {
               <Globe className="h-3.5 w-3.5" />
               {t.footer.sources}
             </a>
+            <button type="button" className="text-muted-foreground hover:text-foreground" onClick={() => navigate("guide")}>
+              {t.footer.guide}
+            </button>
+            <button type="button" className="text-muted-foreground hover:text-foreground" onClick={() => navigate("about")}>
+              {t.footer.about}
+            </button>
           </nav>
-        </div>
-
-        <div className="mt-5 flex flex-col items-center gap-1 border-t pt-4 text-[11px] text-muted-foreground/80 md:flex-row md:justify-between">
-          <p className="inline-flex flex-wrap items-center justify-center gap-1.5">
-            <CheckCircle2 className="h-3 w-3 text-emerald-500" />
-            {t.common.free}
-            <span aria-hidden>·</span>
-            <span>{t.footer.version}</span>
-            <span aria-hidden>·</span>
-            <span>{t.footer.license}</span>
-          </p>
-          <p>
-            {t.app.name}
-            <span className="mx-1" aria-hidden>
-              ·
-            </span>
-            {t.footer.author}
-          </p>
         </div>
       </div>
     </footer>
   );
 }
 
+/* ------------------------------------------------------------------ */
+/* Landing (view "home") — header próprio (patch v1.1 §7.1)          */
+/* ------------------------------------------------------------------ */
+
+function LandingHeader() {
+  const { t } = useLang();
+  const { navigate } = useAppStore();
+
+  return (
+    <header className="sticky top-0 z-40 border-b bg-card">
+      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4">
+        <BrandLockup />
+        <div className="flex items-center gap-1.5">
+          <nav className="hidden items-center gap-1 mr-1 lg:flex" aria-label="Main navigation">
+            <Button variant="ghost" size="sm" onClick={() => navigate("cert")}>
+              {t.shell.examMenu}
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => navigate("progress")}>
+              {t.shell.progress}
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => navigate("about")}>
+              {t.footer.about}
+            </Button>
+          </nav>
+          {/* Controles sempre na barra (v1.1 §7.1 — feedback nº 4.b):
+              PT · EN, tema e Entrar. "Continuar" (retomar sessão) vive no
+              bilhete — nunca "Entrar" e "Continuar" juntos na barra. */}
+          <LangSeg />
+          <ThemeToggle />
+          <AccountControl />
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function LandingFooter() {
+  const { t, f } = useLang();
+  return (
+    <footer className="mt-auto border-t">
+      <div className="mx-auto max-w-6xl px-4 py-6">
+        {/* Assinatura "by Noos" no rodapé — link para o hub (decisão do
+            fundador 2026-10-25; guia §04-F + checklist de lançamento). */}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <NoosBadge />
+          <div className="flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+            <span>{t.shell.localFirst}</span>
+            <span>{f(t.footer.version, { version: APP_VERSION })}</span>
+          </div>
+        </div>
+        <p className="mt-3 max-w-xl text-xs leading-relaxed text-muted-foreground">{t.footer.disclaimer}</p>
+      </div>
+    </footer>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Shell                                                              */
+/* ------------------------------------------------------------------ */
+
 export function RanvierApp() {
-  const { view, syncFromHash } = useAppStore();
+  const { view, syncFromHash, initCert } = useAppStore();
+  const [moreOpen, setMoreOpen] = useState(false);
 
   useEffect(() => {
     syncFromHash();
+    initCert(); // certificação ativa persistida (multi-cert — patch v1.1 §9)
     const onHashChange = () => syncFromHash();
     window.addEventListener("hashchange", onHashChange);
     return () => window.removeEventListener("hashchange", onHashChange);
-  }, [syncFromHash]);
+  }, [syncFromHash, initCert]);
 
-  // Exam view is chrome-less focused (full-bleed, no footer) — everything else shares the shell.
-  const focused = view === "exam";
+  const content = (
+    <>
+      {view === "home" && <HomeView />}
+      {view === "cert" && <CertView />}
+      {view === "study" && <StudyView />}
+      {view === "exam" && <ExamView />}
+      {view === "results" && <ResultsView />}
+      {view === "progress" && <ProgressView />}
+      {view === "guide" && <GuideView />}
+      {view === "about" && <AboutView />}
+      {view === "settings" && <SettingsView />}
+    </>
+  );
 
+  /* Exame: chrome-less — uma questão por tela, nada compete (patch §8).
+     A barra de sessão (Início, cert, posição, relógio) substitui a barra
+     superior. Conteúdo em 720 px; a régua de tempo vive dentro da view. */
+  if (view === "exam") {
+    return (
+      <div className="flex min-h-screen flex-col bg-background">
+        <AdSenseScript />
+        <main className="flex flex-1 flex-col">{content}</main>
+      </div>
+    );
+  }
+
+  /* Landing: header próprio com os mesmos controles, sem rail (patch §7). */
+  if (view === "home") {
+    return (
+      <div className="flex min-h-screen flex-col bg-background">
+        <AdSenseScript />
+        <LandingHeader />
+        <main className="flex flex-1 flex-col">{content}</main>
+        <LandingFooter />
+      </div>
+    );
+  }
+
+  /* Shell interno: rail no desktop, barra superior em toda tela, bottom
+     nav (4 + Mais) no mobile. */
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex min-h-screen flex-col bg-background md:flex-row">
       <AdSenseScript />
-      <Header />
-      <main className="flex flex-1 flex-col">
-        {view === "home" && <HomeView />}
-        {view === "cert" && <CertView />}
-        {view === "study" && <StudyView />}
-        {view === "exam" && <ExamView />}
-        {view === "results" && <ResultsView />}
-        {view === "progress" && <ProgressView />}
-        {view === "guide" && <GuideView />}
-        {view === "about" && <AboutView />}
-      </main>
-      {!focused && <Footer />}
+      <Rail />
+      <div className="flex min-w-0 flex-1 flex-col">
+        <TopBar />
+        <main className="flex flex-1 flex-col pb-20 md:pb-0">{content}</main>
+        <ContentFooter />
+      </div>
+      <MobileBottomNav onMore={() => setMoreOpen(true)} />
+      <MoreSheet open={moreOpen} onOpenChange={setMoreOpen} />
     </div>
   );
 }

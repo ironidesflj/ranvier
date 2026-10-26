@@ -3,64 +3,80 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="color-scheme" content="dark" />
-  <meta name="theme-color" content="#0B1424" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#f7fbf9" />
   <title>Ranvier — offline</title>
   <style>
-    :root { color-scheme: dark; }
+    :root {
+      color-scheme: light dark;
+      --bg: #f7fbf9; --surface: #ffffff; --fg: #0e1b1c; --muted: #525d5e;
+      --border: #d9e0de; --app-ink: #1b5285; --node: #246cad;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0a0f10; --surface: #121919; --fg: #e4e9e8; --muted: #929a99;
+        --border: #2c3535; --app-ink: #8ab8e8; --node: #8ab8e8;
+      }
+    }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #0B1424;
-      color: #e7edf5;
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: "Instrument Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
       padding: 24px;
       text-align: center;
     }
     .card { max-width: 380px; }
-    .mark {
-      width: 64px; height: 64px;
-      margin: 0 auto 20px;
-      border-radius: 14px;
-      background: #246cad;
-      display: flex; align-items: center; justify-content: center;
+    .mark { margin: 0 auto 20px; color: var(--fg); }
+    .mark svg { width: 56px; height: 56px; }
+    h1 {
+      font-family: "Newsreader", Georgia, serif;
+      font-weight: 400;
+      font-size: 24px;
+      letter-spacing: -0.02em;
     }
-    .mark svg { width: 38px; height: 38px; }
-    h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; }
-    p { margin-top: 8px; font-size: 14px; line-height: 1.6; color: #9fb0c3; }
-    p.en { font-size: 12.5px; color: #7c8ca0; }
-    button {
-      margin-top: 22px;
-      padding: 10px 22px;
-      border: 0;
-      border-radius: 10px;
-      background: #246cad;
-      color: #fff;
+    .endorse {
+      margin-top: 6px;
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    p {
+      margin-top: 14px;
+      color: var(--muted);
       font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
+      line-height: 1.6;
     }
-    button:hover { background: #2e7fc0; }
-    button:focus-visible { outline: 2px solid #9cc4e8; outline-offset: 2px; }
-    .badge { margin-top: 26px; font-size: 10px; color: #6d7d92; }
-    .badge i { font-family: Georgia, "Times New Roman", serif; }
+    .meta {
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
   </style>
 </head>
 <body>
-  <main class="card">
+  <div class="card">
     <div class="mark" aria-hidden="true">
-      <svg viewBox="0 0 64 64" fill="none" stroke="#FFFFFF" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M18 33.5 28 43.5 46 22" />
+      <!-- Monograma Ranvier — compacto (patch de identidade v1.0 §4) -->
+      <svg viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round">
+        <path d="M38 94V26"/>
+        <path d="M38 26h22a20 20 0 0 1 0 40H38"/>
+        <path d="M60 66l28 28"/>
       </svg>
     </div>
-    <h1>Você está offline</h1>
-    <p>O Ranvier precisa de conexão na primeira visita. Reconecte-se e tente de novo — depois disso, o app abre mesmo sem internet.</p>
-    <p class="en">You are offline. Reconnect and try again — after your first visit, the app opens even without internet.</p>
-    <button onclick="location.replace('/')">Tentar de novo / Try again</button>
-    <div class="badge">by <i>Noos</i></div>
-  </main>
+    <h1>Ranvier</h1>
+    <p class="endorse">by Noos</p>
+    <p>Você está offline. O rascunho, o histórico e as explicações já baixadas continuam disponíveis. A sincronização espera a conexão.</p>
+    <p class="meta">Local-First · v1.4.1</p>
+  </div>
 </body>
 </html>

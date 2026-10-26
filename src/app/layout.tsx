@@ -4,10 +4,10 @@ import "./globals.css";
 import { Providers } from "./providers";
 
 /**
- * Typography per the Noos identity manual (Fase 1):
- *  - Instrument Sans: app body font.
- *  - IBM Plex Mono: public IDs and code.
- *  - Newsreader: RESERVED for the mother's wordmark (the "Noos" in "by Noos").
+ * Tipografia (guia Noos v1.1 + patch Ranvier §5):
+ *  - Instrument Sans: corpo, botões e alternativas.
+ *  - IBM Plex Mono: tempo, IDs, contadores e metadados.
+ *  - Newsreader: display do app — H1, perguntas e títulos de tela.
  */
 const instrumentSans = Instrument_Sans({
   variable: "--font-instrument-sans",
@@ -68,8 +68,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: dark)", color: "#0B1424" },
-    { media: "(prefers-color-scheme: light)", color: "#246cad" },
+    { media: "(prefers-color-scheme: light)", color: "#f7fbf9" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0f10" },
   ],
   width: "device-width",
   initialScale: 1,
@@ -81,7 +81,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" suppressHydrationWarning>
+    <html lang="pt-BR" data-app="ranvier" suppressHydrationWarning>
       <body
         className={`${instrumentSans.variable} ${plexMono.variable} ${newsreader.variable} antialiased bg-background text-foreground min-h-screen`}
       >

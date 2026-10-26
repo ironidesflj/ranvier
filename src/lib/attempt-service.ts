@@ -393,6 +393,7 @@ export async function getAttemptDetail(attemptId: string): Promise<AttemptDetail
     status: completed ? "COMPLETED" : "IN_PROGRESS",
     startedAt: attempt.startedAt.toISOString(),
     durationMin: attempt.mode === "EXAM" ? cert.durationMin : null,
+    certShortName: cert.shortName,
     result: completed ? await buildResult(attempt.id) : null,
     questions: questionDtos,
     answers: answersRecord,

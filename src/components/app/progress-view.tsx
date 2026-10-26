@@ -23,7 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useLang } from "@/components/app/language-provider";
 import { useAppStore } from "@/store/app-store";
-import { api } from "@/lib/api-client";
+import { api, ApiError } from "@/lib/api-client";
 import { useState } from "react";
 import { AuthModal } from "@/components/app/auth-modal";
 import { QueryError } from "@/components/app/query-error";
@@ -33,13 +33,18 @@ export function ProgressView() {
   const { navigate } = useAppStore();
   const [authOpen, setAuthOpen] = useState(false);
 
-  const { data: progress, isLoading: progressLoading, isError: progressError, isFetching: progressFetching, refetch: refetchProgress } = useQuery({
+  const { data: progress, isLoading: progressLoading, isError: progressError, isFetching: progressFetching, refetch: refetchProgress, error: progressErr } = useQuery({
     queryKey: ["progress"],
     queryFn: api.progress,
     retry: 1,
   });
   const { data: me } = useQuery({ queryKey: ["me"], queryFn: api.me });
-  const { data: attemptsData, isLoading: attemptsLoading } = useQuery({ queryKey: ["attempts"], queryFn: api.listAttempts });
+  const { data: attemptsData, isLoading: attemptsLoading } = useQuery({
+    queryKey: ["attempts"],
+    queryFn: api.listAttempts,
+    staleTime: 0,
+    refetchOnMount: "always",
+  });
   const user = me?.user ?? null;
 
   if (progressLoading) {
@@ -60,10 +65,14 @@ export function ProgressView() {
     return (
       <div className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold tracking-tight">{t.progress.title}</h1>
+          <h1 className="font-display text-3xl font-light tracking-[-0.03em] sm:text-4xl">{t.progress.title}</h1>
           <p className="mt-1 text-sm text-muted-foreground">{t.progress.subtitle}</p>
         </div>
-        <QueryError onRetry={() => void refetchProgress()} isRetrying={progressFetching} />
+        <QueryError
+          onRetry={() => void refetchProgress()}
+          isRetrying={progressFetching}
+          code={progressErr instanceof ApiError ? `HTTP ${progressErr.status}` : undefined}
+        />
       </div>
     );
   }
@@ -92,7 +101,7 @@ export function ProgressView() {
     <div className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">
       <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">{t.progress.title}</h1>
+          <h1 className="font-display text-3xl font-light tracking-[-0.03em] sm:text-4xl">{t.progress.title}</h1>
           <p className="mt-1 text-sm text-muted-foreground">{t.progress.subtitle}</p>
         </div>
       </div>
@@ -156,7 +165,7 @@ export function ProgressView() {
                           {d.correct}/{d.answered}
                         </span>
                       </p>
-                      <span className={cn("shrink-0 font-bold tabular-nums", d.accuracy >= 70 ? "text-emerald-500" : d.accuracy > 0 ? "text-amber-500" : "text-muted-foreground")}>
+                      <span className={cn("shrink-0 font-bold tabular-nums", d.accuracy >= 70 ? "text-[var(--noos-success)]" : d.accuracy > 0 ? "text-[var(--noos-signal)]" : "text-muted-foreground")}>
                         {d.answered > 0 ? `${Math.round(d.accuracy)}%` : "—"}
                       </span>
                     </div>

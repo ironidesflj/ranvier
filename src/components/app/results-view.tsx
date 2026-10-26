@@ -3,35 +3,40 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import {
-  ArrowLeft,
-  BookOpenCheck,
-  CheckCircle2,
-  Clock,
-  Filter,
-  Home,
-  Loader2,
-  RotateCcw,
-  Target,
-  XCircle,
-} from "lucide-react";
+import { ArrowUp, BookOpenCheck, Home, Loader2, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { useLang } from "@/components/app/language-provider";
 import { useAppStore } from "@/store/app-store";
 import { api } from "@/lib/api-client";
+import { APP_VERSION } from "@/lib/version";
+import { orderOptions } from "@/lib/option-order";
 import { QuestionCard } from "@/components/app/question-card";
-import { Markdown } from "@/components/app/markdown";
 import { AdSlot } from "@/components/app/ad-slot";
 import type { ReviewQuestion } from "@/lib/types";
 
+/**
+ * Resultado (patch Ranvier v1.0 §9 + v1.1 §12) — "laudo em papel, não troféu".
+ *
+ *  - Nota em mono grande (56–84) + `/ total` em muted; status com ponto
+ *    verde discreto; linha de corte marcada na régua de 3 px.
+ *  - Breakdown por domínio com porcentagem COLORIDA (verde ≥ corte /
+ *    vermelho < corte) — restaurado a pedido do fundador 2026-10-26
+ *    (feedback nº 7, não enviado ao design; o visual antigo voltou).
+ *  - Barra fixa no topo (v1.1 §11): "Início" sempre à mão — depois de
+ *    rolar a revisão inteira, voltar é um toque, não uma escalada
+ *    (feedback nº 4). "Topo" devolve ao início da página.
+ *  - Revisão por questão com explicação e fonte SEMPRE abertas (v1.1 §11,
+ *    feedback nº 2) e alternativas na MESMA ordem embaralhada da sessão
+ *    (semente por attemptId — nota B, feedback nº 5).
+ *  - Proibido (e ausente): confete, anel colorido, emoji, ranking, badge
+ *    de "parabéns".
+ */
 export function ResultsView() {
   const { t, f, lang } = useLang();
-  const { attemptId, navigate } = useAppStore();
+  const { attemptId, navigate, certSlug } = useAppStore();
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState<"all" | "wrong">("all");
 
@@ -63,7 +68,7 @@ export function ResultsView() {
   const visible = filter === "wrong" ? wrongQuestions : questions;
 
   const retryExam = useMutation({
-    mutationFn: () => api.startAttempt({ certSlug: "databricks-data-engineer-associate", mode: "EXAM" }),
+    mutationFn: () => api.startAttempt({ certSlug, mode: "EXAM" }),
     onSuccess: (res) => {
       toast.success(t.toast.started);
       navigate("exam", { attemptId: res.attemptId });
@@ -99,65 +104,105 @@ export function ResultsView() {
   const isExam = detail.mode === "EXAM";
   const durationMin = Math.floor(result.durationSec / 60);
   const durationSec = result.durationSec % 60;
+  const completedAt = result.completedAt ? new Date(result.completedAt) : null;
+  const dateStr = completedAt
+    ? completedAt.toLocaleDateString(lang === "pt" ? "pt-BR" : "en-US", { day: "2-digit", month: "2-digit", year: "numeric" })
+    : "—";
 
   return (
-    <div className="mx-auto w-full max-w-3xl flex-1 px-4 py-8">
-      {/* Result banner */}
-      <Card
-        className={cn(
-          "border-2",
-          result.passed ? "border-emerald-500/60" : "border-destructive/60"
-        )}
-      >
-        <CardContent className="p-6 text-center">
-          <div
-            className={cn(
-              "mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full",
-              result.passed ? "bg-emerald-500/15 text-emerald-500" : "bg-destructive/15 text-destructive"
-            )}
-            aria-hidden
-          >
-            {result.passed ? <CheckCircle2 className="h-8 w-8" /> : <XCircle className="h-8 w-8" />}
-          </div>
-          <h1 className="text-xl font-bold sm:text-2xl">
-            {isExam ? (result.passed ? t.results.passed : t.results.failed) : t.results.studyTitle}
-          </h1>
-          <p className="mt-2 text-4xl font-bold tabular-nums tracking-tight">
-            {Math.round(result.percent)}
-            <span className="text-xl text-muted-foreground">%</span>
-          </p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {f(t.results.scoreValue, { score: result.score, total: result.total })}
-          </p>
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-xs text-muted-foreground">
-            <span className="inline-flex items-center gap-1.5">
-              <Clock className="h-3.5 w-3.5" />
-              {t.results.timeUsed}: {durationMin}m {durationSec}s
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Target className="h-3.5 w-3.5" />
-              {f(t.results.passingNote, { passing: result.passingScore })}
-            </span>
-          </div>
-          <Progress value={result.percent} className="mt-4 h-2" aria-label={`${result.percent}%`} />
-        </CardContent>
-      </Card>
+    <div className="mx-auto w-full max-w-3xl flex-1 px-4 py-8 sm:py-10">
+      {/* h1 semântico para leitores de tela (equipe UX 3-b FAIL-6) */}
+      <h1 className="sr-only">{isExam ? t.results.reportTitle : t.results.studyTitle}</h1>
 
-      {/* CTAs */}
-      <div className="mt-4 flex flex-wrap justify-center gap-3">
-        {isExam && (
-          <Button onClick={() => retryExam.mutate()} disabled={retryExam.isPending}>
-            {retryExam.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
-            {t.results.retryExam}
+      {/* Barra fixa do laudo (v1.1 §11 — feedback nº 4): Início e Topo
+          sempre à mão, mesmo depois de rolar a revisão inteira. Sombra de
+          flutuação só depois do scroll (v1.1 §6). */}
+      <div className="sticky top-14 z-30 -mx-4 mb-6 border-b bg-card/95 px-4 py-2 backdrop-blur-sm supports-[backdrop-filter]:bg-card/90">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={() => navigate("home")} aria-label={t.results.backHome}>
+              <Home className="h-4 w-4" />
+              <span className="hidden sm:inline">{t.nav.home}</span>
+            </Button>
+            <p className="truncate font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+              {(isExam ? t.results.reportTitle : t.results.studyTitle)} · {detail.certShortName}
+            </p>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <p className="font-mono text-sm font-medium tabular-nums">
+              {result.score}<span className="text-muted-foreground">/{result.total}</span>
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              aria-label={t.results.scrollTop}
+            >
+              <ArrowUp className="h-4 w-4" />
+              <span className="hidden sm:inline">{t.results.scrollTop}</span>
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Laudo */}
+      <header className="border-b pb-6">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <p className="font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+            {isExam ? t.results.reportTitle : t.results.studyTitle}
+          </p>
+          <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+            {f(t.results.reportFooter, { date: dateStr, duration: `${durationMin}m ${durationSec}s`, version: `v${APP_VERSION}` })}
+          </p>
+        </div>
+
+        {/* Nota em mono grande + /total em muted */}
+        <div className="mt-4 flex items-baseline gap-3">
+          <p className="font-mono text-6xl font-medium leading-none tabular-nums tracking-[-0.01em] sm:text-7xl">
+            {result.score}
+          </p>
+          <p className="font-mono text-xl tabular-nums text-muted-foreground">/ {result.total}</p>
+          <p className="ml-2 font-mono text-sm tabular-nums text-muted-foreground">{Math.round(result.percent)}%</p>
+        </div>
+
+        {/* Status com ponto discreto + linha de corte */}
+        <p className="mt-3 flex items-center gap-2 text-sm">
+          <span
+            className={cn("h-2 w-2 shrink-0 rounded-full", result.passed ? "bg-[var(--noos-success)]" : "bg-[var(--noos-danger)]")}
+            aria-hidden
+          />
+          {isExam &&
+            (result.passed
+              ? f(t.results.aboveCutoff, { passing: result.passingScore })
+              : f(t.results.belowCutoff, { passing: result.passingScore }))}
+          {!isExam && f(t.results.scoreValue, { score: result.score, total: result.total })}
+        </p>
+        <div className="relative mt-4 h-[3px] w-full max-w-md bg-surface-2">
+          <div className="h-full bg-app-ink" style={{ width: `${Math.max(Math.round(result.percent), 1)}%` }} />
+          <span
+            className="absolute -top-1 h-[11px] w-px bg-[var(--noos-border-strong)]"
+            style={{ left: `${result.passingScore}%` }}
+            aria-hidden
+          />
+          <span className="absolute -top-6 -translate-x-1/2 font-mono text-[9px] uppercase tracking-[0.08em] text-muted-foreground" style={{ left: `${result.passingScore}%` }}>
+            {f(t.results.cutoffMarker, { passing: result.passingScore })}
+          </span>
+        </div>
+        <p className="mt-3 max-w-[62ch] text-xs leading-relaxed text-muted-foreground">{t.home.passingNote}</p>
+      </header>
+
+      {/* Ações */}
+      <div className="mt-5 flex flex-wrap gap-3">
+        {wrongQuestions.length > 0 && (
+          <Button onClick={() => navigate("study", { questionIds: wrongQuestions.map((q) => q.id) })}>
+            <BookOpenCheck className="h-4 w-4" />
+            {f(t.results.reviewN, { count: wrongQuestions.length })}
           </Button>
         )}
-        {wrongQuestions.length > 0 && (
-          <Button
-            variant="outline"
-            onClick={() => navigate("study", { questionIds: wrongQuestions.map((q) => q.id) })}
-          >
-            <BookOpenCheck className="h-4 w-4" />
-            {t.results.practiceWrong} ({wrongQuestions.length})
+        {isExam && (
+          <Button variant="outline" onClick={() => retryExam.mutate()} disabled={retryExam.isPending}>
+            {retryExam.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
+            {t.results.retryExam}
           </Button>
         )}
         <Button variant="ghost" onClick={() => navigate("home")}>
@@ -166,111 +211,102 @@ export function ResultsView() {
         </Button>
       </div>
 
-      {/* By domain */}
-      <section className="mt-8">
-        <h2 className="mb-3 text-lg font-semibold">{t.results.byDomain}</h2>
-        <Card>
-          <CardContent className="space-y-3 p-4 sm:p-5">
-            {result.byDomain.map((d) => {
-              const pct = d.total > 0 ? Math.round((d.correct / d.total) * 100) : 0;
-              return (
-                <div key={d.code}>
-                  <div className="mb-1 flex items-baseline justify-between gap-2 text-sm">
-                    <p className="min-w-0 font-medium">
-                      <span className="mr-2 inline-flex h-5 w-5 items-center justify-center rounded-md bg-secondary text-[11px] font-bold text-secondary-foreground">
-                        {d.code}
-                      </span>
-                      {lang === "pt" ? d.namePt : d.name}
-                      <span className="ml-2 text-xs text-muted-foreground">
-                        {d.correct}/{d.total}
-                      </span>
-                    </p>
-                    <span className={cn("shrink-0 font-bold tabular-nums", pct >= 70 ? "text-emerald-500" : "text-destructive")}>
+      {/* Breakdown por domínio — porcentagem com cor (verde ≥ corte /
+          vermelho < corte), restaurada a pedido do fundador 2026-10-26
+          (feedback nº 7). Barras de 3 px acompanham a cor; valores tabulares. */}
+      <section className="mt-10">
+        <h2 className="mb-4 font-display text-2xl font-light tracking-[-0.02em]">{t.results.byDomain}</h2>
+        <div className="space-y-4">
+          {result.byDomain.map((d) => {
+            const pct = d.total > 0 ? Math.round((d.correct / d.total) * 100) : 0;
+            const color = pct >= result.passingScore ? "text-[var(--noos-success)]" : "text-[var(--noos-danger)]";
+            const barColor = pct >= result.passingScore ? "bg-[var(--noos-success)]" : "bg-[var(--noos-danger)]";
+            return (
+              <div key={d.code}>
+                <div className="mb-1 flex items-baseline justify-between gap-2 text-sm">
+                  <p className="min-w-0 font-medium">
+                    <span className="mr-2 font-mono text-xs text-muted-foreground">{d.code}</span>
+                    {lang === "pt" ? d.namePt : d.name}
+                  </p>
+                  <p className="flex shrink-0 items-baseline gap-2 font-mono text-sm tabular-nums">
+                    <span className="text-muted-foreground">{d.correct}/{d.total}</span>
+                    <span className={cn("font-medium", color)} aria-label={`${pct}%`}>
                       {pct}%
                     </span>
-                  </div>
-                  <Progress value={pct} className="h-1.5" />
+                  </p>
                 </div>
-              );
-            })}
-          </CardContent>
-        </Card>
+                <div className="h-[3px] w-full bg-surface-2" role="img" aria-label={`${pct}%`}>
+                  <div className={cn("h-full", barColor)} style={{ width: `${pct}%` }} />
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </section>
 
-      {/* Review */}
-      <section className="mt-8">
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-lg font-semibold">{t.results.reviewTitle}</h2>
+      {/* Revisão */}
+      <section className="mt-10">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="font-display text-2xl font-light tracking-[-0.02em]">{t.results.reviewTitle}</h2>
           {wrongQuestions.length > 0 && (
             <Tabs value={filter} onValueChange={(v) => setFilter(v as "all" | "wrong")}>
               <TabsList>
-                <TabsTrigger value="all">
-                  <Filter className="mr-1 h-3.5 w-3.5" />
-                  {t.results.reviewFilterAll} ({questions.length})
-                </TabsTrigger>
-                <TabsTrigger value="wrong">
-                  {t.results.reviewFilterWrong} ({wrongQuestions.length})
-                </TabsTrigger>
+                <TabsTrigger value="all">{t.results.reviewFilterAll} ({questions.length})</TabsTrigger>
+                <TabsTrigger value="wrong">{t.results.reviewFilterWrong} ({wrongQuestions.length})</TabsTrigger>
               </TabsList>
             </Tabs>
           )}
         </div>
 
-        <div className="space-y-4">
-          {visible.map((q) => (
-            <Card key={q.id}>
-              <CardContent className="p-4 sm:p-6">
-                <p className="mb-3 flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+        <div className="space-y-8">
+          {visible.map((q) => {
+            /* Mesma ordem embaralhada da sessão (semente attemptId — nota B):
+               a revisão reproduz exatamente o que a pessoa viu na prova. */
+            const ordering = orderOptions(q, detail.attemptId, q.id);
+            const displayCorrect = ordering.toDisplay(q.correctIndex);
+            const displaySelected = q.selectedIndex !== null ? ordering.toDisplay(q.selectedIndex) : null;
+            return (
+              <div key={q.id}>
+                <p className="mb-3 flex flex-wrap items-center gap-2 border-b pb-2 font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
                   <span
                     className={cn(
-                      "inline-flex h-5 w-5 items-center justify-center rounded-full text-[11px] text-white",
-                      q.correct ? "bg-emerald-500" : "bg-destructive"
+                      "inline-flex h-5 w-5 items-center justify-center rounded-[6px] border text-[11px] font-medium",
+                      q.correct ? "border-[var(--noos-success)] text-[var(--noos-success)]" : "border-[var(--noos-danger)] text-[var(--noos-danger)]"
                     )}
                     aria-hidden
                   >
-                    {q.correct ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
+                    {q.correct ? "✓" : "✗"}
                   </span>
                   {f(t.results.question, { n: questions.indexOf(q) + 1 })}
+                  <span className="text-muted-foreground/70">{q.publicId}</span>
                   {q.selectedIndex === null && (
-                    <span className="rounded-full bg-muted px-2 py-0.5 font-medium">{t.results.noAnswer}</span>
+                    <span className="rounded-[6px] border px-1.5 py-0.5 font-medium">{t.results.noAnswer}</span>
                   )}
                 </p>
                 <QuestionCard
-                  question={q}
-                  selectedIndex={q.selectedIndex}
-                  review={{ correctIndex: q.correctIndex, correct: q.correct }}
+                  question={{ ...q, options: ordering.options }}
+                  selectedIndex={displaySelected}
+                  review={{
+                    correctIndex: displayCorrect,
+                    correct: q.correct,
+                    explanationEn: q.explanationEn,
+                    explanationPt: q.explanationPt,
+                    referenceUrl: q.referenceUrl,
+                    referenceTitle: q.referenceTitle,
+                  }}
+                  /* Pills preenchidas de domínio + dificuldade logo abaixo do
+                     cabeçalho "Questão N" (fundador 2026-10-26: "abaixo da
+                     questão x aparecia o domínio tal e a dificuldade, os dois
+                     com fundo preenchido — eu gostava disso, traz de volta"). */
+                  showMeta
                 />
-                {/* Review-mode explanation (QuestionCard only shows feedback panel in study mode) */}
-                <div className="mt-4 rounded-xl border bg-muted/30 p-4">
-                  <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    {t.results.explanation}
-                  </p>
-                  <Markdown text={lang === "pt" ? q.explanationPt : q.explanationEn} className="text-sm" />
-                  {q.referenceUrl && (
-                    <a
-                      href={q.referenceUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-primary underline underline-offset-4 hover:opacity-80"
-                    >
-                      {t.results.source}: {q.referenceTitle ?? q.referenceUrl}
-                    </a>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+              </div>
+            );
+          })}
         </div>
       </section>
 
-      <AdSlot placement="results" className="mt-8" />
-
-      <div className="mt-8 text-center">
-        <Button variant="ghost" onClick={() => navigate("progress")}>
-          <ArrowLeft className="h-4 w-4" />
-          {t.nav.progress}
-        </Button>
-      </div>
+      <AdSlot placement="results" className="mt-10" />
     </div>
   );
 }
