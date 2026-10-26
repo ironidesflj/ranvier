@@ -93,7 +93,7 @@ export function CertSelectorMenu({ variant = "bar" }: { variant?: "bar" | "butto
           {variant === "bar" ? (
             <button
               type="button"
-              className="flex h-10 max-w-[190px] items-center gap-1.5 rounded-[10px] border bg-card px-2.5 font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-foreground transition-colors hover:border-[var(--noos-border-strong)]"
+              className="flex h-10 min-w-0 max-w-[190px] items-center gap-1.5 rounded-[10px] border bg-card px-2.5 font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-foreground transition-colors hover:border-[var(--noos-border-strong)] max-[429px]:max-w-[130px]"
               aria-label={t.shell.certSelectorLabel}
               aria-haspopup="menu"
             >

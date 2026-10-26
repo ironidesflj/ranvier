@@ -117,9 +117,9 @@ export function AccountControl({ size = "bar" }: { size?: "bar" | "sheet" }) {
   if (!user) {
     return (
       <>
-        <Button variant="outline" size="sm" onClick={() => setAuthOpen(true)} className={size === "bar" ? "h-9" : "h-11 w-full"}>
+        <Button variant="outline" size="sm" onClick={() => setAuthOpen(true)} className={size === "bar" ? "h-9 max-[429px]:w-9 max-[429px]:px-0" : "h-11 w-full"}>
           <LogIn className="h-4 w-4" />
-          {t.auth.loginTitle}
+          <span className="max-[429px]:hidden">{t.auth.loginTitle}</span>
         </Button>
         <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
       </>
@@ -170,7 +170,7 @@ export function TopBar() {
   return (
     <header className="sticky top-0 z-40 border-b bg-card">
       <div className="flex h-14 items-center justify-between gap-2 px-4">
-        <div className="flex min-w-0 items-center gap-2">
+        <div className="flex min-w-0 flex-1 items-center gap-2">
           {/* Mobile: marca (→ Início) + seletor de certificação.
               Desktop: o rail já carrega a marca; a barra começa no seletor. */}
           <button
@@ -179,8 +179,8 @@ export function TopBar() {
             aria-label={t.app.name}
             className="flex items-center gap-2 text-left md:hidden"
           >
-            <RanvierMark className="h-[18px] w-[18px] text-foreground" />
-            <span className="font-display text-lg font-normal leading-none tracking-[-0.03em]">{t.app.name}</span>
+            <RanvierMark className="h-[18px] w-[18px] shrink-0 text-foreground" />
+            <span className="truncate font-display text-lg font-normal leading-none tracking-[-0.03em]">{t.app.name}</span>
           </button>
           <CertSelectorMenu />
         </div>
