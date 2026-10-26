@@ -121,13 +121,24 @@ v1.4.0 = patch de design v1.1 sobre os 7 feedbacks.
   constante de módulo (scroll preservado).
 - Modo estudo exige ≥1 domínio; todos pré-marcados.
 
+## Verificado na expansão DBDEA v4 (300 questões)
+
+- Banco publicado como fonte canônica em `src/data`: 300 questões, registry
+  completo `RAN-DBDEA-00001`–`RAN-DBDEA-00300` e 6 simulados disjuntos.
+- Distribuição: S1 19, S2 59, S3 69, S4 43, S5 31, S6 33, S7 46.
+- Gate estrito aprovado com 0 achados; red team aprovado em 17/17 mutações.
+- Viés de alternativa correta mais longa: 18,3%, abaixo do limite de 40%.
+- O CI executa validação, gate estrito e red team em todo push/PR.
+- Após o deploy, o Neon precisa ser atualizado com `bun scripts/seed.ts`; a
+  confirmação de saúde deve esperar `questions: 300`.
+
 ## Limitações conhecidas (honestas)
 
 1. **Deploy exige conferência de saúde após cada alteração de infraestrutura**
    (incidente resolvido em 2026-10-24: a produção chegou a retornar 500 nas
    queries de DB). O procedimento permanente é executar `curl /api/health`
    após redeploy e confirmar `status: ok`, `db: ok`, `certifications: 1` e
-   `questions: 116`; a receita de reparo permanece em `../DEPLOY.md` §4/§5/§11.
+   `questions: 300`; a receita de reparo permanece em `../DEPLOY.md` §4/§5/§11.
 2. SW stale-while-revalidate: primeira visita offline sem cache prévio não tem
    catálogo (comportamento esperado do SWR; visitantes que já usaram o app
    têm cache).
