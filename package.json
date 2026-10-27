@@ -1,6 +1,6 @@
 {
   "name": "ranvier",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "private": true,
   "scripts": {
     "dev": "next dev -p 3000 2>&1 | tee dev.log",
@@ -20,6 +20,7 @@
     "ci:gate": "bun scripts/ci_gate/gate.ts src/data --strict",
     "ci:gate:selftest": "bun scripts/ci_gate/selftest.ts",
     "manifest": "bun scripts/generate-manifest.ts",
+    "validate:manifest": "bun scripts/validate-manifest.ts",
     "icons": "bun scripts/generate-icons.ts"
   },
   "dependencies": {
