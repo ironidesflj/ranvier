@@ -16,9 +16,8 @@ visual; v1.4.0 = patch de design v1.1; v1.4.1 = 4 ajustes de UI do fundador.
   **Sem mudanças de schema e de questões** na v1.5.0 (só contrato/versão).
 - PWA: manifest (tema papel #f7fbf9), sw.js stale-while-revalidate
   (`ranvier-v1.5.0`), offline.html, ícones com monograma R.
-- `/api/health`: produção está saudável (`status: ok`, `db: ok`), mas ainda
-  retorna `questions: 116` até o seed v4 ser executado no Neon. O sandbox
-  local já valida as 300 questões.
+- `/api/health`: produção confirmada saudável com
+  `{"status":"ok","db":"ok","certifications":1,"questions":300}`.
 
 ## Auditoria do banco — data_fixed_v2
 
@@ -31,7 +30,8 @@ visual; v1.4.0 = patch de design v1.1; v1.4.1 = 4 ajustes de UI do fundador.
   enunciados, explicações, referências ou dificuldades.
 - A validação local confirmou 116 questões, 0 erros e 0 warnings (à época do
   pacote v2; a expansão para 300 questões foi entregue e publicada — ver
-  "Verificado na expansão DBDEA v4"; a produção ainda aguarda o seed Neon.
+  "Verificado na expansão DBDEA v4"; produção e sandbox estão alinhados em
+  300 questões.
 
 ## Documentação pública sincronizada
 
