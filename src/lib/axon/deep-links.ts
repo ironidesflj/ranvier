@@ -1,20 +1,23 @@
 /**
- * Axon (F1) — Deep-links to the Noos hub.
+ * Axon — deep-links to the Noos hub (fatia 5: format adopted; the canonical
+ * domain flip ships when the hub pages go live).
  *
- * The only ecosystem seam in the app UI: the Community button deep-links to
- * the question's discussion page on the hub, anchored by the stable public ID,
- * generated in the current interface language. The hub being down never breaks
- * study — these are links, not dependencies.
+ * Links, not dependencies: zero hub fetches at runtime — the hub being down
+ * never breaks study. The origins match the package's canonicalUrl /
+ * fallbackUrl; NEXT_PUBLIC_NOOS_HUB_URL overrides the base (set it to
+ * https://noos.study once the hub's /q/ pages are lit).
  *
- * Canonical hub domain: noos.study (register per the Carta).
- * Free canonical fallback (until the domain exists): https://noos-hub.vercel.app
- * Override with NEXT_PUBLIC_NOOS_HUB_URL once noos.study is live.
+ * The public ID is validated before a URL is built (constitution §3): a
+ * broken link on a published ID is a contract violation — fail here, at
+ * render time, not at the student's click. CI guarantees every registry ID
+ * is valid, so this guard never fires in practice; it exists so a future
+ * regression cannot ship silently.
  */
-
+import { validateId } from "@ironidesflj/axon";
 import type { Lang } from "@/lib/types";
 
-export const NOOS_HUB_CANONICAL_URL = "https://noos.study";
-export const NOOS_HUB_FALLBACK_URL = "https://noos-hub.vercel.app";
+export const NOOS_HUB_CANONICAL_URL = "https://noos.study"; // package canonicalUrl origin
+export const NOOS_HUB_FALLBACK_URL = "https://noos-hub.vercel.app"; // package fallbackUrl origin
 
 /** Hub base URL (env-configurable; defaults to the free canonical fallback). */
 export function hubBaseUrl(): string {
@@ -25,6 +28,10 @@ export function hubBaseUrl(): string {
 
 /** Deep-link to a question's discussion page, in the current UI language. */
 export function discussionUrl(publicId: string, lang: Lang): string {
+  const v = validateId(publicId);
+  if (!v.ok) {
+    throw new Error(`invalid publicId for deep-link: ${publicId} — ${v.reason} (constitution §3)`);
+  }
   return `${hubBaseUrl()}/${lang}/q/${publicId}`;
 }
 
