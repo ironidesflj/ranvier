@@ -187,7 +187,6 @@ export async function runGate(
         finding("ALTO", "MARKDOWN_FENCE", "Parsing", q.key, `${f}: bloco de código não fechado`, "Corrigir fence");
       if (/\r/.test(t))
         finding("MÉDIO", "WINDOWS_CR", "Parsing", q.key, `${f} contém CR (fim de linha Windows)`, "Normalizar para LF");
-      // eslint-disable-next-line no-control-regex
       if (/[\x00-\x08\x0B\x0C\x0E-\x1F]/.test(t))
         finding("ALTO", "CONTROL_CHARS", "Parsing", q.key, `${f} contém caractere de controle`, "Sanitizar");
       if (/[\u201C\u201D\u2018\u2019]/.test(t))
