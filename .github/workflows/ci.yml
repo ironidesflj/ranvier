@@ -41,6 +41,9 @@ jobs:
       - name: Question-bank quality gate
         run: bun run ci:gate
 
+      - name: Validate manifest.jsonl (hub contract, zero tolerance)
+        run: bun scripts/validate-manifest.ts
+
       - name: Quality-gate red team selftest
         run: bun run ci:gate:selftest
 
