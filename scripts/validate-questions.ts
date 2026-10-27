@@ -12,7 +12,7 @@ import { s7Questions } from "../src/data/questions/s7-governance";
 import { ID_REGISTRY, ID_REGISTRY_BY_KEY } from "../src/data/questions/id-registry";
 import type { SeedQuestion } from "../src/data/questions/types";
 import { CERTIFICATIONS, EXAM_DISTRIBUTION } from "../src/data/certifications";
-import { isValidQuestionId, parseQuestionId } from "../src/lib/axon/ids";
+import { validateId } from "@ironidesflj/axon";
 
 const all: SeedQuestion[] = [
   ...s1Questions,
@@ -62,15 +62,19 @@ for (const q of all) {
 }
 
 // Public ID registry (Noos ecosystem): every published question must carry a
-// registered RAN-EXAM-SEQ ID — valid format, unique, never recycled.
+// registered RAN-EXAM-SEQ ID — valid format (package validateId, reason
+// logged), unique, never recycled.
 const examCode = CERTIFICATIONS[0].examCode.toUpperCase();
 const seenPublicIds = new Set<string>();
 for (const entry of ID_REGISTRY) {
-  if (!isValidQuestionId(entry.publicId)) errors.push(`registry: invalid publicId ${entry.publicId} (${entry.key})`);
+  const v = validateId(entry.publicId);
+  if (!v.ok) {
+    errors.push(`registry: invalid publicId ${entry.publicId} (${entry.key}) — ${v.reason}`);
+  } else if (v.parsed.exam !== examCode) {
+    errors.push(`registry: ${entry.publicId} exam segment != ${examCode}`);
+  }
   if (seenPublicIds.has(entry.publicId)) errors.push(`registry: duplicate publicId ${entry.publicId}`);
   seenPublicIds.add(entry.publicId);
-  const parsed = parseQuestionId(entry.publicId);
-  if (parsed && parsed.exam !== examCode) errors.push(`registry: ${entry.publicId} exam segment != ${examCode}`);
 }
 for (const q of all) {
   const publicId = ID_REGISTRY_BY_KEY[q.key];
