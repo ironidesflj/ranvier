@@ -2,12 +2,12 @@
 
 ## Autorizado (em curso)
 
-- **Deploy da v1.5.0** (fundador/GPT local, receita `docs/DEPLOY.md`):
-  Vercel envs → `bun run build:vercel` → Neon `db:generate:prod` +
-  `db:push:prod` + seed (idempotente) → redeploy → `/api/health` deve
-  retornar `{"status":"ok","db":"ok","certifications":1,"questions":300}` e
-  `/manifest.jsonl` deve servir os checksums canônicos (linha 1 =
-  `sha256:95e20047…`).
+- **Deploy da v1.5.1** (fundador/GPT local, receita `docs/DEPLOY.md`): redeploy
+  padrão na Vercel — sem mudança de schema/questões/DB. Confirmar
+  `/api/health` = `questions:300` (inalterado) e `/og/og-image.png` = 200.
+  (O deploy da v1.5.0 foi concluído em 2026-10-27 — produção confirmada ao
+  vivo com health 300 e checksums canônicos no `/manifest.jsonl`, linha 1
+  `sha256:95e20047…`.)
 - **Fase 1 — acender o hub** (passo do mantenedor, fora do repo do app):
   committar o conteúdo de `public/manifest.jsonl` como `manifestos/RAN.jsonl`
   no repo do hub; o deploy seguinte acende 300 páginas PT/EN em
@@ -18,13 +18,22 @@
 
 ## Fechado (entregue)
 
+- **v1.5.1** (2026-10-27, spec `spec-v1.5.1-og-preview.md`): fechamento da
+  dívida #1 — OG/social preview completo: arte "bilhete de exame" 1200×630
+  clara (a og:image) + gêmea escura como ativo, geradas por pipeline
+  determinístico SVG→sharp (`bun run og`) com tipografia de marca;
+  `metadataBase`/canonical/og:image(+alt/dimensões)/og:locale pt_BR+en_US/
+  twitter summary_large_image; og:description com os números reais; bump
+  v1.5.1 + popup de 1 item (compartilhar com cartão de prévia).
 - **v1.5.0** (2026-10-27, spec `spec-v1.5.0-axon-convergence.md`):
   Convergência Axon — fatias 2 (IDs via `generateId`/`validateId` com
   `reason`), 3 (`computeChecksum` canônico + `contentVersion` opcional) e 4
   (manifesto validado pelo parser do hub, tolerância zero, no CI) adotadas
   sobre o pacote `@ironidesflj/axon@0.2.1`; deep-link com guard de ID;
   bump v1.5.0 + popup da expansão (300 questões, 6 simulados) + README em
-  inglês.
+  inglês. **Aplicada no GitHub e publicada pelo fundador em 2026-10-27**
+  (CI/Red Team/manifest workflow aprovados; produção com health 300 e
+  manifesto canônico — verificação independente no worklog Task 14).
 - **v1.4.1** (2026-10-26): os 4 ajustes de UI do fundador — pills preenchidas,
   fundo colorido sutil, bloco de explicação preenchido, 15/16px no lugar da
   escala 20–32px.
@@ -33,9 +42,9 @@
   barra, shuffle por tentativa, multi-cert com "em breve", % colorida por
   domínio. O contrato de fonte 20–32px foi depois revisto pelo fundador
   ("ainda gigante") e substituído por 15/16px na v1.4.1.
-- **Reparo de produção + publicação da expansão**: deploy e build verificados;
-  produção saudável, mas o seed Neon ainda está pendente. A API permanece em
-  `questions: 116` até essa operação.
+- **Reparo de produção + publicação da expansão** (executado pelo GPT local
+  do fundador): produção verificada ao vivo com `questions: 300` em
+  2026-10-27.
 - **Adoção do estado canônico** (Task 11): sandbox byte-equivalente ao repo
   do fundador (v1.4.1 + banco 300 + CI gate + Axon pin).
 
@@ -83,17 +92,12 @@ resolvem com CSS"). Diagnóstico pós-auditoria e estado:
 
 ## Dívidas conhecidas (impacto · motivo de aceitação · condição de reabertura)
 
-1. **Material de divulgação do link (OG/social preview)** — pedido do fundador
-   2026-10-25 ("criar material de divulgação que vai atrelado ao link do app,
-   diferentes plataformas, aquela imagem que vai junto ao link").
-   Impacto: compartilhar o link hoje não traz imagem/cartão de prévia
-   (Open Graph/Twitter Card incompletos), o que reduz cliques e reconhecimento
-   de marca. Motivo de aceitação: exige decisão de design (arte por plataforma,
-   monograma + bilhete de exame), produção de imagem e metadados — não é
-   mudança de uma linha; ficou registrado como dívida em vez de embarcar
-   sem spec. Condição de reabertura: próxima rodada de design/lançamento
-   (spec curta: og:image 1200×630, twitter:card summary_large_image, ícone
-   Apple-touch, arte clara/escura, textos PT/EN, nenhuma métrica inventada).
+1. ~~**Material de divulgação do link (OG/social preview)**~~ — **fechado na
+   v1.5.1** (spec `spec-v1.5.1-og-preview.md`): og:image 1200×630 (arte clara
+   "bilhete de exame"; gêmea escura como ativo), twitter card
+   summary_large_image, apple-touch (já existia), textos PT/EN, zero métricas
+   inventadas. Segue como follow-up natural (não dívida): cards por idioma
+   quando houver rotas por idioma.
 2. **Campo extra `db:"ok"` no `/api/health`** (divergência literal do contrato
    documentado; superconjunto inofensivo) — documentado no DEPLOY.md.
 3. **Flip do domínio canônico pendente**: `noos.study` já está no ar (hub
