@@ -27,4 +27,10 @@ export interface SeedQuestion {
   /** Short human title of the reference, e.g. "Auto Loader — Databricks Docs". */
   referenceTitle: string;
   difficulty: Difficulty;
+  /**
+   * Content version for the Noos manifest (Axon fatia 3): absent = 1; a typo
+   * fix on a PUBLISHED question bumps it here — the public ID never changes.
+   * A rewrite gets a new key/ID instead. Lives only in the manifest, not the DB.
+   */
+  contentVersion?: number;
 }
