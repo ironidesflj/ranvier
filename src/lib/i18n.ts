@@ -366,9 +366,7 @@ export const dict = {
       title: "O que há de novo",
       subtitle: "Avisamos uma única vez por atualização — depois, é só estudar.",
       items: [
-        "O banco quase triplicou: agora são 300 questões autorais com referência oficial por questão — antes eram 116.",
-        "Seis simulados completos no formato do exame, sem repetição de questões entre eles.",
-        "Cada questão agora carrega uma ID pública estável (RAN-…) — é ela que ancora a citação e as futuras páginas de discussão no hub Noos.",
+        "Compartilhar ficou melhor: o link do Ranvier agora abre com cartão de prévia — imagem, título e resumo — no WhatsApp, LinkedIn e outras plataformas.",
       ],
       close: "Entendi",
     },
@@ -802,9 +800,7 @@ export const dict = {
       title: "What's new",
       subtitle: "We show this once per update — then it's back to studying.",
       items: [
-        "The question bank nearly tripled: 300 original questions, each with an official reference — up from 116.",
-        "Six full mock exams in the real exam format, with no question overlap between them.",
-        "Every question now carries a stable public ID (RAN-…) — the anchor for citing it and for the upcoming discussion pages on the Noos hub.",
+        "Sharing got better: the Ranvier link now opens with a preview card — image, title and summary — on WhatsApp, LinkedIn and other platforms.",
       ],
       close: "Got it",
     },
