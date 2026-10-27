@@ -1,25 +1,34 @@
 /**
- * manifest.jsonl generator — publishes the question bank as the static Noos hub
- * contract (Guia de Adaptação — Fase 1, capítulo 4).
+ * manifest.jsonl generator — publishes the question bank as the static Noos
+ * hub contract (Axon fatias 2+3+4: IDs pela escrita, checksum canônico e
+ * validação pelo mesmo parser que o hub usa na ingestão).
  *
- * The app owns the questions and progress; the hub owns the discussions. This
- * script is what the CI runs on every bank change: it validates the bank,
- * keeps the public-ID registry consistent and writes public/manifest.jsonl
- * (one line per question, all Table-4 fields + checksum) which the app serves
- * as a static file. The hub ingests it on its scheduled build — no runtime
- * coupling, no auth between services.
+ * The app owns the questions and progress; the hub owns the discussions.
+ * This script is what the CI runs on every bank change: it validates the
+ * bank, keeps the public-ID registry consistent, writes public/manifest.jsonl
+ * (one line per question, the 9 contract fields + referenceTitle) and —
+ * BEFORE writing — re-parses the whole serialized file with parseManifest
+ * (from @ironidesflj/axon) and verifies every checksum line by line with
+ * verifyChecksum. Zero tolerance for the publisher: any rejection or
+ * divergence fails the run (tolerating dirty lines is the hub's right,
+ * never ours).
+ *
+ * Checksum: computeChecksum over the canonical [statement, options, answer,
+ * reference] — the algorithm is LOCKED (axon constitution §2); changing it
+ * is a MAJOR with 90-day notice. Only the snapshot enters the sum;
+ * version and metadata do not.
  *
  * Public ID rules (registry at src/data/questions/id-registry.ts):
- *  - Assigned ONCE, never renamed (published IDs are immutable).
- *  - Sequential per exam, no recycling. Removal = epitaph (warning below),
+ *  - Assigned ONCE via generateId (RAN- prefix, package-issued format),
+ *    never renamed, never recycled. Removal = epitaph (warning below),
  *    never a reused number.
- *  - New questions are appended with the next free sequence — never renumbered.
+ *  - New questions are appended with the next free sequence — never
+ *    renumbered. `--assign` does exactly that and nothing else.
  *
  * Usage:
  *   bun scripts/generate-manifest.ts             # validate + write manifest (fails if any question lacks a registered ID)
  *   bun scripts/generate-manifest.ts --assign    # also appends registry entries for NEW questions (safe: append-only)
  */
-import { createHash } from "node:crypto";
 import { existsSync, writeFileSync } from "node:fs";
 import { CERTIFICATIONS } from "../src/data/certifications";
 import { s1Questions } from "../src/data/questions/s1-platform";
@@ -30,8 +39,8 @@ import { s5Questions } from "../src/data/questions/s5-cicd";
 import { s6Questions } from "../src/data/questions/s6-troubleshooting";
 import { s7Questions } from "../src/data/questions/s7-governance";
 import type { SeedQuestion } from "../src/data/questions/types";
-import { formatQuestionId, parseQuestionId, isValidQuestionId } from "../src/lib/axon/ids";
-import { manifestLineSchema } from "../src/lib/axon/schema";
+import { generateId, validateId, parseManifest, verifyChecksum, computeChecksum } from "@ironidesflj/axon";
+import { APP_ID_PREFIX } from "../src/lib/axon/ids";
 
 const ALL_QUESTIONS: SeedQuestion[] = [
   ...s1Questions,
@@ -82,8 +91,9 @@ function renderRegistry(entries: RegistryEntry[]): string {
  *    exactly that and nothing else — it never renumbers existing entries).
  *  - A removed question keeps its entry here (epitaph) so the number is never
  *    reused; the manifest reports it as a warning.
- *  - Typo fixes keep the ID (version bumps); a rewrite gets a NEW ID appended,
- *    with the old one kept as its alias/predecessor.
+ *  - Typo fixes keep the ID (contentVersion bumps in the question data); a
+ *    rewrite gets a NEW ID appended, with the old one kept as its
+ *    alias/predecessor.
  */
 export interface IdRegistryEntry {
   key: string;
@@ -106,32 +116,24 @@ async function loadRegistry(): Promise<RegistryEntry[]> {
   return (mod.ID_REGISTRY as RegistryEntry[]).map((e) => ({ key: e.key, publicId: e.publicId }));
 }
 
-/** sha256 of the canonical content — detects divergence between manifest and app. */
-function checksumOf(snapshot: {
-  statement: string;
-  options: string[];
-  answer: string;
-  reference: string;
-}): string {
-  const canonical = JSON.stringify({
-    statement: snapshot.statement,
-    options: snapshot.options,
-    answer: snapshot.answer,
-    reference: snapshot.reference,
-  });
-  return `sha256:${createHash("sha256").update(canonical, "utf8").digest("hex")}`;
-}
-
 async function main() {
   const errors: string[] = [];
   const warnings: string[] = [];
   const registry = await loadRegistry();
   const byKey = new Map(registry.map((e) => [e.key, e.publicId]));
 
-  // Registry sanity: unique keys, unique/valid public IDs.
+  // Registry sanity: unique keys, unique/valid public IDs — through the
+  // package's validateId, with the rejection reason in the log (fatia 2).
   const seenIds = new Set<string>();
   for (const e of registry) {
-    if (!isValidQuestionId(e.publicId)) errors.push(`registry: invalid publicId ${e.publicId} (${e.key})`);
+    const v = validateId(e.publicId);
+    if (!v.ok) {
+      errors.push(`registry: invalid publicId ${e.publicId} (${e.key}) — ${v.reason}`);
+      continue;
+    }
+    if (v.parsed.exam !== examCode) {
+      errors.push(`registry: publicId ${e.publicId} (${e.key}) exam segment != ${examCode}`);
+    }
     if (seenIds.has(e.publicId)) errors.push(`registry: duplicate publicId ${e.publicId}`);
     seenIds.add(e.publicId);
   }
@@ -142,13 +144,13 @@ async function main() {
     for (const q of missing) errors.push(`no public ID registered for ${q.key} (run with --assign to append)`);
   }
   if (missing.length > 0 && assign) {
-    let nextSeq = registry.reduce((max, e) => {
-      const parsed = parseQuestionId(e.publicId);
-      return parsed && parsed.exam === examCode ? Math.max(max, parsed.seq) : max;
+    let lastIssued = registry.reduce((max, e) => {
+      const v = validateId(e.publicId);
+      return v.ok && v.parsed.exam === examCode ? Math.max(max, v.parsed.seq) : max;
     }, 0);
     for (const q of missing) {
-      nextSeq += 1;
-      const publicId = formatQuestionId(examCode, nextSeq);
+      const publicId = generateId(APP_ID_PREFIX, examCode, lastIssued);
+      lastIssued += 1;
       registry.push({ key: q.key, publicId });
       byKey.set(q.key, publicId);
       console.log(`  + registry: ${q.key} → ${publicId}`);
@@ -173,7 +175,7 @@ async function main() {
       options: [...q.options],
       answer: LETTERS[q.correctIndex],
       reference: q.referenceUrl,
-      referenceTitle: q.referenceTitle,
+      referenceTitle: q.referenceTitle, // extra field — tolerated by the hub parser, used by its page spec
     };
     const line = {
       id: e.publicId,
@@ -181,17 +183,26 @@ async function main() {
       topics: [DOMAIN_TOPICS[q.domainCode] ?? `s${q.domainCode}`],
       difficulty: q.difficulty.toLowerCase(),
       lang: "en", // questions are always in the exam's English source (product decision)
-      version: 1, // content version (bump on typo fixes; the ID never changes)
-      checksum: checksumOf(snapshot),
+      version: q.contentVersion ?? 1, // content version — typo fixes bump it; the ID never changes
+      checksum: computeChecksum(snapshot), // canonical, LOCKED algorithm (fatia 3)
       aliases: [] as string[], // no GLI- IDs were ever published — registry born at RAN-
       snapshot,
     };
-    const parsed = manifestLineSchema.safeParse(line);
-    if (!parsed.success) {
-      errors.push(`${e.key}: manifest line failed schema — ${parsed.error.issues[0]?.message}`);
-      continue;
-    }
     lines.push(JSON.stringify(line));
+  }
+
+  // Fatia 4 — validate with the SAME parser the hub uses on ingestion,
+  // over the actual serialized bytes: any rejection or checksum divergence
+  // fails the run. Zero tolerance for the publisher.
+  const content = lines.length > 0 ? lines.join("\n") + "\n" : "";
+  const parsed = parseManifest(content);
+  for (const r of parsed.rejected) {
+    errors.push(`manifest line ${r.lineNumber} rejected by the hub parser — ${r.reason}`);
+  }
+  const diverged = parsed.ok.filter((r) => !verifyChecksum(r));
+  if (diverged.length > 0) {
+    const sample = diverged.map((r) => r.id).slice(0, 5).join(", ");
+    errors.push(`checksum divergent on ${diverged.length} line(s): ${sample}${diverged.length > 5 ? "…" : ""}`);
   }
 
   if (errors.length > 0) {
@@ -200,12 +211,14 @@ async function main() {
     process.exit(1);
   }
 
-  writeFileSync(MANIFEST_PATH, lines.length > 0 ? lines.join("\n") + "\n" : "", "utf8");
+  writeFileSync(MANIFEST_PATH, content, "utf8");
 
   console.log(`\n✓ manifest.jsonl — ${lines.length} questions (${MANIFEST_PATH})`);
   console.log(`  exam: ${examCode} (${cert.name})`);
   console.log(`  first: ${registry[0]?.publicId} · last: ${registry[registry.length - 1]?.publicId}`);
   console.log(`  registry: ${registry.length} entries (aliases: none — no GLI- ever published)`);
+  console.log(`  hub parser: ${parsed.ok.length} ok · ${parsed.rejected.length} rejected · ${diverged.length} checksum divergences`);
+  console.log(`  checksum (line 1): ${parsed.ok[0]?.checksum}`);
   if (warnings.length > 0) {
     console.log(`warnings: ${warnings.length}`);
     for (const w of warnings) console.log("  ⚠ " + w);
