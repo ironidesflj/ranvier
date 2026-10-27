@@ -2,26 +2,42 @@
 
 ## Autorizado (em curso)
 
-- **v1.4.1** (lote fechado 2026-10-26, spec própria): os 4 ajustes de UI do
-  fundador pós-comparação v1.3.1 × app antigo — pills preenchidas de domínio
-  + dificuldade em estudo/revisão, fundo colorido sutil (mais discreto que o
-  antigo) no certo/errado, bloco de explicação + fonte preenchido na cor do
-  resultado, e tamanho de leitura do app antigo de volta (15/16px) no lugar
-  da escala 20–32px do patch v1.1 §5.
-- **Reparo de produção** (executado pelo GPT local do fundador, com receita do
-  `../DEPLOY.md`): Vercel envs → `bun run build:vercel` → Neon
-  `db:generate:prod` + `db:push:prod` + seed → redeploy → `/api/health` deve
-  retornar `{"status":"ok","db":"ok","certifications":1,"questions":116}`.
-- **Publicação da v1.4.1** após o reparo (bundle/patch/zip desta leva quando
-  o fundador pedir).
+- **Deploy da v1.5.0** (fundador/GPT local, receita `docs/DEPLOY.md`):
+  Vercel envs → `bun run build:vercel` → Neon `db:generate:prod` +
+  `db:push:prod` + seed (idempotente) → redeploy → `/api/health` deve
+  retornar `{"status":"ok","db":"ok","certifications":1,"questions":300}` e
+  `/manifest.jsonl` deve servir os checksums canônicos (linha 1 =
+  `sha256:95e20047…`).
+- **Fase 1 — acender o hub** (passo do mantenedor, fora do repo do app):
+  committar o conteúdo de `public/manifest.jsonl` como `manifestos/RAN.jsonl`
+  no repo do hub; o deploy seguinte acende 300 páginas PT/EN em
+  `noos.study/{lang}/q/{ID}` + redirects de alias + sitemap.
+- **Fase 2 — fatia 5 completa**: setar `NEXT_PUBLIC_NOOS_HUB_URL=https://noos.study`
+  nas envs da Vercel junto/com o hub aceso (badge e Comunidade apontam ao
+  canônico vivo).
 
 ## Fechado (entregue)
 
+- **v1.5.0** (2026-10-27, spec `spec-v1.5.0-axon-convergence.md`):
+  Convergência Axon — fatias 2 (IDs via `generateId`/`validateId` com
+  `reason`), 3 (`computeChecksum` canônico + `contentVersion` opcional) e 4
+  (manifesto validado pelo parser do hub, tolerância zero, no CI) adotadas
+  sobre o pacote `@ironidesflj/axon@0.2.1`; deep-link com guard de ID;
+  bump v1.5.0 + popup da expansão (300 questões, 6 simulados) + README em
+  inglês.
+- **v1.4.1** (2026-10-26): os 4 ajustes de UI do fundador — pills preenchidas,
+  fundo colorido sutil, bloco de explicação preenchido, 15/16px no lugar da
+  escala 20–32px.
 - **v1.4.0** (2026-10-26): patch de design v1.1 aplicado — raio 6/10/14/20 +
   sombras, explicação na revisão, barras de sessão presas, controles na
   barra, shuffle por tentativa, multi-cert com "em breve", % colorida por
   domínio. O contrato de fonte 20–32px foi depois revisto pelo fundador
   ("ainda gigante") e substituído por 15/16px na v1.4.1.
+- **Reparo de produção + publicação da expansão**: deploy e build verificados;
+  produção saudável, mas o seed Neon ainda está pendente. A API permanece em
+  `questions: 116` até essa operação.
+- **Adoção do estado canônico** (Task 11): sandbox byte-equivalente ao repo
+  do fundador (v1.4.1 + banco 300 + CI gate + Axon pin).
 
 ## Pendente (próximos passos naturais)
 
@@ -62,8 +78,8 @@ resolvem com CSS"). Diagnóstico pós-auditoria e estado:
   cronometrado; exige spec própria com decisão do fundador sobre como o tempo
   pausado conta. Reabrir quando houver decisão.
 - **Glossário bilíngue**: fora do escopo do patch de identidade; entra no V2.
-- **Domínio canônico `noos.study`**: registrar e trocar o fallback dos
-  deep-links (`NEXT_PUBLIC_NOOS_HUB_URL`).
+- ~~**Domínio canônico `noos.study`**~~: resolvido como tarefa viva — o domínio
+  existe e o hub está no ar; resta o flip de env (Autorizado, Fase 2).
 
 ## Dívidas conhecidas (impacto · motivo de aceitação · condição de reabertura)
 
@@ -80,7 +96,11 @@ resolvem com CSS"). Diagnóstico pós-auditoria e estado:
    Apple-touch, arte clara/escura, textos PT/EN, nenhuma métrica inventada).
 2. **Campo extra `db:"ok"` no `/api/health`** (divergência literal do contrato
    documentado; superconjunto inofensivo) — documentado no DEPLOY.md.
-3. **`noos.study` ainda não existe** (deep-links no fallback vercel.app).
+3. **Flip do domínio canônico pendente**: `noos.study` já está no ar (hub
+   v10.2 + registry), mas o app continua apontando ao fallback até o env
+   `NEXT_PUBLIC_NOOS_HUB_URL` ser setado na Vercel (Fase 2, acima) — por
+   decisão de sequência: não acender link que 404 antes do primeiro
+   manifesto no hub.
 
 ## Fora de escopo (nunca)
 
