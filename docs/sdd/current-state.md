@@ -1,24 +1,24 @@
 # current-state.md — estado verificado
 
-Última atualização: **2026-10-26 · v1.4.1** (lote: os 4 ajustes de UI
-pedidos pelo fundador comparando a v1.3.1 × app antigo — pills preenchidas,
-fundo colorido sutil no certo/errado, bloco de explicação preenchido, fim
-da letra gigante; spec: `spec-v1.4.1-founder-feedback.md`). Lotes
-anteriores: v1.3.0 = identidade visual; v1.3.1 = 1º lote de feedback;
-v1.4.0 = patch de design v1.1 sobre os 7 feedbacks.
+Última atualização: **2026-10-27 · v1.5.0** (lote: Convergência Axon — fatias
+2, 3 e 4 do dossiê adotadas sobre o pacote `@ironidesflj/axon` + bump de
+versão anunciando a expansão do banco; spec:
+`spec-v1.5.0-axon-convergence.md`). Lotes anteriores: v1.3.x = identidade
+visual; v1.4.0 = patch de design v1.1; v1.4.1 = 4 ajustes de UI do fundador.
 
 ## Versão e artefatos
 
-- App: **v1.4.1** (`src/lib/version.ts` = fonte única; `package.json`,
+- App: **v1.5.0** (`src/lib/version.ts` = fonte única; `package.json`,
   `public/sw.js`, `public/offline.html` no mesmo lote).
-- Banco: 116 questões (S1=8, S2=24, S3=25, S4=18, S5=12, S6=12, S7=17),
+- Banco: 300 questões (S1=19, S2=59, S3=69, S4=43, S5=31, S6=33, S7=46),
   1 certificação (Databricks Data Engineer Associate, blueprint May/2026),
-  IDs públicas congeladas RAN-DBDEA-00001..00116. **Sem mudanças de schema
-  e de questões** neste lote (apenas apresentação).
+  IDs públicas congeladas RAN-DBDEA-00001..00300, 6 simulados disjuntos.
+  **Sem mudanças de schema e de questões** na v1.5.0 (só contrato/versão).
 - PWA: manifest (tema papel #f7fbf9), sw.js stale-while-revalidate
-  (`ranvier-v1.4.1`), offline.html, ícones com monograma R.
-- `/api/health`: `{"status":"ok","db":"ok","certifications":1,"questions":116}`
-  confirmado em produção e no sandbox.
+  (`ranvier-v1.5.0`), offline.html, ícones com monograma R.
+- `/api/health`: produção está saudável (`status: ok`, `db: ok`), mas ainda
+  retorna `questions: 116` até o seed v4 ser executado no Neon. O sandbox
+  local já valida as 300 questões.
 
 ## Auditoria do banco — data_fixed_v2
 
@@ -29,9 +29,9 @@ v1.4.0 = patch de design v1.1 sobre os 7 feedbacks.
   COPY INTO, funções Spark SQL e JDBC; normalização de metadados; e
   reequilíbrio das alternativas em 76 questões, sem alterar gabaritos,
   enunciados, explicações, referências ou dificuldades.
-- A validação local confirmou 116 questões, 0 erros e 0 warnings. A expansão
-  recomendada para aproximadamente 300 questões é roadmap, não bloqueio da
-  versão atual.
+- A validação local confirmou 116 questões, 0 erros e 0 warnings (à época do
+  pacote v2; a expansão para 300 questões foi entregue e publicada — ver
+  "Verificado na expansão DBDEA v4"; a produção ainda aguarda o seed Neon.
 
 ## Documentação pública sincronizada
 
@@ -43,12 +43,41 @@ v1.4.0 = patch de design v1.1 sobre os 7 feedbacks.
 
 ## Consumidores do Axon
 
-- `@ironidesflj/axon@0.2.1` está linkado com pin exato no `package.json` e no
-  lockfile. Esta primeira fatia formaliza o Ranvier como consumidor do pacote;
-  validação de IDs, checksum e manifesto ainda será adotada separadamente,
-  atrás de feature flags, sem alterar o acervo nesta etapa.
+- `@ironidesflj/axon@0.2.1` linkado com pin exato (package.json + lockfile).
+  **Fatias adotadas (v1.5.0, 2026-10-27):** 1 (link, inerte por desenho),
+  2 (IDs na escrita — `generateId`/`validateId` com `reason` no log),
+  3 (checksum canônico `computeChecksum` + `contentVersion` opcional no
+  seed) e 4 (manifesto validado pelo parser do hub `parseManifest` +
+  `verifyChecksum`, tolerância zero, no `ci.yml` e no `manifest.yml`).
+  Fatia 5: formato de deep-link adotado (ID no rodapé + botão Comunidade +
+  badge); flip para o domínio canônico pendente de env
+  (`NEXT_PUBLIC_NOOS_HUB_URL=https://noos.study`) na Vercel.
+- Estado vivo do ecossistema: `docs/sdd/fatias-dossie.md` (instantâneo
+  trazido pelo fundador, atualizado nesta adoção).
 
-## Verificado na v1.4.1 (evidência no worklog Task 10)
+## Verificado na v1.5.0 (evidência no worklog Task 13)
+
+- **Checksums canônicos**: `public/manifest.jsonl` regenerado com
+  `computeChecksum` do pacote (array canônico `[statement, options, answer,
+  reference]`) — antes da correção, a auditoria provou 300/300 divergentes
+  contra o contrato (algoritmo local serializava objeto). Validado:
+  `parseManifest` 300 ok / 0 rejeitadas / 0 divergências; checksum linha 1 =
+  `sha256:95e20047…`.
+- **CI com o parser do hub**: `scripts/validate-manifest.ts` (novo) roda no
+  `ci.yml` e no `manifest.yml`; o gerador se auto-valida antes de escrever
+  (tolerância zero para quem publica). `schema.ts` zod local removido.
+- **`version` do manifesto real**: campo opcional `contentVersion` no
+  `SeedQuestion` (ausente = 1) — correção de typo em questão publicada bumpa
+  o campo, a ID nunca muda.
+- **Deep-link com guard**: `discussionUrl` valida a ID via `validateId`
+  (constitution §3 — falha em render, não no clique do aluno).
+- **v1.5.0 + popup** anunciando a expansão (300 questões, 6 simulados, ID
+  pública estável), PT/EN, 1× por versão; README reescrito em inglês.
+- QA navegador: popup EN+PT, estudo até graduado, ID no rodapé, Comunidade →
+  `{base}/{lang}/q/{ID}`, badge → home, zero erros de console, 375 sem
+  overflow; lint/tsc/validate/gate/red-team verdes.
+
+## Verificado na v1.4.1 (mantido)
 
 - **Fim da letra gigante**: pergunta e alternativas voltaram ao tamanho de
   leitura do app antigo — stem Newsreader 15px@<640 / 16px ≥640 (medido no
@@ -145,7 +174,10 @@ v1.4.0 = patch de design v1.1 sobre os 7 feedbacks.
 3. Exame retomado conserva o deadline do servidor (correto para prova
    cronometrada).
 4. Item "Revisão" do rail sem estado ativo (ação transitória — conhecido).
-5. Deep-links usam o fallback `noos-hub.vercel.app` até `noos.study` existir.
+5. Deep-links usam o fallback `noos-hub.vercel.app` até o env
+   `NEXT_PUBLIC_NOOS_HUB_URL=https://noos.study` ser setado na Vercel (o hub
+   canônico já está no ar; o flip acompanha a Fase 1 — primeiro manifesto
+   commitado — para não acender link que 404).
 6. Multi-cert com UMA certificação disponível: o seletor existe e a
    arquitetura está pronta, mas trocar de fato só será exercitável quando a
    segunda certificação entrar em produção (guarda de confirmação dormente).
@@ -155,6 +187,8 @@ v1.4.0 = patch de design v1.1 sobre os 7 feedbacks.
 
 ## Onde estão as evidências
 
-- `worklog.md` (registro vivo, Task IDs 0–9) — diffs, comandos, medições.
+- `worklog.md` (registro vivo, Task IDs 0–13) — diffs, comandos, medições.
 - `download/ranvier-v1.3.1.*` (bundle/patch/zip) — artefatos da leva anterior
-  (a leva v1.4.0 gera os próprios artefatos quando o fundador pedir).
+  (cada leva gera os próprios artefatos quando o fundador pedir).
+- `docs/sdd/fatias-dossie.md` — instantâneo do ecossistema Noos trazido pelo
+  fundador (27/out/2026), atualizado nas adoções de fatia.
