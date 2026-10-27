@@ -1,23 +1,28 @@
 # current-state.md — estado verificado
 
-Última atualização: **2026-10-27 · v1.5.0** (lote: Convergência Axon — fatias
-2, 3 e 4 do dossiê adotadas sobre o pacote `@ironidesflj/axon` + bump de
-versão anunciando a expansão do banco; spec:
-`spec-v1.5.0-axon-convergence.md`). Lotes anteriores: v1.3.x = identidade
+Última atualização: **2026-10-27 · v1.5.1** (lote: OG/social preview —
+fechamento da dívida #1; spec: `spec-v1.5.1-og-preview.md`). Lote anterior:
+v1.5.0 = Convergência Axon (fatias 2, 3 e 4 do dossiê sobre o pacote
+`@ironidesflj/axon` + bump anunciando a expansão do banco; spec:
+`spec-v1.5.0-axon-convergence.md`). Lotes mais antigos: v1.3.x = identidade
 visual; v1.4.0 = patch de design v1.1; v1.4.1 = 4 ajustes de UI do fundador.
 
 ## Versão e artefatos
 
-- App: **v1.5.0** (`src/lib/version.ts` = fonte única; `package.json`,
+- App: **v1.5.1** (`src/lib/version.ts` = fonte única; `package.json`,
   `public/sw.js`, `public/offline.html` no mesmo lote).
 - Banco: 300 questões (S1=19, S2=59, S3=69, S4=43, S5=31, S6=33, S7=46),
   1 certificação (Databricks Data Engineer Associate, blueprint May/2026),
   IDs públicas congeladas RAN-DBDEA-00001..00300, 6 simulados disjuntos.
-  **Sem mudanças de schema e de questões** na v1.5.0 (só contrato/versão).
+  **Sem mudanças de schema e de questões** na v1.5.0/v1.5.1 (só
+  contrato/versão/metadados).
 - PWA: manifest (tema papel #f7fbf9), sw.js stale-while-revalidate
-  (`ranvier-v1.5.0`), offline.html, ícones com monograma R.
-- `/api/health`: produção confirmada saudável com
-  `{"status":"ok","db":"ok","certifications":1,"questions":300}`.
+  (`ranvier-v1.5.1`), offline.html, ícones com monograma R.
+- Social preview (v1.5.1): og:image 1200×630 "bilhete de exame"
+  (`public/og/`, gerada por `bun run og`), twitter summary_large_image,
+  canonical + og:locale pt_BR/en_US no `layout.tsx`.
+- `/api/health`: `{"status":"ok","db":"ok","certifications":1,"questions":300}`
+  confirmado em produção e no sandbox.
 
 ## Auditoria do banco — data_fixed_v2
 
@@ -30,8 +35,7 @@ visual; v1.4.0 = patch de design v1.1; v1.4.1 = 4 ajustes de UI do fundador.
   enunciados, explicações, referências ou dificuldades.
 - A validação local confirmou 116 questões, 0 erros e 0 warnings (à época do
   pacote v2; a expansão para 300 questões foi entregue e publicada — ver
-  "Verificado na expansão DBDEA v4"; produção e sandbox estão alinhados em
-  300 questões.
+  "Verificado na expansão DBDEA v4" e produção `questions: 300`).
 
 ## Documentação pública sincronizada
 
@@ -54,6 +58,26 @@ visual; v1.4.0 = patch de design v1.1; v1.4.1 = 4 ajustes de UI do fundador.
   (`NEXT_PUBLIC_NOOS_HUB_URL=https://noos.study`) na Vercel.
 - Estado vivo do ecossistema: `docs/sdd/fatias-dossie.md` (instantâneo
   trazido pelo fundador, atualizado nesta adoção).
+
+## Verificado na v1.5.1 (evidência no worklog Task 14)
+
+- **v1.5.0 publicada pelo fundador**: GitHub + Vercel `READY`; produção
+  conferida ao vivo — `/api/health` = `questions:300` e `/manifest.jsonl`
+  byte-idêntico ao do sandbox (300 linhas, checksums canônicos, linha 1
+  `sha256:95e20047…`); `validate:manifest` no sandbox = 300 válidas / 0
+  rejeitadas / 0 divergentes sob o parser do hub.
+- **OG/social preview** (dívida #1 fechada): arte clara + gêmea escura
+  auditadas visualmente (VLM) — textos legíveis, tipografia de marca na
+  renderização, sem sobreposição/corte; `<head>` servido com og:image
+  absoluta (+width/height/alt), og:locale pt_BR + en_US, twitter card
+  summary_large_image, canonical; `/og/og-image.png` 200 (image/png,
+  72.396 bytes).
+- **Popup v1.5.1** (1 item — cartão de prévia ao compartilhar), PT/EN, 1×
+  por versão (localStorage `1.5.1`), não reaparece após reload.
+- QA navegador: fluxo do simulado intacto (Questão 1 de 45, resposta, próxima,
+  saída com confirmação), mobile 375 sem overflow, zero erros de
+  console/página; lint 0 · tsc 0 · validate:manifest 300/0/0 ·
+  validate:questions 300 · ci:gate --strict PASS.
 
 ## Verificado na v1.5.0 (evidência no worklog Task 13)
 
@@ -187,7 +211,7 @@ visual; v1.4.0 = patch de design v1.1; v1.4.1 = 4 ajustes de UI do fundador.
 
 ## Onde estão as evidências
 
-- `worklog.md` (registro vivo, Task IDs 0–13) — diffs, comandos, medições.
+- `worklog.md` (registro vivo, Task IDs 0–14) — diffs, comandos, medições.
 - `download/ranvier-v1.3.1.*` (bundle/patch/zip) — artefatos da leva anterior
   (cada leva gera os próprios artefatos quando o fundador pedir).
 - `docs/sdd/fatias-dossie.md` — instantâneo do ecossistema Noos trazido pelo
