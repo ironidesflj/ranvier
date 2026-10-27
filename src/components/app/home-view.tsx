@@ -36,9 +36,16 @@ import { SOON_LINE_CODES } from "@/data/soon-certs";
  * A certificação exibida é a ATIVA (multi-cert — patch v1.1 §9).
  */
 export function HomeView() {
-  const { t, f, lang } = useLang();
+  const { t, f, lang, langReady } = useLang();
   const { navigate, certSlug } = useAppStore();
-  const { data, isLoading } = useQuery({ queryKey: ["catalog", lang], queryFn: () => api.catalog(lang) });
+  /* Catalog: espera o idioma ser resolvido (perf: 1 chamada, não 2) e aceita
+     cache de 24h — o conteúdo só muda quando o banco muda (deploy/reseed). */
+  const { data, isPending } = useQuery({
+    queryKey: ["catalog", lang],
+    queryFn: () => api.catalog(lang),
+    enabled: langReady,
+    staleTime: 24 * 60 * 60 * 1000,
+  });
   const cert = data?.certifications.find((c) => c.slug === certSlug) ?? data?.certifications[0] ?? null;
   /* Lista de tentativas: sempre fresca ao montar a landing — o botão
      "Continuar" do bilhete depende dela e o cache stale escondia sessões
@@ -123,7 +130,7 @@ export function HomeView() {
             <p className="font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
               {t.home.ticket.label}
             </p>
-            {isLoading || !cert ? (
+            {isPending || !cert ? (
               <div className="mt-3 space-y-3">
                 <Skeleton className="h-7 w-4/5" />
                 <Skeleton className="h-4 w-2/3" />
@@ -204,7 +211,7 @@ export function HomeView() {
       <section className="mx-auto max-w-6xl px-4 py-10">
         <h2 className="mb-1 font-display text-2xl font-light tracking-[-0.02em]">{t.home.domainsTitle}</h2>
         <p className="mb-6 text-sm text-muted-foreground">{t.home.domainsSubtitle}</p>
-        {isLoading ? (
+        {isPending ? (
           <div className="max-w-3xl space-y-3">
             {Array.from({ length: 5 }).map((_, i) => (
               <Skeleton key={i} className="h-10 w-full" />

@@ -29,11 +29,13 @@ import { QueryError } from "@/components/app/query-error";
 import { EXAM_DISTRIBUTION } from "@/data/certifications";
 
 export function CertView() {
-  const { t, lang } = useLang();
+  const { t, lang, langReady } = useLang();
   const { navigate, certSlug } = useAppStore();
-  const { data, isLoading, isError, isFetching, refetch, error } = useQuery({
+  const { data, isPending, isError, isFetching, refetch, error } = useQuery({
     queryKey: ["catalog", lang],
     queryFn: () => api.catalog(lang),
+    enabled: langReady,
+    staleTime: 24 * 60 * 60 * 1000,
     retry: 1,
   });
   /* Certificação ATIVA (multi-cert — patch v1.1 §9). */
@@ -48,7 +50,7 @@ export function CertView() {
     onError: () => toast.error(t.toast.error),
   });
 
-  if (isLoading) {
+  if (isPending) {
     return (
       <div className="mx-auto w-full max-w-6xl space-y-4 px-4 py-10">
         <Skeleton className="h-10 w-2/3" />

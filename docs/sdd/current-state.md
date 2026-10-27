@@ -1,26 +1,29 @@
 # current-state.md — estado verificado
 
-Última atualização: **2026-10-27 · v1.5.1** (lote: OG/social preview —
-fechamento da dívida #1; spec: `spec-v1.5.1-og-preview.md`). Lote anterior:
-v1.5.0 = Convergência Axon (fatias 2, 3 e 4 do dossiê sobre o pacote
-`@ironidesflj/axon` + bump anunciando a expansão do banco; spec:
-`spec-v1.5.0-axon-convergence.md`). Lotes mais antigos: v1.3.x = identidade
-visual; v1.4.0 = patch de design v1.1; v1.4.1 = 4 ajustes de UI do fundador.
+Última atualização: **2026-10-27 · v1.6.0** (lote: transparência de
+privacidade + performance de carregamento + prep.ts portátil; spec:
+`spec-v1.6.0-privacy-performance.md`). Lote anterior: v1.5.1 = OG/social
+preview (não publicada — embarcou na v1.6.0); v1.5.0 = Convergência Axon
+(fatias 2, 3 e 4 sobre o pacote `@ironidesflj/axon`, publicada). Lotes mais
+antigos: v1.3.x = identidade visual; v1.4.0 = patch de design v1.1; v1.4.1 =
+4 ajustes de UI do fundador.
 
 ## Versão e artefatos
 
-- App: **v1.5.1** (`src/lib/version.ts` = fonte única; `package.json`,
+- App: **v1.6.0** (`src/lib/version.ts` = fonte única; `package.json`,
   `public/sw.js`, `public/offline.html` no mesmo lote).
 - Banco: 300 questões (S1=19, S2=59, S3=69, S4=43, S5=31, S6=33, S7=46),
   1 certificação (Databricks Data Engineer Associate, blueprint May/2026),
   IDs públicas congeladas RAN-DBDEA-00001..00300, 6 simulados disjuntos.
-  **Sem mudanças de schema e de questões** na v1.5.0/v1.5.1 (só
-  contrato/versão/metadados).
+  **Sem mudanças de schema e de questões** na v1.5.0/v1.5.1/v1.6.0 (só
+  contrato/versão/metadados/UI).
 - PWA: manifest (tema papel #f7fbf9), sw.js stale-while-revalidate
-  (`ranvier-v1.5.1`), offline.html, ícones com monograma R.
-- Social preview (v1.5.1): og:image 1200×630 "bilhete de exame"
+  (`ranvier-v1.6.0`), offline.html, ícones com monograma R.
+- Social preview (v1.5.1→v1.6.0): og:image 1200×630 "bilhete de exame"
   (`public/og/`, gerada por `bun run og`), twitter summary_large_image,
   canonical + og:locale pt_BR/en_US no `layout.tsx`.
+- Privacidade no app (v1.6.0): seção "Privacidade e segurança" no Sobre (5
+  fatos auditados) + reasseguro no modal de login com link para o Sobre.
 - `/api/health`: `{"status":"ok","db":"ok","certifications":1,"questions":300}`
   confirmado em produção e no sandbox.
 
@@ -58,6 +61,30 @@ visual; v1.4.0 = patch de design v1.1; v1.4.1 = 4 ajustes de UI do fundador.
   (`NEXT_PUBLIC_NOOS_HUB_URL=https://noos.study`) na Vercel.
 - Estado vivo do ecossistema: `docs/sdd/fatias-dossie.md` (instantâneo
   trazido pelo fundador, atualizado nesta adoção).
+
+## Verificado na v1.6.0 (evidência no worklog Task 16)
+
+- **Privacidade no app**: seção no Sobre com 5/5 pontos renderizados (EN e
+  PT, DOM conferido) — só fatos auditados (hash scrypt ilegível, dados
+  mínimos, zero terceiros/ads hoje, anônimo local-first, exclusão LGPD com
+  cascade); reasseguro no modal de login + link que navega ao Sobre (`#/sobre`).
+- **Performance**: **1 única chamada de catalog** na carga limpa (contada no
+  log do servidor — antes eram 2, pt+en); `langReady` gate + staleTime 24h
+  nos 4 consumidores; `/api/catalog` responde com
+  `cache-control: public, s-maxage=300, stale-while-revalidate=86400`.
+- **prep.ts portátil** (fix do fundador adotado e melhorado): raiz via
+  `import.meta.dir`, banco canônico `src/data` (data_fixed não existe mais no
+  repo), url_check.tsv opcional, expansion auto-criada; allowlist regenerada
+  (76 URLs, preservação intacta) e **gate PASS strict depois da regeneração**.
+- **Popup v1.6.0** (3 itens — OG + privacidade + velocidade), PT/EN, 1× por
+  versão (localStorage `1.6.0`).
+- Incidente sandbox: SQLite local zerado às 16:18 (fora do lote; nenhuma
+  operação do lote toca DB) → reseed idempotente → health 300 → POST
+  attempts 201 → simulado re-verificado. Produção (Neon) intocada.
+- QA navegador: simulado "Questão 1 de 45" (`#/simulado/{id}`), mobile 375
+  sem overflow, zero erros de console/página; lint 0 · tsc 0 ·
+  validate:manifest 300/0/0 · validate:questions 300 · ci:gate --strict
+  PASS · red team 17/17.
 
 ## Verificado na v1.5.1 (evidência no worklog Task 14)
 
@@ -211,7 +238,7 @@ visual; v1.4.0 = patch de design v1.1; v1.4.1 = 4 ajustes de UI do fundador.
 
 ## Onde estão as evidências
 
-- `worklog.md` (registro vivo, Task IDs 0–14) — diffs, comandos, medições.
+- `worklog.md` (registro vivo, Task IDs 0–16) — diffs, comandos, medições.
 - `download/ranvier-v1.3.1.*` (bundle/patch/zip) — artefatos da leva anterior
   (cada leva gera os próprios artefatos quando o fundador pedir).
 - `docs/sdd/fatias-dossie.md` — instantâneo do ecossistema Noos trazido pelo

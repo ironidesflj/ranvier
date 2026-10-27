@@ -322,6 +322,15 @@ export const dict = {
         "Marcas e nomes de produtos pertencem aos seus respectivos detentores e são usados apenas de forma referencial.",
       ],
       authorTitle: "Autor",
+      privacyTitle: "Privacidade e segurança",
+      privacyDesc: "Como o Ranvier trata seus dados — em linguagem clara, sem asteriscos.",
+      privacyPoints: [
+        "Sua senha nunca fica em texto: ela vira um hash salgado (scrypt) que nem a manutenção do projeto consegue ler ou reverter.",
+        "A conta pede só e-mail — o nome é opcional — e guarda apenas o seu progresso de estudo. Nada além disso.",
+        "Sem rastreadores, sem analytics, sem anúncios hoje. Nenhum dado é compartilhado ou vendido — o progresso sincronizado fica apenas no banco do próprio app.",
+        "Tudo funciona sem conta: no modo anônimo, o progresso fica no seu navegador. A conta existe só para sincronizar entre dispositivos.",
+        "LGPD: você pode excluir sua conta a qualquer momento em Ajustes — a exclusão apaga tentativas e respostas junto, sem deixar dados órfãos.",
+      ],
       authorName: "Ironides Junior",
       authorRole: "Idealizador e mantenedor",
       authorBio: "Engenheiro de dados entusiasta de certificações e de educação gratuita de qualidade.",
@@ -359,6 +368,8 @@ export const dict = {
       sessionNote: "Sua sessão usa cookie seguro httpOnly.",
       authErrorGeneric: "Não foi possível autenticar. Verifique os dados e tente novamente.",
       anonNote: "Login é opcional: sem conta, tudo funciona e o progresso fica salvo neste navegador. Com uma conta gratuita, o progresso sincroniza entre dispositivos — só e-mail e senha, sem rastreamento.",
+      privacyNote: "Sua senha vira um hash que ninguém consegue ler — nem a manutenção do projeto. Sem terceiros, sem venda de dados.",
+      privacyLink: "Saiba como protegemos seus dados",
     },
     /* Aviso de novidades — 1× por usuário a cada versão (localStorage). */
     whatsNew: {
@@ -367,6 +378,8 @@ export const dict = {
       subtitle: "Avisamos uma única vez por atualização — depois, é só estudar.",
       items: [
         "Compartilhar ficou melhor: o link do Ranvier agora abre com cartão de prévia — imagem, título e resumo — no WhatsApp, LinkedIn e outras plataformas.",
+        "Transparência de privacidade: uma seção nova no Sobre explica, em linguagem clara, como seus dados são tratados — senha como hash ilegível, zero terceiros, exclusão a qualquer momento.",
+        "Carregamento mais rápido: fim da chamada duplicada de catálogo, cache de 24h no app e cache de borda no servidor.",
       ],
       close: "Entendi",
     },
@@ -756,6 +769,15 @@ export const dict = {
         "Trademarks and product names belong to their respective owners and are used referentially only.",
       ],
       authorTitle: "Author",
+      privacyTitle: "Privacy and security",
+      privacyDesc: "How Ranvier handles your data — in plain language, no fine print.",
+      privacyPoints: [
+        "Your password is never stored in plain text — it becomes a salted scrypt hash that not even the project maintainer can read or reverse.",
+        "An account asks for your email only — the name field is optional — and stores just your study progress. Nothing else.",
+        "No trackers, no analytics, no ads today. No data is shared or sold — synced progress lives only in the app's own database.",
+        "Everything works without an account: in anonymous mode your progress stays in your browser. The account exists only to sync across devices.",
+        "LGPD: you can delete your account at any time in Settings — deletion removes your attempts and answers too, leaving no orphan data.",
+      ],
       authorName: "Ironides Junior",
       authorRole: "Founder and maintainer",
       authorBio: "Data engineer passionate about certifications and free, quality education.",
@@ -793,6 +815,8 @@ export const dict = {
       sessionNote: "Your session uses a secure httpOnly cookie.",
       authErrorGeneric: "Could not authenticate. Check your credentials and try again.",
       anonNote: "Login is optional: without an account everything works and progress stays saved in this browser. With a free account, progress syncs across devices — email and password only, no tracking.",
+      privacyNote: "Your password becomes a hash nobody can read — not even the project maintainer. No third parties, no data selling.",
+      privacyLink: "See how we protect your data",
     },
     /* Release notes popup — once per user per version (localStorage). */
     whatsNew: {
@@ -801,6 +825,8 @@ export const dict = {
       subtitle: "We show this once per update — then it's back to studying.",
       items: [
         "Sharing got better: the Ranvier link now opens with a preview card — image, title and summary — on WhatsApp, LinkedIn and other platforms.",
+        "Privacy transparency: a new section in About explains, in plain language, how your data is handled — unreadable password hashes, zero third parties, deletion anytime.",
+        "Faster loading: the duplicate catalog call is gone, plus a 24h in-app cache and server-side edge caching.",
       ],
       close: "Got it",
     },

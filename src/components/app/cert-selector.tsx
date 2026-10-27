@@ -51,12 +51,17 @@ function initials(user: { name: string | null; email: string } | null): string {
 }
 
 export function CertSelectorMenu({ variant = "bar" }: { variant?: "bar" | "button" }) {
-  const { t, f, lang } = useLang();
+  const { t, f, lang, langReady } = useLang();
   const { certSlug, setCert, navigate } = useAppStore();
   const queryClient = useQueryClient();
   const [pendingCert, setPendingCert] = useState<{ slug: string; code: string } | null>(null);
 
-  const { data } = useQuery({ queryKey: ["catalog", lang], queryFn: () => api.catalog(lang) });
+  const { data } = useQuery({
+    queryKey: ["catalog", lang],
+    queryFn: () => api.catalog(lang),
+    enabled: langReady,
+    staleTime: 24 * 60 * 60 * 1000,
+  });
   const certs: PublicCertification[] = data?.certifications ?? [];
   const active = certs.find((c) => c.slug === certSlug) ?? certs[0] ?? null;
 

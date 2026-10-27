@@ -7,4 +7,4 @@
  * The Whats-new dialog keys off this value: it shows once per user per
  * version change (localStorage "ranvier:whatsnew:seen").
  */
-export const APP_VERSION = "1.5.1";
+export const APP_VERSION = "1.6.0";

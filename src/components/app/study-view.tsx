@@ -34,13 +34,15 @@ type Phase = "config" | "session" | "summary";
  * CANÔNICO no protocolo; a UI traduz canônico ↔ exibido.
  */
 export function StudyView() {
-  const { t, f, lang } = useLang();
+  const { t, f, lang, langReady } = useLang();
   const { navigate, studyDomainCode, studyQuestionIds, certSlug } = useAppStore();
   const queryClient = useQueryClient();
 
-  const { data, isLoading, isError, isFetching, refetch, error } = useQuery({
+  const { data, isPending, isError, isFetching, refetch, error } = useQuery({
     queryKey: ["catalog", lang],
     queryFn: () => api.catalog(lang),
+    enabled: langReady,
+    staleTime: 24 * 60 * 60 * 1000,
     retry: 1,
   });
   /* Certificação ATIVA (multi-cert — patch v1.1 §9), com fallback para a
@@ -157,7 +159,7 @@ export function StudyView() {
           <p className="mt-1 text-sm text-muted-foreground">{t.study.subtitle}</p>
         </div>
 
-        {isLoading ? (
+        {isPending ? (
           <div className="space-y-4">
             <Skeleton className="h-40 w-full" />
             <Skeleton className="h-20 w-full" />

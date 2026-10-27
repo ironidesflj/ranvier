@@ -3,17 +3,19 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Loader2, LogIn, UserPlus, ShieldCheck } from "lucide-react";
+import { Loader2, LogIn, Lock, UserPlus, ShieldCheck } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useLang } from "@/components/app/language-provider";
+import { useAppStore } from "@/store/app-store";
 import { api, ApiError } from "@/lib/api-client";
 
 export function AuthModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { t, f } = useLang();
+  const { navigate } = useAppStore();
   const queryClient = useQueryClient();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -150,6 +152,27 @@ export function AuthModal({ open, onClose }: { open: boolean; onClose: () => voi
             </form>
           </TabsContent>
         </Tabs>
+
+        {/* Reasseguro de privacidade no ponto exato da decisão (pedido do
+            fundador 2026-10-27) — fatos auditados, link para a seção completa. */}
+        <div className="mt-4 border-t pt-3">
+          <p className="flex items-start gap-2 text-xs leading-relaxed text-muted-foreground">
+            <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--noos-success)]" aria-hidden />
+            <span>
+              {t.auth.privacyNote}{" "}
+              <button
+                type="button"
+                className="font-medium underline underline-offset-2 transition-colors hover:text-foreground"
+                onClick={() => {
+                  onClose();
+                  navigate("about");
+                }}
+              >
+                {t.auth.privacyLink}
+              </button>
+            </span>
+          </p>
+        </div>
       </DialogContent>
     </Dialog>
   );

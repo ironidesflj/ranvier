@@ -1,0 +1,124 @@
+{
+  "verdict": "PASS",
+  "strict": true,
+  "baseDir": "/home/z/my-project/src/data",
+  "generatedAt": "2026-10-27T19:26:12.408Z",
+  "stats": {
+    "totalQuestions": 300,
+    "totalRegistry": 300,
+    "perDomain": {
+      "1": {
+        "count": 19,
+        "weight": 6
+      },
+      "2": {
+        "count": 59,
+        "weight": 21
+      },
+      "3": {
+        "count": 69,
+        "weight": 22
+      },
+      "4": {
+        "count": 43,
+        "weight": 16
+      },
+      "5": {
+        "count": 31,
+        "weight": 10
+      },
+      "6": {
+        "count": 33,
+        "weight": 10
+      },
+      "7": {
+        "count": 46,
+        "weight": 15
+      }
+    },
+    "difficulty": {
+      "EASY": 74,
+      "MEDIUM": 161,
+      "HARD": 65
+    },
+    "correctIndex": {
+      "0": 84,
+      "1": 73,
+      "2": 75,
+      "3": 68
+    },
+    "lengthBias": {
+      "pctCorrectLongest": 18.3,
+      "correctLongestCount": 55,
+      "meanCorrectLen": 112,
+      "meanDistractorLen": 109,
+      "flaggedQuestions": [
+        "S1-004",
+        "S1-009",
+        "S1-012",
+        "S2-002",
+        "S2-003",
+        "S2-010",
+        "S2-014",
+        "S2-025",
+        "S2-027",
+        "S2-028",
+        "S2-039",
+        "S2-048",
+        "S2-050",
+        "S2-056",
+        "S2-059",
+        "S3-016",
+        "S3-017",
+        "S3-029",
+        "S3-037",
+        "S3-039",
+        "S3-043",
+        "S3-045",
+        "S3-051",
+        "S3-053",
+        "S3-054",
+        "S3-057",
+        "S3-061",
+        "S3-062",
+        "S4-007",
+        "S4-015",
+        "S4-018",
+        "S4-021",
+        "S4-027",
+        "S4-033",
+        "S4-037",
+        "S4-043",
+        "S5-011",
+        "S5-017",
+        "S5-018",
+        "S5-021",
+        "S5-022",
+        "S5-030",
+        "S6-004",
+        "S6-017",
+        "S6-019",
+        "S6-032",
+        "S7-002",
+        "S7-011",
+        "S7-023",
+        "S7-027",
+        "S7-030",
+        "S7-031",
+        "S7-035",
+        "S7-038",
+        "S7-046"
+      ]
+    },
+    "disjointSimuladosPossible": 6,
+    "uniqueUrls": 74,
+    "allowlistSize": 76,
+    "counts": {
+      "CRIT": 0,
+      "ALTO": 0,
+      "MÉDIO": 0,
+      "BAIXO": 0
+    }
+  },
+  "findings": []
+}

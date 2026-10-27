@@ -10,7 +10,13 @@ export async function GET(req: Request) {
   try {
     const lang = (new URL(req.url).searchParams.get("lang") === "en" ? "en" : "pt") as Lang;
     const catalog = await getCatalog(lang);
-    return NextResponse.json({ certifications: catalog });
+    const res = NextResponse.json({ certifications: catalog });
+    // Edge cache (perf fix (b), plan.md): the catalog is a public per-lang
+    // payload that only changes when the question bank is re-seeded (deploy)
+    // — cacheable for 5 min and swappable-while-revalidating for a day. This
+    // takes the ~500ms DB round-trip off the first-hit path for new visitors.
+    res.headers.set("Cache-Control", "public, s-maxage=300, stale-while-revalidate=86400");
+    return res;
   } catch (err) {
     return jsonError(err);
   }

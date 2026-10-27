@@ -2,6 +2,7 @@
 # Política (Security Engineer): só adicione URL após verificação on-line (HTTP 200 + leitura de conteúdo)
 # e registro no log de verificação. URLs do banco de questões DEVEM vir daqui (types.ts: 'verified list').
 # URL	Título exemplo	Fonte
+https://docs.databricks.com/aws/en/admin/system-tables	System tables reference — Databricks Docs	bank
 https://docs.databricks.com/aws/en/admin/system-tables/audit-logs	Audit log system table reference — Databricks Docs	bank
 https://docs.databricks.com/aws/en/archive/connectors/jdbc	Query databases using JDBC — Databricks Docs	bank
 https://docs.databricks.com/aws/en/compute	Compute — Databricks Docs	bank
@@ -10,10 +11,10 @@ https://docs.databricks.com/aws/en/compute/configure	Configure clusters — Data
 https://docs.databricks.com/aws/en/compute/photon	Photon — Databricks Docs	bank
 https://docs.databricks.com/aws/en/compute/sql-warehouse/warehouse-behavior	SQL warehouse sizing, scaling, and queuing behavior — Databricks Docs	bank
 https://docs.databricks.com/aws/en/connect/external-systems/jdbc	(verificada na auditoria v1)	url_check
-https://docs.databricks.com/aws/en/connect/streaming/kafka/	Connect to Apache Kafka — Databricks Docs	bank
+https://docs.databricks.com/aws/en/connect/streaming/kafka/	Structured Streaming from Kafka — Databricks Docs	bank
 https://docs.databricks.com/aws/en/data-engineering/batch-vs-streaming	Batch vs. streaming data processing — Databricks Docs	bank
 https://docs.databricks.com/aws/en/data-governance/unity-catalog/	What is Unity Catalog? — Databricks Docs	bank
-https://docs.databricks.com/aws/en/data-governance/unity-catalog/abac/	Attribute-based access control in Unity Catalog — Databricks Docs	bank
+https://docs.databricks.com/aws/en/data-governance/unity-catalog/abac/	Attribute-based access control — Databricks Docs	bank
 https://docs.databricks.com/aws/en/data-governance/unity-catalog/abac/abac-vs-rls-cm	When to use ABAC vs table-level row filters and column masks — Databricks Docs	bank
 https://docs.databricks.com/aws/en/data-governance/unity-catalog/filters-and-masks/	Row filters and column masks — Databricks Docs	bank
 https://docs.databricks.com/aws/en/data-governance/unity-catalog/manage-privileges/	Manage privileges in Unity Catalog — Databricks Docs	bank
@@ -40,7 +41,8 @@ https://docs.databricks.com/aws/en/jobs/configure-job	Configure and edit Lakeflo
 https://docs.databricks.com/aws/en/jobs/configure-task	Configure and edit tasks in Lakeflow Jobs — Databricks Docs	bank
 https://docs.databricks.com/aws/en/jobs/control-flow	Control the flow of tasks within Lakeflow Jobs — Databricks Docs	bank
 https://docs.databricks.com/aws/en/jobs/diagnose-job-performance	Diagnose job performance — Databricks Docs	bank
-https://docs.databricks.com/aws/en/jobs/file-arrival-triggers	Trigger jobs when new files arrive — Databricks Docs	bank
+https://docs.databricks.com/aws/en/jobs/dynamic-value-references	Use dynamic value references — Databricks Docs	bank
+https://docs.databricks.com/aws/en/jobs/file-arrival-triggers	Trigger a job when a file arrives — Databricks Docs	bank
 https://docs.databricks.com/aws/en/jobs/monitor	Monitor Lakeflow Jobs — Databricks Docs	bank
 https://docs.databricks.com/aws/en/jobs/notifications	Add notifications on a job — Databricks Docs	bank
 https://docs.databricks.com/aws/en/jobs/privileges	Manage permissions on Lakeflow Jobs — Databricks Docs	bank
@@ -49,7 +51,7 @@ https://docs.databricks.com/aws/en/jobs/task-values	Use task values to pass info
 https://docs.databricks.com/aws/en/jobs/tasks/for-each	Use a For each task to run another task in a loop — Databricks Docs	bank
 https://docs.databricks.com/aws/en/jobs/tasks/if-else	Add branching logic to a job with the If/else task — Databricks Docs	bank
 https://docs.databricks.com/aws/en/jobs/tasks/notebook	Notebook task for jobs — Databricks Docs	bank
-https://docs.databricks.com/aws/en/jobs/trigger-table-update	Trigger jobs when source tables are updated — Databricks Docs	bank
+https://docs.databricks.com/aws/en/jobs/trigger-table-update	Trigger a job when a table updates — Databricks Docs	bank
 https://docs.databricks.com/aws/en/jobs/triggers	Automate jobs with schedules and triggers — Databricks Docs	bank
 https://docs.databricks.com/aws/en/lakehouse/medallion	Medallion lakehouse architecture — Databricks Docs	bank
 https://docs.databricks.com/aws/en/ldp/cdc	The AUTO CDC APIs (Lakeflow Declarative Pipelines) — Databricks Docs	bank
@@ -68,13 +70,11 @@ https://docs.databricks.com/aws/en/spark/latest/spark-sql/language-manual/functi
 https://docs.databricks.com/aws/en/sql/language-manual/sql-ref-functions	Spark SQL built-in functions — Databricks Docs	bank
 https://docs.databricks.com/aws/en/sql/language-manual/sql-ref-syntax-ddl-create-materialized-view	CREATE MATERIALIZED VIEW — Databricks Docs	bank
 https://docs.databricks.com/aws/en/sql/language-manual/sql-ref-syntax-ddl-create-view	CREATE VIEW — Databricks Docs	bank
+https://docs.databricks.com/aws/en/sql/user/queries/performance-insights	Query performance insights — Databricks Docs	bank
+https://docs.databricks.com/aws/en/sql/user/queries/query-history	Query history — Databricks Docs	bank
 https://docs.databricks.com/aws/en/sql/user/queries/query-profile	Query profile — Databricks Docs	bank
 https://docs.databricks.com/aws/en/tables/clustering	Use Liquid Clustering for tables — Databricks Docs	bank
 https://docs.databricks.com/aws/en/tables/constraints	Table constraints — Databricks Docs	bank
 https://docs.databricks.com/aws/en/tables/convert-to-managed	Convert external or foreign Delta Lake tables to Unity Catalog managed tables — Databricks Docs	bank
 https://docs.databricks.com/aws/en/tables/external	Work with external tables — Databricks Docs	bank
-https://docs.databricks.com/aws/en/sql/user/queries/performance-insights	Query performance insights — Databricks Docs	job3-verified
-https://docs.databricks.com/aws/en/sql/user/queries/query-history	Query history — Databricks Docs	job3-verified
-https://docs.databricks.com/aws/en/admin/system-tables	System tables reference — Databricks Docs	job3-verified
-https://docs.databricks.com/aws/en/tables/features/change-data-feed	Use change data feed — Databricks Docs	job3-verified
-https://docs.databricks.com/aws/en/jobs/dynamic-value-references	Use dynamic value references — Databricks Docs	job3-verified
+https://docs.databricks.com/aws/en/tables/features/change-data-feed	Use change data feed — Databricks Docs	bank

@@ -1,0 +1,302 @@
+# STEM DIGEST do banco atual — leia ANTES de redigir novas questões (dedup de conceito)
+# key	difficulty	correctIndex	stem (primeiros 160 chars)
+S1-001	MEDIUM	1	A data engineering team runs a nightly pipeline that reads Delta tables, applies PySpark transformations, and writes a gold table. The pipeline is executed by a
+S1-002	EASY	1	A company currently exports data from its operational systems to Parquet files in cloud object storage. Analysts want to run ad hoc SQL queries over that data, 
+S1-003	EASY	0	A healthcare company is migrating its analytics to the Databricks Data Intelligence Platform. Its security officers need one central place to define who can acc
+S1-004	MEDIUM	0	A two-person data engineering team schedules a nightly Lakeflow Job that runs a PySpark notebook to refresh reporting tables. The team has no cluster administra
+S1-005	MEDIUM	1	A BI team connects Tableau and Power BI to the Databricks workspace over JDBC/ODBC and spends the day running ad hoc SQL queries and dashboards against gold Del
+S1-006	MEDIUM	2	A data engineering team is migrating a legacy Spark application into a Lakeflow Job. One task in the job must run a compiled JAR that the team maintains. The te
+S1-007	HARD	3	A machine learning team works interactively in notebooks, training models on GPU-enabled instances with Databricks Runtime for Machine Learning and several cust
+S1-008	EASY	3	A retail company wants its data quality notebook to run automatically every night at 02:00, to retry the task if it fails, and to email the on-call engineer whe
+S1-009	MEDIUM	0	A fintech runs its Databricks workspace on classic compute, with all-purpose clusters for interactive notebook work and job clusters for nightly Lakeflow Jobs. 
+S1-010	EASY	2	A data engineer created an all-purpose cluster for interactive notebook work on Friday, used it all day, and then forgot to terminate it before leaving. On Mond
+S1-011	MEDIUM	1	A data engineering team is standardizing the environment for a long-lived production pipeline. The tech lead asks everyone to select a Databricks Runtime versio
+S1-012	EASY	0	A data engineering team's nightly Lakeflow Job runs on a classic job cluster that spends five to ten minutes launching before the first task starts. The team is
+S1-013	MEDIUM	2	A BI team is choosing a SQL warehouse for analysts who run ad hoc queries and dashboard refreshes with very uneven traffic: long quiet periods followed by burst
+S1-014	EASY	1	A new analyst asks where each of these artifacts should live in the Databricks workspace: an iterative Python script that will be edited and run cell by cell, a
+S1-015	MEDIUM	3	Finance asks the platform team to break down monthly Databricks compute costs by team and project so that each group can be charged back. The company runs a sin
+S1-016	MEDIUM	0	A platform team must install a native operating system package on every node of every classic cluster in the workspace before notebooks or job tasks run, and ma
+S1-017	MEDIUM	2	A team's latency-sensitive Lakeflow Jobs run on classic job clusters, and every run still loses four to six minutes while cloud instances are acquired and boots
+S1-018	EASY	3	A newly hired data engineer asks how work is divided when a PySpark notebook runs on a multi-node cluster: where the notebook's code and the Spark session live,
+S1-019	EASY	1	A finance analyst reviewing the Databricks invoice asks the platform team what a "DBU" actually is, because the bill is expressed in Databricks Units consumed p
+S2-001	EASY	2	A streaming media company is designing its ingestion layer on the Databricks Data Intelligence Platform. It has three sources: - A legacy billing system that de
+S2-002	EASY	1	A product manager e-mails the data engineering team a weekly CSV export that lives on her laptop. The team needs its contents in a Unity Catalog-governed Delta 
+S2-003	EASY	0	A data engineer schedules this statement as the single task of a nightly Lakeflow Job. The source folder accumulates Parquet files throughout the day: ```sql CO
+S2-004	MEDIUM	3	A team must load JSON booking updates from a Unity Catalog volume with COPY INTO. The producer occasionally adds new fields, so the files do not all share the s
+S2-005	EASY	1	A newly hired data engineer runs the following statement in a workspace where Unity Catalog manages all data access: ```sql COPY INTO main.ops.shipments FROM 'a
+S2-006	EASY	2	A team copies this snippet from an old tutorial to ingest JSON files that keep arriving in a Unity Catalog volume: ```python df = (spark.read .format("cloudFile
+S2-007	MEDIUM	0	An Auto Loader stream that feeds a Unity Catalog-governed Delta table failed in the middle of the night after processing part of the incoming file batch. In the
+S2-008	HARD	3	To reduce storage costs, a cloud administrator applies a 30-day lifecycle expiration rule to every prefix under the S3 bucket that hosts an Auto Loader stream's
+S2-009	MEDIUM	1	An Auto Loader stream reads files that land in Amazon S3 at a rate that has grown to hundreds of thousands of files per hour spread over a deep directory tree. 
+S2-010	HARD	2	A team runs Auto Loader against Amazon S3 in classic file notification mode: they set cloudFiles.useNotifications to true and grant Auto Loader the permissions 
+S2-011	EASY	3	A bank's security policy forbids creating event notification services or queues in its cloud storage accounts. The data team still wants Auto Loader to ingest n
+S2-012	MEDIUM	0	Event files like the one below arrive continuously in a UC volume, and the team starts Auto Loader with schema inference (no explicit schema, cloudFiles.schemaL
+S2-013	HARD	2	An Auto Loader stream with an inferred schema has run for weeks using only the default schema evolution settings. This morning, the producer adds a new column l
+S2-014	MEDIUM	1	A compliance feed must land in a table whose schema has to stay strictly stable — no automatic column additions. At the same time, the team cannot tolerate inge
+S2-015	MEDIUM	3	An Auto Loader stream runs with an inferred schema. In today's batch, some records use a column name with different casing (OrderID instead of order_id), and on
+S2-016	MEDIUM	0	Auto Loader is ingesting the JSON events below with schema inference, so every field — nested ones included — is currently a string: ```json {"event_ts": "2026-
+S2-017	HARD	1	A retailer wants to ingest files from cloud object storage into a Unity Catalog-governed table once per night. The pipeline should start on a schedule, process 
+S2-018	MEDIUM	2	A logistics company must ingest shipment telemetry from a supplier's bucket: roughly 5,000 new Parquet files per day arriving around the clock, volume growing a
+S2-019	MEDIUM	3	Sales operations needs Salesforce data — accounts, opportunities, and their ongoing changes — replicated into Unity Catalog-governed Delta tables. The requireme
+S2-020	MEDIUM	0	The team configures a Lakeflow Connect managed streaming connector for a Confluent Kafka topic that carries semi-structured JSON order events. Everything must l
+S2-021	HARD	1	A notebook task extracts a 400-million-row table from a PostgreSQL data warehouse over JDBC. The current read runs on a single connection and takes hours: ```py
+S2-022	MEDIUM	3	A vendor exposes order data only through a paged REST API that returns JSON documents; there are no file drops and no direct database access. The team must land
+S2-023	MEDIUM	0	A junior engineer tries to start an incremental read of a Kafka topic called orders on a Confluent cluster: ```python df = (spark.read .format("confluent") .opt
+S2-024	EASY	2	A company is building its lakehouse on the medallion architecture. Several sources feed the first layer: Parquet files in Amazon S3, events from Kafka, and Sale
+S2-025	MEDIUM	1	A new Auto Loader stream must ingest events from a landing directory that already holds two years of history: about one million small JSON files produced by a d
+S2-026	EASY	3	A team starts a new Auto Loader stream on a bucket that already contains three years of legacy extracts from a retired system. Those historical files will be lo
+S2-027	MEDIUM	0	An online retailer's operational data lives in a MySQL database: product catalog, inventory, and orders. The analytics platform needs an initial copy of every t
+S2-028	MEDIUM	0	A team defines a streaming table in a Lakeflow Declarative Pipeline using the read_files table-valued function over a landing directory, and the table's refresh
+S2-029	MEDIUM	0	A Lakeflow Job runs an Auto Loader stream on a job cluster and terminates the cluster after each run. The stream's checkpointLocation points at a scratch path o
+S2-030	EASY	2	A team's ingestion notebooks currently reference raw files by full s3:// URIs, with long-lived cloud credentials pasted directly into the code. The governance p
+S2-031	MEDIUM	3	One shared landing directory receives deliveries from many producers: clickstream exports, audit logs, invoice images, and order events, all mixed in the same p
+S2-032	MEDIUM	1	A Lakeflow Job task calls a partner REST API that uses OAuth 2.0 client-credentials authentication: the task presents a client ID and a long-lived client secret
+S2-033	MEDIUM	0	An operations dashboard queries a Delta table that must never be more than a few minutes out of date. The team runs an Auto Loader stream on always-on compute a
+S2-034	MEDIUM	2	A company runs several Lakeflow Connect managed connectors, and three of them read from PostgreSQL databases that all accept the same service-account credential
+S2-035	HARD	1	A streaming table created with read_files over a landing directory has been live for weeks. A faulty transformation in the pipeline polluted its contents; the s
+S2-036	MEDIUM	0	A scheduled Lakeflow Job runs this statement every night to load the day's files into a reporting table: ```sql COPY INTO main.ops.deliveries_raw FROM '/Volumes
+S2-037	MEDIUM	3	A company's gold layer ends with a nightly aggregated orders table that a legacy planning system can only consume from its own PostgreSQL database. Right after 
+S2-038	MEDIUM	1	A finance tool exports nightly CSV files, each starting with a header row of column names. The team loads them with the statement below, and the first run produ
+S2-039	EASY	0	An insurance data source delivers one complete extract at 02:00 every night, and nothing changes during the day. Analysts refresh their dashboards once each mor
+S2-040	MEDIUM	2	A supplier landing directory has accumulated more than 40,000 small CSV files over two years of daily deliveries. The nightly COPY INTO run keeps getting slower
+S2-041	HARD	3	For months, a nightly COPY INTO has loaded new files from a landing volume into main.ops.bookings. During a schema dispute, an engineer drops and re-creates the
+S2-042	MEDIUM	1	A partner REST API returns orders in pages, and every response includes a next_page cursor. A nightly Lakeflow Job must fetch only orders that are new since the
+S2-043	HARD	2	A nightly job pages through a partner events API that occasionally times out. The job's retry logic can re-request a page, so the same event_id sometimes arrive
+S2-044	EASY	0	A data platform team is cataloguing the ingestion options available through Lakeflow Connect for an architecture review. One column of their catalogue must reco
+S2-045	MEDIUM	3	A Structured Streaming query reads a 12-partition Kafka topic that feeds a Delta table. During traffic spikes, single micro-batches grow enormous and overwhelm 
+S2-046	MEDIUM	1	A bronze streaming table in a Lakeflow pipeline ingests device events. Rows with a null device_id arrive occasionally; they must never reach the table, but the 
+S2-047	MEDIUM	2	A producer team can deliver its event feed either as Avro or as raw XML files, and it asks the ingestion team which formats can be loaded directly into Delta ta
+S2-048	MEDIUM	0	Files land in a Unity Catalog volume at unpredictable hours: some days at 08:00, some at 23:00, and some days not at all. Consumers want each delivery loaded sh
+S2-049	HARD	2	Two teams each start their own Auto Loader stream over the same landing directory, writing to the same Delta table, main.bronze.clicks. Each stream has its own 
+S2-050	HARD	2	A landing bucket holds three years of historical files that must be loaded into a new table exactly once by a dedicated backfill run. After that run completes, 
+S2-051	MEDIUM	0	An engineer with a background in classic Kafka consumers is setting up a Structured Streaming read from a Confluent Kafka topic and asks where the reading posit
+S2-052	MEDIUM	2	During an ingestion review, the team lists their sources: PostgreSQL, Salesforce, Confluent Kafka, Google Analytics, and a niche SaaS recruiting tool with no Da
+S2-053	EASY	1	Alongside the tabular feeds, a document-processing pipeline receives scanned invoices, signature images, and PDF contracts that downstream jobs will process but
+S2-054	EASY	3	A business analyst has produced a one-off CSV extract on their laptop and needs it available to the whole team for a shared analysis. The team's storage is full
+S2-055	MEDIUM	0	A feed has a strict schema contract with the producing team: the ingested table must contain exactly the agreed columns, and anything the producer adds outside 
+S2-056	HARD	0	A managed database connector will replicate data from a production PostgreSQL instance into Unity Catalog. Of the roughly forty schemas in the instance, the tea
+S2-057	MEDIUM	1	A nightly JDBC extraction reads a 200-million-row table from an external database and then filters it down to the last three days inside Spark. Network costs ar
+S2-058	HARD	2	A data provider delivers files inside a Hive-style directory layout — year=2026/month=10/day=27/part-001.json — and the ingestion team wants the year, month, an
+S2-059	EASY	0	A producing system can publish its events either as a continuous stream to a Kafka topic or as files dropped into cloud storage every few minutes. The consuming
+S3-001	EASY	0	A data engineer is building the silver layer of a medallion pipeline. The bronze table catalog.sales.bronze_customers contains a nullable STRING column named re
+S3-002	MEDIUM	2	The bronze table catalog.crm.bronze_contacts stores two email columns. primary_email is frequently NULL, and some of those rows have a usable secondary_email. T
+S3-003	MEDIUM	1	An events bronze table landed event_time as STRING values like '2026-03-14 09:30:00' and amount as STRING values like '125.50'. The silver table must standardiz
+S3-004	EASY	3	During ingestion design, a junior engineer proposes dropping rows with NULLs and casting every column to its final type before writing to the bronze table, argu
+S3-005	MEDIUM	1	A silver table of customer contacts is usable as long as a customer can be reached by at least one channel. Rows where BOTH email and phone are NULL must be rem
+S3-006	EASY	0	While validating a silver notebook, an engineer joins two small bronze tables to check key overlap before promoting the pipeline: ```python payments = spark.rea
+S3-007	HARD	2	A daily silver job joins about 1 million sales rows to dim_prices, which holds one row per (product_id, store_id) because prices vary by store. After the join r
+S3-008	MEDIUM	3	A nightly job joins a 900 GB transactions DataFrame to a 250 MB currency_rates dimension on currency_code and then aggregates by market. The Spark UI shows a So
+S3-009	MEDIUM	0	A marketing engineer needs every combination of customer segment (40 rows) and promo code (5,000 rows) for a campaign evaluation job, and writes: ```python resu
+S3-010	MEDIUM	1	Two regional extracts can overlap: the same order row may appear in both files. An engineer combines them expecting SQL UNION semantics, where duplicate rows co
+S3-011	MEDIUM	2	Building catalog.sales.silver_customers from bronze, an engineer must: (1) split the STRING column full_name on the single space character into two new STRING c
+S3-012	EASY	0	The bronze table catalog.web.bronze_search stores an ARRAY<STRING> column tags on each search event. For tag-level analytics, the silver table needs one row per
+S3-013	HARD	3	A silver pipeline must exclude cancelled orders but keep every other row, including orders whose status is still NULL because they are pending manual review. Af
+S3-014	HARD	1	bronze_orders accumulates re-delivered files: the same order_id appears multiple times with different ingested_at values, and silver must keep exactly the most 
+S3-015	EASY	3	While validating a silver table, an engineer wants a one-call profile of the numeric column amount: count, mean, standard deviation, min, max, and the approxima
+S3-016	EASY	2	A daily gold KPI reports distinct visitors per date over roughly 800 million events. The exact query below runs for about 25 minutes because counting distinct v
+S3-017	MEDIUM	0	Every night, catalog.ops.order_updates arrives with changed rows for existing order_id keys plus brand-new orders. catalog.ops.silver_orders must reflect the up
+S3-018	MEDIUM	1	On a cluster with 4 workers, a silver aggregation over a 3 GB DataFrame shows 200 shuffle tasks in the Spark UI; most tasks process only a few megabytes, and sc
+S3-019	MEDIUM	2	A data engineer compares a query's static plan with its executed plan: a SortMergeJoin became a BroadcastHashJoin, and the number of shuffle partitions in a lat
+S3-020	MEDIUM	0	A shuffle-heavy silver aggregation repeatedly fails with a java.lang.OutOfMemoryError raised inside an executor while tasks build their aggregation buffers; the
+S3-021	EASY	1	A BI dashboard queries a gold aggregation — complex joins plus a GROUP BY over billions of rows — on every page load, and each query takes about 40 seconds. The
+S3-022	HARD	3	The analytics team wants catalog.analytics.daily_revenue as a precomputed daily revenue rollup over catalog.sales.gold_orders. The underlying aggregation is exp
+S3-023	HARD	3	JSON event files land continuously in cloud storage. The gold table catalog.analytics.gold_site_events must be built incrementally inside a Lakeflow Spark Decla
+S3-024	MEDIUM	2	A team hardening silver tables in Unity Catalog debates how far the database itself will enforce data quality: - "If we add a PRIMARY KEY, duplicate keys can ne
+S3-025	MEDIUM	1	The analytics team defines a gold materialized view in SQL over silver tables. Its data quality rule: margin_pct must be between 0 and 100. Rows that violate th
+S3-026	MEDIUM	0	During a performance review of a silver pipeline, a reviewer notices that the author registered a Python UDF to uppercase a country code and to split a full nam
+S3-027	EASY	2	A PySpark job reads a Delta table into a DataFrame that currently has 200 partitions spread across the cluster. Before writing the result, the team wants to end
+S3-028	EASY	1	A junior engineer chains several DataFrame operations in a notebook: two withColumn calls, a filter on status, and a select of five columns. Each cell returns a
+S3-029	HARD	3	Two analysts on different teams must share the same SQL definition — a curated customer list built over several silver tables. The definition must live in one g
+S3-030	MEDIUM	0	Last night, a batch job ran a faulty UPDATE on catalog.sales.orders, overwriting the status column on every row. The faulty commit landed as version 3, and the 
+S3-031	MEDIUM	2	An auditor must verify catalog.finance.ledger as it stood 20 days ago. The team runs the time travel query for that snapshot, but it fails with a FILE_NOT_FOUND
+S3-032	MEDIUM	1	A streaming pipeline commits new data to catalog.ops.events every 30 seconds. After a few months, the Delta table holds hundreds of thousands of small files, an
+S3-033	EASY	3	Every dashboard query against catalog.sales.orders derives the order date by calling to_date(order_ts) — an expression repeated across dozens of reports over bi
+S3-034	HARD	1	An operational database streams its change feed into a bronze table: each row carries the operation (insert, update, delete), a monotonically increasing sequenc
+S3-035	MEDIUM	0	A Delta table catalog.sales.payments declares amount as DOUBLE. A new ingestion job builds a DataFrame in which amount is still STRING, with raw values like '12
+S3-036	EASY	2	Before promoting a new PySpark transformation into the nightly production job, an engineer wants to see what Spark intends to do with it — the planned join stra
+S3-037	HARD	2	A reconciliation job must align catalog.sales.silver_orders with the source extract catalog.sales.latest_orders in one atomic pass: matched orders get their sta
+S3-038	MEDIUM	3	Over the past week, catalog.ops.shipments has behaved strangely: row counts shift overnight even though the team's own jobs were idle, and the table version kee
+S3-039	MEDIUM	0	The source system exports two timestamps as STRING columns: ordered_at and shipped_at, both formatted like '2026-07-02 14:45:00'. In the silver transformation, 
+S3-040	MEDIUM	1	The table catalog.sales.order_items stores one row per line item, with columns order_id and item. An export job must return exactly one row per order, carrying 
+S3-041	MEDIUM	1	A nightly sales report joins catalog.sales.facts_sales to catalog.sales.dim_stores on store_id to append each store's region and manager. After the join, the re
+S3-042	MEDIUM	3	A daily consolidation reads two regional extracts into DataFrames. Both extracts carry the same four columns — order_id, order_date, amount, region — but the EU
+S3-043	HARD	0	Yesterday, the query plan for the nightly reconciliation broadcast a 30 MB currency dimension next to a multi-terabyte fact table automatically — no hint appear
+S3-044	HARD	2	In an exploratory notebook, an engineer wants to inspect catalog.events.bronze_events, a table with roughly 200 million rows. She runs the cell below, and a few
+S3-045	HARD	2	A gold aggregate — weekly revenue by region — is currently a plain Delta table that a nightly Lakeflow Job fully rewrites with INSERT OVERWRITE. The team is eva
+S3-046	EASY	0	The source system resent yesterday's events file, and the bronze table now contains rows that are exactly identical across every column — a full-row duplicate o
+S3-047	MEDIUM	1	A monthly revenue report reads from a table with one row per month and region: the twelve months are values in a month column. The dashboard specification now r
+S3-048	EASY	3	A gold orders table feeds a dashboard that averages the rating column, and stakeholders want missing ratings to count as 0 instead of NULL. The engineer prepari
+S3-049	MEDIUM	2	Phone numbers arrive in the bronze table in five different formats — '(11) 98888-7777', '5511988887777', '+55 11 98888-7777', among others. The silver contract 
+S3-050	MEDIUM	0	A bronze table lands the amount column as STRING, with valid decimals like '125.50' and occasional junk like 'N/A'. The silver job must produce a DECIMAL(10,2) 
+S3-051	HARD	3	Compliance requires that every payment amount be non-negative. An engineer runs the statement below on a Delta table that already holds millions of historical r
+S3-052	EASY	1	A new data architect is reviewing the team's medallion pipeline and asks the engineers to state what belongs in the silver layer and what belongs in the gold la
+S3-053	HARD	2	A silver pipeline must process only the rows that changed in a bronze Delta table since its last run — inserts, updates, and deletes alike — instead of rescanni
+S3-054	MEDIUM	0	A bronze events table stores customer details in a nested column, declared as follows: ```sql customer STRUCT<name: STRING, address: STRUCT<city: STRING, countr
+S3-055	MEDIUM	3	A data engineer builds an intermediate DataFrame in her notebook: a read of a large Parquet dataset from cloud storage, a join with a 5 GB dimension, a filter t
+S3-056	MEDIUM	1	Marketing asks the data team for a very specific list: every registered customer who did not place a single order in October. The relevant tables are catalog.sa
+S3-057	HARD	0	A re-delivered bronze file duplicated customer records: the same customer_id now appears up to three times, and the copies differ in their updated_at values, so
+S3-058	HARD	2	An analyst joins customers to loyalty_accounts on customer_id and is surprised to see that customers whose customer_id is NULL disappear from the output. The jo
+S3-059	MEDIUM	3	A monthly revenue report must show one row per month with two separate columns, web_revenue and store_revenue. The source is a large orders table with the colum
+S3-060	MEDIUM	1	The bronze orders table stores an ARRAY<STRING> column named coupon_codes. The attribution notebook needs one row per order_id and coupon pair, but many orders 
+S3-061	HARD	0	A reporting query must return every order, joined to its payment when one exists, while showing only approved payment details: ```sql SELECT o.order_id, p.statu
+S3-062	HARD	2	The weekly engagement report counts reviews with the expression SELECT count(comment_text) FROM catalog.reviews. The reported number comes out lower than the ta
+S3-063	EASY	3	A nightly reprocessing job was accidentally deployed with this write and, on its first run, replaced an entire silver table with only a partial re-run's worth o
+S3-064	HARD	2	A late-arrival job rebuilds only yesterday's slice of the events table, which is partitioned by event_date. In a single write, it must atomically replace only t
+S3-065	HARD	0	Every night, a MERGE synchronizes catalog.sales.silver_orders with the source extract, updating matched orders and inserting new ones: ```sql MERGE INTO catalog
+S3-066	MEDIUM	1	An ingestion job appends a DataFrame to catalog.sales.customers, an existing Delta table. This week the source schema added a new column, loyalty_tier, and the 
+S3-067	MEDIUM	3	Years of analytics history live as Parquet datasets in the company's cloud storage lake. Governance now requires these datasets to become Delta tables, so that 
+S3-068	MEDIUM	0	The development team wants a safe sandbox for risky experiments: a copy of the 100 TB production table catalog.sales.orders that they can transform, rewrite, an
+S3-069	MEDIUM	0	A monthly reconciliation must compare the bank statement feed with the ledger: every row from either side must appear in the output, matched rows side by side, 
+S4-001	EASY	2	A Lakeflow Job contains four tasks: `ingest` (notebook task), `validate` (SQL task), `enrich` (pipeline task), and `publish` (dashboard task). `validate` and `e
+S4-002	MEDIUM	3	A nightly Lakeflow Job loads data with several tasks. No matter whether those loading tasks succeed or fail, the team must always archive the temporary landing 
+S4-003	MEDIUM	0	A notebook task in a Lakeflow Job calls a partner REST API that intermittently returns HTTP 503 errors. The team wants the task to be re-run automatically up to
+S4-004	MEDIUM	1	The first task in a Lakeflow Job, named qc, ends with `dbutils.jobs.taskValues.set(key = "bad_records", value = bad_count)`. If bad_records is greater than zero
+S4-005	HARD	2	A Lakeflow Job task named agg ends with: ```python dbutils.jobs.taskValues.set(key = "row_count", value = result_count) ``` result_count is the Python float `12
+S4-006	MEDIUM	0	A team maintains a cleaning notebook that takes a table name as a parameter. They want one Lakeflow Job to run this notebook once for each of six bronze tables 
+S4-007	EASY	3	The first task in a Lakeflow Job, named load_raw, ends with: ```python dbutils.jobs.taskValues.set(key = "ingested_rows", value = raw_df.count()) ``` The next t
+S4-008	EASY	1	A notebook task in a Lakeflow Job must receive a processing date and an environment name. The notebook already starts with: ```python batch_date = dbutils.widge
+S4-009	EASY	0	A team is building a Lakeflow Job with three steps: (1) run a saved Databricks SQL query that aggregates yesterday's orders into a reporting table; (2) run an u
+S4-010	MEDIUM	2	A Lakeflow Job includes a SQL task that runs a saved query against Unity Catalog tables, alongside notebook tasks that run on a classic job cluster. Before appr
+S4-011	MEDIUM	0	A Lakeflow Job on classic compute has four tasks that run sequentially, and each task is configured with its own job cluster. Every task spends several minutes 
+S4-012	MEDIUM	1	A Lakeflow Job runs every 30 minutes on a schedule, and each run takes about 40 minutes. The team notices that some scheduled runs never execute: while a previo
+S4-013	MEDIUM	2	A vendor drops CSV files into an Amazon S3 bucket at unpredictable times — sometimes several times a day, sometimes not for days. Today a cron job runs every 30
+S4-014	HARD	3	A file arrival trigger monitors a landing directory in a Unity Catalog volume. Files arrive in bursts: each batch of 20-30 files lands within about a minute, an
+S4-015	MEDIUM	1	Two upstream teams independently update the Unity Catalog Delta tables sales.orders and sales.customers at unpredictable times. A downstream Lakeflow Job must r
+S4-016	EASY	3	A compliance report must be generated every day at 06:00 UTC, using whatever data exists at that moment — even if no new data arrived overnight — and it must ne
+S4-017	HARD	2	A Lakeflow Job has task retries configured. The on-call data engineer notices that when a task fails on its first attempt but succeeds on a retry, no notificati
+S4-018	HARD	1	A Lakeflow Job with eight tasks failed during last night's run: tasks 1-4 succeeded, task 5 failed because of a bad record that has now been fixed in the source
+S4-019	MEDIUM	0	A production Lakeflow Job that publishes Unity Catalog tables was created by a senior data engineer who left the company last month. His user account has since 
+S4-020	EASY	2	A team maintains a shared Python module, data_prep.py, which lives in the team's Git repository and is reviewed through pull requests. Several production pipeli
+S4-021	HARD	3	A data engineering team must run a Lakeflow Job at 02:00 every weekday, Monday through Friday, so that reporting tables are fresh before analysts arrive. In the
+S4-022	EASY	3	A task in a production Lakeflow Job got stuck in an infinite loop over the weekend. Nobody was watching, and the job stayed in the running state for three days,
+S4-023	MEDIUM	1	When a nightly Lakeflow Job fails, the team already receives an email notification. Operations, however, also needs every failure recorded in its own incident s
+S4-024	MEDIUM	2	The production version of an ETL notebook lives on the release branch of the team's GitHub repository. Today, a team member copies the notebook into the workspa
+S4-025	HARD	0	A Lakeflow Job runs ingest, transform, and publish as a linear chain. The team must add an alerting task that runs only when the ingest task fails — it must nev
+S4-026	EASY	0	A daily Lakeflow Job must fire at 06:00 in the company's Sao Paulo office (America/Sao_Paulo). The platform team in Paris created the schedule, so its timezone 
+S4-027	MEDIUM	3	A Lakeflow Job orchestrates an end-to-end flow: a notebook task lands raw files, then a Lakeflow Declarative Pipeline must process the new data, and a final tas
+S4-028	MEDIUM	2	A nightly Lakeflow Job takes a processing_date parameter whose default is the current date. Late this evening, an on-call engineer must reprocess yesterday's da
+S4-029	MEDIUM	3	A Lakeflow Job's transformations require pandas 2.x. The team has been prototyping on a shared cluster that other teams also depend on, and that cluster has pan
+S4-030	MEDIUM	0	A Lakeflow Job starts with a notebook task, `pick_tables`, which scans operational metadata and computes the exact list of bronze tables that need a rebuild — a
+S4-031	MEDIUM	1	An operations dashboard is published in the workspace, and the first analyst to open it each morning waits while all of its queries run from scratch. The team a
+S4-032	MEDIUM	3	A Lakeflow Job runs two slow loads in parallel after the same extract task: load_customers and load_orders have no dependency on each other, and both must stay 
+S4-033	MEDIUM	0	A Lakeflow Job has six tasks — notebooks, one Python script, and one SQL file — that all live in the same GitHub repository on the release branch. Setting the r
+S4-034	EASY	3	A data engineer is editing a production Lakeflow Job in which the notebook task B already depends on the notebook task D. To make the two steps verify each othe
+S4-035	MEDIUM	0	A data engineering team runs the same preparation pipeline for a morning report. Business users need it at 06:00 from Monday through Friday, while the Saturday 
+S4-036	MEDIUM	2	A platform team's master Lakeflow Job coordinates the company's onboarding flow. One step must launch the partner team's onboarding job, wait for its outcome, a
+S4-037	HARD	3	A Lakeflow Job declares a job-level parameter target_date, and one of its notebook tasks declares a task parameter with the same key target_date but a different
+S4-038	MEDIUM	0	Governance rules at a company state that compute used by Lakeflow Jobs must follow approved shapes: permitted node types and a maximum worker count. The platfor
+S4-039	MEDIUM	2	A team is migrating an old ETL process to Lakeflow Jobs. Today one long notebook chains five processing stages with %run: each stage calls the next notebook, ev
+S4-040	EASY	1	A source system that feeds a nightly Lakeflow Job will undergo maintenance tomorrow, and the team decides the job should not fire while the data is unstable. To
+S4-041	HARD	1	The first task in a Lakeflow Job runs a SQL task that computes yesterday's totals; a downstream notebook task needs that number as a parameter, but the SQL task
+S4-042	MEDIUM	1	A downstream Lakeflow Job must refresh whenever two specific upstream tables change — sales.orders and sales.returns — but a third table in the same schema, sal
+S4-043	MEDIUM	3	A team configures a file arrival trigger by pasting the raw cloud URL of an S3 bucket where a vendor drops CSV files: s3://vendor-drops/incoming/. The trigger s
+S5-001	EASY	0	A data engineer maintains the notebooks for a sales pipeline in a Databricks Git Folder (formerly Repos) connected to the team's GitHub repository. They need to
+S5-002	MEDIUM	1	A data engineer is refactoring ingestion notebooks on the `feature/dq-checks` branch checked out in their Git Folder. While waiting for CI, they must also repro
+S5-003	MEDIUM	2	A team stores all pipeline code in Git Folders backed by an Azure DevOps repository. Policy forbids direct pushes to `main`: every change must be reviewed in a 
+S5-004	MEDIUM	3	A team owns one ETL codebase that runs in dev, test, and prod workspaces, and each workspace uses a different SQL warehouse for the job's SQL tasks. The bundle'
+S5-005	HARD	1	A team's bundle defines a Lakeflow Spark Declarative Pipeline (formerly DLT) with one notebook library at the root, and the prod target overrides the `libraries
+S5-006	EASY	0	A data engineering team supports dev, test, and prod workspaces. Today an administrator recreates the team's Lakeflow Job, its notebooks, and a Lakeflow Spark D
+S5-007	MEDIUM	2	In a CI workflow, this command just completed with no errors reported: ```bash databricks bundle validate -t prod ``` The next step is to create or update the b
+S5-008	MEDIUM	3	A GitHub Actions workflow runs on every pull request that touches the team's Automation Bundle. The team wants the check to fail before any production resource 
+S5-009	MEDIUM	1	A nightly GitHub Actions workflow deploys the team's Automation Bundle to production. The workflow must authenticate to the Databricks workspace without any hum
+S5-010	EASY	0	A CI workflow just deployed the team's bundle to the dev target. As a smoke test, the workflow must start the deployed Lakeflow Job whose bundle resource key is
+S5-011	EASY	2	A data engineering team's bundle stores the Unity Catalog location for its pipeline in a variable, and the pipeline resource references that variable. The prod 
+S5-012	HARD	3	A team's `prod` target declares no `mode`. After deploying it, the job appears in the Jobs UI with a `[dev]` marker appended to its name, and the job runs under
+S5-013	EASY	3	A newly hired data engineer wants to start adopting Automation Bundles for the team's Lakeflow Jobs and pipelines. They need a first bundle project on their lap
+S5-014	MEDIUM	3	A team's CI pipeline deploys every open pull request as its own Automation Bundle target — pr_142, pr_143, and so on — creating a disposable copy of the pipelin
+S5-015	MEDIUM	0	A team deploys one Automation Bundle to dev and prod targets. In dev only, the group data_team must hold CAN_MANAGE_RUN on the bundle's Lakeflow Job so members 
+S5-016	MEDIUM	1	A team's Automation Bundle has grown into a single 600-line databricks.yml: two Lakeflow Jobs, one pipeline, and per-environment overrides for dev, test, and pr
+S5-017	HARD	2	A nightly GitHub Actions workflow authenticates as the service principal ci-deployer and runs databricks bundle deploy -t prod, creating and updating the team's
+S5-018	MEDIUM	0	A data engineer fixes a null-handling bug in the silver_orders notebook inside the team's Git folder, which is cloned from the team's remote repository and has 
+S5-019	MEDIUM	1	A data engineer uses the Databricks CLI on a laptop that runs commands against both the team's development workspace and the production workspace. They are tire
+S5-020	EASY	2	A team's CI log shows this command completing successfully, with no target specified: ```bash databricks bundle validate ``` A junior engineer expected the comm
+S5-021	MEDIUM	3	A team's Automation Bundle defines one Lakeflow Job and its notebooks. The team promotes releases through development, staging, and production workspaces and mu
+S5-022	EASY	0	A company's data platform runs on Bitbucket, and the platform lead wants to manage pipeline notebooks in Databricks Git folders connected to the company's Bitbu
+S5-023	HARD	2	A team deploys one Automation Bundle to three targets: dev, test, and prod. Each target is a different Databricks workspace, and the team must keep each environ
+S5-024	MEDIUM	1	An Automation Bundle deploys a Lakeflow Job whose Python task must call an external API with a bearer token. Security policy forbids the token from appearing in
+S5-025	MEDIUM	3	A company keeps all of its data products in one large monorepo. The orders team only needs the /products/orders directory — its notebooks and job definitions — 
+S5-026	MEDIUM	0	While developing ingestion notebooks locally in an IDE, a data engineer wants their local project folder and a folder in the Databricks workspace to stay in ste
+S5-027	EASY	2	A new data engineer has only seen the Databricks CLI used to deploy Automation Bundles and assumes that bundles are all it is for. The team lead wants to correc
+S5-028	HARD	1	A team's Automation Bundle defines a Lakeflow Job whose notebook task references a project file, notebook_path: ../src/ingest.py. The bundle deploys to the dev 
+S5-029	MEDIUM	3	Minutes after a routine deploy of the prod target, dashboards show that a change in the release broke a downstream metric. The team must restore production to t
+S5-030	HARD	0	One bundle serves several CI pipelines, and each runner needs a slightly different value for the same setting — for example, the catalog prefix the deployed pip
+S5-031	HARD	2	A GitHub Actions runner runs Databricks CLI commands on every merge to main. DATABRICKS_HOST is already set to the workspace URL, the team has created the servi
+S6-001	EASY	0	A scheduled Lakeflow Job that loads nightly sales data used to complete in about 18 minutes. Over the past month, runs have crept up to 45 minutes and more. Bef
+S6-002	MEDIUM	1	A Lakeflow Job has the task graph ingest → validate → enrich → publish. In the latest run, `ingest` succeeded, `validate` failed after four minutes, and `enrich
+S6-003	MEDIUM	2	A nightly Lakeflow Job with six tasks failed at `transform_customers` (task 4) because a partner delivered a malformed file. Tasks 1-3 succeeded, and tasks 5-6 
+S6-004	HARD	3	A PySpark job joins a 4 TB events table with a small dimension table on `user_id`. One stage has 200 tasks: 199 finish in under two minutes, but one task runs f
+S6-005	HARD	1	A pipeline joins a large fact table with a dimension table on a heavily skewed key. The team cannot rewrite the join right now and wants Spark to mitigate the s
+S6-006	MEDIUM	2	In the Spark UI, a stage's tasks report large Spill (Disk) values — tens of GB spilled across the stage — and the stage takes three times longer than its siblin
+S6-007	EASY	0	A team is creating a new Delta table for order line items. Queries almost always filter on `order_date` and `customer_id`. The team's older tables use Hive-styl
+S6-008	MEDIUM	3	A Delta table was created with Liquid Clustering using `CLUSTER BY (region, order_date)`. Usage has shifted: most queries now filter by `customer_id`, and regio
+S6-009	EASY	1	A small platform team schedules dozens of manual Lakeflow Jobs to run OPTIMIZE and VACUUM on Unity Catalog managed Delta tables. Runs get skipped whenever the o
+S6-010	MEDIUM	2	A shuffle-heavy aggregation job fails repeatedly with `java.lang.OutOfMemoryError: Java heap space` on the executors. The Spark UI shows long garbage-collection
+S6-011	MEDIUM	0	After a platform change, every new job cluster terminates during launch. The cluster event log shows an `INIT_SCRIPTS_FAILED` event, and the team recently added
+S6-012	EASY	3	A job ran unchanged for months on a shared cluster whose `pandas` cluster library was pinned to 1.5.3. Last week, another team updated the cluster's libraries t
+S6-013	MEDIUM	1	An analytics team serves executive dashboards from a Medium SQL warehouse. During the morning peak, individual dashboard queries take over a minute, and the que
+S6-014	MEDIUM	0	A scheduled notebook task fails with an uncaught Python exception. The job run page shows only the exception type and a truncated message, and the engineer need
+S6-015	HARD	2	A Databricks SQL query that joins two gold tables and aggregates them takes minutes every night. The engineer wants a visual diagnosis: which operators dominate
+S6-016	EASY	3	A company's nightly Lakeflow Job cluster failed to launch: the cluster event log shows a cloud provider error stating that no instances of the requested type ar
+S6-017	EASY	0	A data engineering team runs a nightly workload of SQL queries and Spark DataFrame transformations over large Delta tables — heavy scans, joins, and aggregation
+S6-018	MEDIUM	1	A Lakeflow Job runs on an autoscaling job cluster configured with minimum 2 workers and maximum 8. At the start of a large backfill, thousands of tasks are queu
+S6-019	EASY	0	A data engineer is new to the Databricks platform and wants to study a slow PySpark notebook run in the Spark UI. The engineer wants to start from the actions t
+S6-020	HARD	2	An all-purpose cluster that hosts the team's interactive notebooks was restarted overnight: sessions died, and the uptime counter had reset by morning. The engi
+S6-021	MEDIUM	1	Databricks SQL dashboards have been intermittently slow for a week. The team lead wants to review the slowest queries that one specific analyst ran on the share
+S6-022	MEDIUM	3	A dashboard query against two gold Delta tables finished in about 40 seconds when the warehouse was cold. Minutes later, the exact same query returned in two se
+S6-023	MEDIUM	0	A streaming workload ingests Kafka events into a streaming table through a continuously running query. Throughput seemed to drop after a configuration change, a
+S6-024	HARD	2	A job joins a large events table with a small users table on `account_id`, and a handful of accounts hold most of the rows. The Spark UI shows one straggler tas
+S6-025	HARD	1	A nightly aggregation shuffles about 6 GB of data. The plan submitted to the cluster ended with 200 post-shuffle partitions, yet the Spark UI shows the final st
+S6-026	MEDIUM	3	A PySpark job reads a large Delta table that was written as many small files. The read stage schedules over 4,000 tasks that each finish in a fraction of a seco
+S6-027	MEDIUM	2	A sales fact table is partitioned by `order_date`. A query filters `WHERE order_date = '2026-10-02'`, but it still scans hundreds of gigabytes and runs for minu
+S6-028	EASY	0	A data engineer supports dozens of Databricks SQL users and keeps finding the same performance problems: tables fragmented into small files, exploding joins, an
+S6-029	MEDIUM	1	In the jobs timeline, one stage of a nightly Lakeflow Job takes 40 minutes while its sibling stages finish in about three minutes each. Before changing any conf
+S6-030	HARD	3	A complex batch ETL join stage spills over 40 GB of shuffle data to local disk on every nightly run. The query cannot be redesigned this quarter, so the team wa
+S6-031	EASY	0	A team changed one shuffle configuration on their nightly pipeline, and the on-call engineer reports that the job 'feels faster' now. Before rolling the change 
+S6-032	HARD	0	A pro SQL warehouse serves the company's morning dashboards. At 9 a.m., more concurrent queries arrive than the running clusters can execute, and analysts watch
+S6-033	MEDIUM	0	A long-running job on a cluster with spot workers loses one mid-run: the node is reclaimed by the cloud provider, and a shuffle stage that had tasks on that nod
+S7-001	EASY	0	A data engineer is decommissioning two production tables governed by Unity Catalog. Both tables currently hold live data, and the engineer runs the following st
+S7-002	EASY	1	An upstream system continuously writes Delta files to s3://acme-raw/legacy/events/, and that system must keep full control of the data's lifecycle. The data tea
+S7-003	MEDIUM	2	A senior engineer creates the following table in a schema that has a managed storage location configured: ```sql CREATE TABLE main.fin.transactions ( txn_id BIG
+S7-004	HARD	3	main.sales.orders_hist is a Unity Catalog external Delta table whose files live at s3://acme-raw/orders_hist. The team now wants Unity Catalog to manage the tab
+S7-005	EASY	1	A data team is building a new curated table that summarizes several silver tables, computed with a single query. They want Unity Catalog to own the table's stor
+S7-006	MEDIUM	0	A lakehouse on Unity Catalog contains the catalog main with several schemas. The group data_analysts already has these grants: ```sql GRANT USE CATALOG ON CATAL
+S7-007	MEDIUM	2	An analyst who belongs to the group finance_analysts runs: ```sql SELECT * FROM analytics.finance.invoices; ``` The query fails with a permissions error, even t
+S7-008	EASY	3	A governance engineer is onboarding a new analytics team to the lakehouse. The team's group, finance_analysts, must be allowed to read rows from the table analy
+S7-009	MEDIUM	1	A platform admin runs the following statements against a Unity Catalog metastore, intending to cut off a contractor's read access: ```sql GRANT SELECT ON TABLE 
+S7-010	HARD	0	A contractor's engagement is being transferred to a partner organization. Today the contractor reads main.hr.compensation through membership in the hr_analysts 
+S7-011	EASY	3	A platform team supports about 60 analysts who join and leave the company frequently, plus a scheduled ingestion pipeline that runs unattended every night. The 
+S7-012	MEDIUM	2	A retail company stores all of its sales transactions in main.sales.transactions, with records from every sales region. The governance team protects the table w
+S7-013	MEDIUM	1	The table main.crm.customers contains the column email (STRING). Only the group pii_viewers should see real email addresses; every other user with SELECT should
+S7-014	MEDIUM	3	An HR database contains employee records with sensitive Social Security Numbers. The ssn column of main.hr.employees is protected as follows: ```sql CREATE FUNC
+S7-015	MEDIUM	0	A governance admin wants a single policy attached to the catalog main that masks every column tagged pii = ssn for all users except the compliance_team group. H
+S7-016	MEDIUM	1	A bank runs 200+ Delta tables across the catalogs main and finance. Sensitive columns are classified with governed tags. The governance team must guarantee cons
+S7-017	HARD	2	A lead data engineer is preparing a governance review for auditors who want to understand how Databricks protects sensitive data in Unity Catalog. The engineer 
+S7-018	MEDIUM	2	A data engineer must register an existing Delta dataset as an external table in Unity Catalog and runs the following statement: ```sql CREATE TABLE main.sales.o
+S7-019	EASY	0	A data platform team plans to rename a column in main.sales.orders, one of the most widely reused tables in the lakehouse. Before making the change, the lead en
+S7-020	MEDIUM	1	A compliance officer must produce a list of every principal that ran SELECT against the sensitive table main.hr.compensation during the last 30 days, along with
+S7-021	MEDIUM	3	A workspace has years of legacy tables in the workspace-local Hive metastore, still referenced by old jobs using two-part names like legacy_db.orders. The compa
+S7-022	MEDIUM	0	A company runs five Databricks workspaces, all in the AWS region us-east-1, and wants every workspace to see the same Unity Catalog catalogs, such as main and f
+S7-023	MEDIUM	2	A nightly Lakeflow Job runs under the service principal loader-sp and writes report files into the Unity Catalog volume main.ops.drop_zone. The job's identity a
+S7-024	EASY	1	A new data engineer joins a company whose lakehouse is governed by Unity Catalog. The onboarding documentation consistently refers to tables by fully qualified 
+S7-025	MEDIUM	2	A company syncs groups such as data_engineers from its identity provider to Databricks using SCIM provisioning. The governance team wants a single definition of
+S7-026	EASY	0	During a quarterly access review, the governance team must list every principal that currently holds any privilege on the Unity Catalog table main.sales.orders,
+S7-027	HARD	2	During a security audit, the auditors require separation of duties across the company's Databricks deployment. They ask the platform lead to explain which admin
+S7-028	MEDIUM	1	An external security auditor is reviewing how the company's lakehouse reaches its cloud storage. The platform lead explains that one Unity Catalog object encaps
+S7-029	MEDIUM	0	A new analytics domain is joining the lakehouse, and the governance team plans to give it a dedicated Unity Catalog catalog so its schemas and tables stay separ
+S7-030	MEDIUM	2	A data engineer created the Unity Catalog table main.finance.risk_scores and owned it until she changed teams. No GRANT statement ever named her user, yet she c
+S7-031	HARD	2	A governance program is rolling out governed tags — key-value classifications such as pii=high — so that ABAC policies can act on them uniformly. The data gover
+S7-032	MEDIUM	1	The governance team plans to rename msrp, a single column in main.products.price_list, a 60-column table with dozens of downstream dashboards and pipelines. Mos
+S7-033	HARD	2	A platform team is designing file storage under Unity Catalog. Machine learning artifacts produced by Databricks jobs should live in storage that Unity Catalog 
+S7-034	HARD	0	The governance team granted the group marketing_analysts all of its access to catalog main with one set of statements: ```sql GRANT USE CATALOG ON CATALOG main 
+S7-035	MEDIUM	3	During a security architecture review, the team is documenting every kind of object that Unity Catalog can protect with grants, beyond the familiar catalogs, sc
+S7-036	HARD	3	Five workspaces share one Unity Catalog metastore, and by default every workspace can see every catalog. A new compliance requirement says one analytics catalog
+S7-037	HARD	1	Security policy requires rotating the AWS IAM role that backs the company's lakehouse storage every quarter. The role is attached to a Unity Catalog storage cre
+S7-038	MEDIUM	0	A platform team keeps its production notebooks in a Databricks Git folder cloned from the team's GitHub repository. External auditors must be allowed to open an
+S7-039	MEDIUM	2	A production pipeline reads its database password from the Databricks secret scope etl-secrets. The analysts' group must be able to read an API key stored in th
+S7-040	MEDIUM	3	A contractor's engagement ends today, and the offboarding checklist requires that all access to Unity Catalog data be cut off before the end of the day. An acce
+S7-041	MEDIUM	1	A global company syncs its Databricks groups from its identity provider using automatic identity management. The group data-latam is a nested member of the corp
+S7-042	MEDIUM	0	Finance needs a monthly cost breakdown of Databricks usage by team for chargeback, computed from the lakehouse itself rather than from invoices or the cloud pro
+S7-043	HARD	2	A company runs one Unity Catalog metastore shared by several business domains. Security policy requires that every managed table created in the finance catalog 
+S7-044	EASY	3	During an architecture review, a new data engineer must explain how three Unity Catalog objects work together for cloud storage: the object that holds the IAM c
+S7-045	MEDIUM	0	A Lakeflow Job writes manifest files directly to the cloud storage path s3://acme-dropzone/manifests/, which is registered in Unity Catalog as the external loca
+S7-046	EASY	2	During a security review, an auditor asks what the Databricks audit trail actually captures, expecting it to log only SQL queries. The platform lead must answer

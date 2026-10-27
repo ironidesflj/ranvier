@@ -1,6 +1,6 @@
 "use client";
 
-import { BadgeCheck, BookOpen, ExternalLink, Github, Heart, Linkedin, Mail, MessageCircle, Scale, ShieldCheck, Sparkles, Wrench } from "lucide-react";
+import { BadgeCheck, BookOpen, ExternalLink, EyeOff, Ghost, Github, Heart, KeyRound, Linkedin, Lock, Mail, MessageCircle, Scale, ShieldCheck, Sparkles, Trash2, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -13,6 +13,10 @@ import { hubHomeUrl } from "@/lib/axon/deep-links";
 export function AboutView() {
   const { t, lang } = useLang();
   const { navigate } = useAppStore();
+
+  /* Ícones dos pontos de privacidade (um por promessa — pedido do fundador
+     2026-10-27: transparência de segurança no app; só fatos auditados). */
+  const privacyIcons = [KeyRound, Mail, EyeOff, Ghost, Trash2];
 
   const sources = [
     { label: t.about.sources.examPage, href: "https://www.databricks.com/learn/certification/data-engineer-associate" },
@@ -82,6 +86,30 @@ export function AboutView() {
                 <span className="text-muted-foreground">{item}</span>
               </li>
             ))}
+          </ul>
+        </CardContent>
+      </Card>
+
+      {/* Privacy & security — audited facts, plain language (founder request 2026-10-27) */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Lock className="h-4 w-4 text-primary" aria-hidden />
+            {t.about.privacyTitle}
+          </CardTitle>
+          <CardDescription>{t.about.privacyDesc}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ul className="space-y-2.5">
+            {t.about.privacyPoints.map((item, i) => {
+              const Icon = privacyIcons[i] ?? BadgeCheck;
+              return (
+                <li key={i} className="flex gap-2.5 text-sm">
+                  <Icon className="mt-0.5 h-4 w-4 shrink-0 text-[var(--noos-success)]" aria-hidden />
+                  <span className="text-muted-foreground">{item}</span>
+                </li>
+              );
+            })}
           </ul>
         </CardContent>
       </Card>
