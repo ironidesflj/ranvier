@@ -1,6 +1,6 @@
 {
   "name": "ranvier",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "private": true,
   "scripts": {
     "dev": "next dev -p 3000 2>&1 | tee dev.log",
@@ -21,7 +21,8 @@
     "ci:gate:selftest": "bun scripts/ci_gate/selftest.ts",
     "manifest": "bun scripts/generate-manifest.ts",
     "validate:manifest": "bun scripts/validate-manifest.ts",
-    "icons": "bun scripts/generate-icons.ts"
+    "icons": "bun scripts/generate-icons.ts",
+    "og": "bun scripts/generate-og.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
