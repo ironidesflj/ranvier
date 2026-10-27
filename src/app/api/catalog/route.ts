@@ -15,7 +15,10 @@ export async function GET(req: Request) {
     // payload that only changes when the question bank is re-seeded (deploy)
     // — cacheable for 5 min and swappable-while-revalidating for a day. This
     // takes the ~500ms DB round-trip off the first-hit path for new visitors.
-    res.headers.set("Cache-Control", "public, s-maxage=300, stale-while-revalidate=86400");
+    const cachePolicy = "public, s-maxage=300, stale-while-revalidate=86400";
+    res.headers.set("Cache-Control", cachePolicy);
+    // Vercel's CDN policy is separate from the browser cache policy.
+    res.headers.set("CDN-Cache-Control", cachePolicy);
     return res;
   } catch (err) {
     return jsonError(err);
