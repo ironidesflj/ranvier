@@ -1,15 +1,20 @@
 /**
- * Axon — Fase 1 slice: ID generator, question schema, deep-link helper.
+ * Axon — the Noos ecosystem contract, consumed from the npm package.
  *
- * The Axon is the Noos ecosystem's shared TypeScript package (semver'd library
- * linked at build time — never a service). This in-repo module is the minimal
- * F1 adoption, structured so it can be extracted verbatim into the shared
- * package when it exists. No runtime dependency on the hub — ever.
+ * Slice status (docs/sdd/fatias-dossie.md is the live state pointer):
+ *  - fatia 1 (link): exact-pinned @ironidesflj/axon@0.2.1, lockfile committed.
+ *  - fatia 2 (IDs na escrita): scripts generate/validate IDs through the
+ *    package's generateId/validateId — rejections are logged with reason.
+ *  - fatia 3 (checksum canônico): computeChecksum from the package — the
+ *    LOCKED algorithm over [statement, options, answer, reference].
+ *  - fatia 4 (manifesto no CI): parseManifest + verifyChecksum on every
+ *    bank change, zero rejections tolerated for the publisher.
+ *  - fatia 5 (badge + deep-link): URL format adopted (footer ID + community
+ *    button + "by Noos" badge); canonical-domain flip pending env.
+ *
+ * The package is NEVER a service — always linked at build. Zero hub fetches
+ * at runtime.
  */
-
-export const AXON_PACKAGE = "axon";
-export const AXON_VERSION = "0.1.0"; // semver — Fase 1 slice
-
-export * from "./ids";
+export * from "@ironidesflj/axon";
+export { APP_ID_PREFIX } from "./ids";
 export * from "./deep-links";
-export * from "./schema";
