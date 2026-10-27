@@ -18,6 +18,7 @@ on:
       - "src/data/certifications.ts"
       - "src/lib/axon/**"
       - "scripts/generate-manifest.ts"
+      - "scripts/validate-manifest.ts"
   workflow_dispatch:
 
 permissions:
@@ -43,6 +44,12 @@ jobs:
 
       - name: Generate manifest.jsonl
         run: bun scripts/generate-manifest.ts
+
+      # Fatia 4 — zero tolerance for the publisher: the SAME parser the hub
+      # uses on ingestion (parseManifest, @ironidesflj/axon) plus verifyChecksum
+      # line by line. Any rejection or divergence fails the CI.
+      - name: Validate manifest.jsonl with the hub parser (zero tolerance)
+        run: bun scripts/validate-manifest.ts
 
       - name: Commit updated manifest (if changed)
         run: |
