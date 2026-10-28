@@ -1,43 +1,61 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeft, ArrowRight, CheckCircle2, Layers, Loader2, Play, Target } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Eye, Layers, Loader2, Play, Target, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Markdown } from "@/components/app/markdown";
 import { cn } from "@/lib/utils";
 import { useLang } from "@/components/app/language-provider";
 import { useAppStore } from "@/store/app-store";
 import { api, ApiError } from "@/lib/api-client";
 import { orderOptions, type OptionOrdering } from "@/lib/option-order";
-import { QuestionCard, type FeedbackState } from "@/components/app/question-card";
+import { QuestionCard, LETTERS } from "@/components/app/question-card";
 import { QueryError } from "@/components/app/query-error";
-import type { FlashcardDrawScope, PublicQuestion } from "@/lib/types";
+import type { FlashcardDrawnCard, FlashcardDrawScope } from "@/lib/types";
 
 type Phase = "config" | "session" | "done";
 
-interface CardResult {
-  questionId: string;
-  correct: boolean;
-  intervalDays: number;
+/** localStorage flag: the recall instruction shows only on the first session. */
+const HINT_SEEN_KEY = "ranvier:fc-hint-seen";
+
+/** Reveal payload for the current card (display-mapped through the session ordering). */
+interface RevealedCard {
+  correctIndex: number;
+  explanationEn: string;
+  explanationPt: string;
+  referenceUrl: string | null;
+  referenceTitle: string | null;
+  wrongDays: number;
+  rightDays: number;
 }
 
 /**
- * Flashcards com repetição espaçada (v1.7.0 — spec
- * docs/sdd/spec-v1.7.0-flashcards.md).
+ * Flashcards com repetição espaçada — SESSÃO V2 (v1.8.0 — spec
+ * docs/sdd/spec-v1.8.0-trilhas-flashcards.md §3).
  *
- * 1 questão do banco = 1 cartão. Frente com as alternativas (recall ativo
- * fiel ao formato da prova); a resposta/pulo chama o servidor, que corrige,
- * aplica o SM-2 e devolve o verso (gabarito + explicação + fonte + próxima
- * revisão). Cartão "errado/pulado" re-entra na fila DA PRÓPRIA SESSÃO
- * (limitado a 1 re-entrada por cartão — garantia de término).
+ * Divisão de trabalho com os outros modos: Estudar/Exame treinam
+ * RECONHECIMENTO (alternativas clicáveis, correção server-side); o
+ * flashcard treina EVOCAÇÃO — a frente não mostra alternativas (exceto nas
+ * 18 "statement-selection", onde as afirmações SÃO o enunciado), o aluno
+ * tenta lembrar, vira o cartão e se julga com honestidade binária:
  *
- * Nada de streak/XP/confete: o máximo de gamificação é o número factual
- * "N para hoje" (patch §1). Barra de sessão presa como no Estudar (§10.1);
- * alternativas embaralhadas por sessão com semente estável (nota B).
+ *   frente (evocação) → "Ver resposta" → verso (gabarito + explicação) →
+ *   [ Errei · volta hoje ]  [ Acertei · amanhã/em N dias ] → próximo cartão.
+ *
+ * As projeções SRS vêm do SERVIDOR no reveal (mesma matemática de srs.ts,
+ * função pura aplicada sem persistir) — o aluno vê o efeito de cada
+ * julgamento antes de decidir (padrão Anki). Julgar = avançar. "Errei"
+ * re-entra na fila da própria sessão (1× por cartão — garantia de término).
+ * Virar e abandonar sem julgar NÃO registra revisão (o cartão segue devido).
+ *
+ * Teclado (desktop): Espaço/Enter vira · 1 = errei · 2 = acertei.
+ * Nada de streak/XP/confete (patch §1) — o máximo de gamificação é o
+ * número factual "N para hoje".
  */
 export function FlashcardsView() {
   const { t, f, lang, langReady } = useLang();
@@ -65,13 +83,13 @@ export function FlashcardsView() {
   const [scope, setScope] = useState<FlashcardDrawScope>("mixed");
   const [count, setCount] = useState("20");
   /* Fila da sessão (cresce com re-entradas) + semente estável de embaralhamento. */
-  const [queue, setQueue] = useState<PublicQuestion[]>([]);
+  const [queue, setQueue] = useState<FlashcardDrawnCard[]>([]);
   const [sessionId, setSessionId] = useState("");
   const [index, setIndex] = useState(0);
-  const [pick, setPick] = useState<number | null>(null);
-  const [reviewing, setReviewing] = useState(false);
-  const [currentFeedback, setCurrentFeedback] = useState<{ selected: number | null; feedback: FeedbackState; intervalDays: number } | null>(null);
-  const [results, setResults] = useState<Record<string, CardResult>>({});
+  const [revealed, setRevealed] = useState<RevealedCard | null>(null);
+  const [revealing, setRevealing] = useState(false);
+  const [grading, setGrading] = useState(false);
+  const [results, setResults] = useState<Record<string, boolean>>({});
   const [requeued, setRequeued] = useState<Set<string>>(new Set());
 
   const draw = useMutation({
@@ -85,8 +103,7 @@ export function FlashcardsView() {
       setQueue(res.cards);
       setSessionId(`fc-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`);
       setIndex(0);
-      setPick(null);
-      setCurrentFeedback(null);
+      setRevealed(null);
       setResults({});
       setRequeued(new Set());
       setPhase("session");
@@ -96,48 +113,62 @@ export function FlashcardsView() {
     onError: () => toast.error(t.toast.error),
   });
 
-  /* Revisão: resposta (índice canônico) ou pulo (null) — a correção e o
-     agendamento acontecem no servidor; o verso é montado com a resposta. */
-  async function handleReview(question: PublicQuestion, ordering: OptionOrdering, displayPick: number | null) {
-    if (reviewing || currentFeedback) return;
-    setReviewing(true);
-    const canonical = displayPick !== null ? ordering.toCanonical(displayPick) : null;
+  const current = queue[index] ?? null;
+  const ordering = useMemo(
+    () => (current ? orderOptions(current, sessionId, current.id) : null),
+    [current, sessionId],
+  );
+
+  /* V2: reveal é LEITURA — verso + projeções; sem escrita de estado. */
+  async function handleReveal(card: FlashcardDrawnCard, ord: OptionOrdering) {
+    if (revealing || revealed) return;
+    setRevealing(true);
     try {
-      const res = await api.flashcardsReview(question.id, canonical);
-      const feedback: FeedbackState = {
-        correct: res.correct,
-        correctIndex: ordering.toDisplay(res.correctIndex),
+      const res = await api.flashcardsReveal(card.id);
+      setRevealed({
+        correctIndex: ord.toDisplay(res.correctIndex),
         explanationEn: res.explanationEn,
         explanationPt: res.explanationPt,
         referenceUrl: res.referenceUrl,
         referenceTitle: res.referenceTitle,
-      };
-      setCurrentFeedback({ selected: displayPick, feedback, intervalDays: res.intervalDays });
-      setResults((prev) => ({ ...prev, [question.id]: { questionId: question.id, correct: res.correct, intervalDays: res.intervalDays } }));
-      /* Cartão errado/pulado: re-entra na fila da sessão (1× por cartão —
-         garantia de término; o estado dele já vence AGORA no servidor). */
-      if (!res.correct && !requeued.has(question.id)) {
-        setQueue((prev) => [...prev, question]);
-        setRequeued((prev) => new Set(prev).add(question.id));
-      }
+        wrongDays: res.projection.wrong.intervalDays,
+        rightDays: res.projection.right.intervalDays,
+      });
     } catch {
       toast.error(t.toast.error);
     } finally {
-      setReviewing(false);
+      setRevealing(false);
     }
   }
 
-  function nextCard() {
-    setPick(null);
-    setCurrentFeedback(null);
-    if (index + 1 >= queue.length) {
-      setPhase("done");
-      void queryClient.invalidateQueries({ queryKey: ["flashcards-summary"] });
-      toast.success(t.flashcards.toastFinished);
-    } else {
-      setIndex(index + 1);
+  /* V2: julgamento binário do aluno → escrita SM-2 → auto-avançar.
+     "Errei" re-entra na fila 1× (o estado dele já vence AGORA no servidor). */
+  async function handleGrade(remembered: boolean) {
+    if (!current || !revealed || grading) return;
+    setGrading(true);
+    const willRequeue = !remembered && !requeued.has(current.id);
+    try {
+      await api.flashcardsGrade(current.id, remembered);
+      setResults((prev) => ({ ...prev, [current.id]: remembered }));
+      if (willRequeue) {
+        setQueue((prev) => [...prev, current]);
+        setRequeued((prev) => new Set(prev).add(current.id));
+      }
+      /* Avança contra a fila COMO FICARÁ (re-entrada já contabilizada). */
+      if (index + 1 >= queue.length + (willRequeue ? 1 : 0)) {
+        setPhase("done");
+        void queryClient.invalidateQueries({ queryKey: ["flashcards-summary"] });
+        toast.success(t.flashcards.toastFinished);
+      } else {
+        setIndex(index + 1);
+      }
+      setRevealed(null);
+      window.scrollTo({ top: 0 });
+    } catch {
+      toast.error(t.toast.error);
+    } finally {
+      setGrading(false);
     }
-    window.scrollTo({ top: 0 });
   }
 
   function finishSession() {
@@ -147,22 +178,60 @@ export function FlashcardsView() {
   }
 
   const seenCount = Object.keys(results).length;
-  const correctCount = Object.values(results).filter((r) => r.correct).length;
+  const correctCount = Object.values(results).filter(Boolean).length;
   const reentryCount = requeued.size;
-  const current = queue[index] ?? null;
-  const ordering = useMemo(
-    () => (current ? orderOptions(current, sessionId, current.id) : null),
-    [current, sessionId],
-  );
 
-  function srsWhen(intervalDays: number): string {
-    if (intervalDays === 0) return t.flashcards.dueToday;
-    if (intervalDays === 1) return t.flashcards.dueTomorrow;
-    return f(t.flashcards.dueInDays, { days: intervalDays });
+  /* Teclado (spec §3.2): Espaço/Enter vira · 1 = errei · 2 = acertei. */
+  useEffect(() => {
+    if (phase !== "session" || !current || !ordering) return;
+    const card = current;
+    const ord = ordering;
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const target = e.target as HTMLElement | null;
+      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) return;
+      if (!revealed && (e.key === " " || e.key === "Enter")) {
+        /* Enter num botão/link focado deixa o clique nativo agir. */
+        if (e.key === "Enter" && target?.closest("button, a")) return;
+        e.preventDefault(); // Espaço não rola a página nem "clica" botão focado
+        void handleReveal(card, ord);
+      } else if (revealed && (e.key === "1" || e.key === "2")) {
+        e.preventDefault();
+        void handleGrade(e.key === "2");
+      }
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [phase, current, ordering, revealed, revealing, grading, index, queue, requeued]);
+
+  /* Rótulo da projeção SRS (calculada no servidor, formatada aqui). */
+  function projLabel(days: number): string {
+    if (days === 0) return t.flashcards.projToday;
+    if (days === 1) return t.flashcards.projTomorrow;
+    return f(t.flashcards.projInDays, { days });
+  }
+
+  /* Instrução de evocação: só na primeira sessão (localStorage 1×). */
+  const [hintSeen, setHintSeen] = useState(true);
+  useEffect(() => {
+    try {
+      setHintSeen(Boolean(window.localStorage.getItem(HINT_SEEN_KEY)));
+    } catch {
+      setHintSeen(true);
+    }
+  }, []);
+  function markHintSeen() {
+    if (hintSeen) return;
+    setHintSeen(true);
+    try {
+      window.localStorage.setItem(HINT_SEEN_KEY, "1");
+    } catch {
+      /* sem storage: a instrução vale só nesta sessão — aceitável */
+    }
   }
 
   // -------------------------------------------------------------------
-  // Config phase — resumo factual + escopo + início
+  // Config phase — resumo factual + escopo + início (inalterado da v1.7.0)
   // -------------------------------------------------------------------
   if (phase === "config") {
     const totalAvailable = (summary?.dueCount ?? 0) + (summary?.newCount ?? 0);
@@ -277,11 +346,10 @@ export function FlashcardsView() {
   }
 
   // -------------------------------------------------------------------
-  // Session phase — frente → resposta/pulo → verso → próximo
+  // Session phase — frente (evocação) → verso (gabarito) → julgamento
   // -------------------------------------------------------------------
   if (phase === "session" && current && ordering) {
-    const reviewed = seenCount;
-    const percent = queue.length > 0 ? Math.round(((index) / queue.length) * 100) : 0;
+    const percent = queue.length > 0 ? Math.round((index / queue.length) * 100) : 0;
 
     return (
       <div className="mx-auto w-full max-w-3xl flex-1 px-4 py-6 sm:py-8">
@@ -329,43 +397,110 @@ export function FlashcardsView() {
           )}
         </div>
 
-        <QuestionCard
-          question={{ ...current, options: ordering.options }}
-          selectedIndex={currentFeedback ? currentFeedback.selected : pick}
-          feedback={currentFeedback?.feedback ?? null}
-          onSelect={(i) => setPick(i)}
-          onConfirm={pick !== null && !currentFeedback ? () => void handleReview(current, ordering, pick) : undefined}
-          disabled={reviewing}
-          showMeta
-        />
+        {/* FRENTE (evocação) — sem alternativas; as 18 statement-selection
+            mostram as afirmações como parte do enunciado (não-clicáveis). */}
+        {!revealed && (
+          <article className="rounded-[14px] border bg-card p-5 shadow-[var(--shadow-rest)] sm:p-6">
+            {/* pills domínio + dificuldade (mesma linguagem do QuestionCard) */}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full bg-surface-2 px-2.5 py-1 text-xs font-medium">
+                {t.common.domain} {current.domainCode} · {lang === "pt" ? current.domainNamePt : current.domainName}
+              </span>
+              <span className="rounded-full bg-surface-2 px-2.5 py-1 text-xs text-muted-foreground">
+                {t.study.difficulty}: {t.study.difficulties[current.difficulty]}
+              </span>
+            </div>
 
-        {/* Rodapé: Confirmar / Pular (frente) · Próximo + linha SRS (verso) */}
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
-          <div className="flex items-center gap-3">
-            {currentFeedback ? (
-              <Button onClick={nextCard}>
-                {index + 1 >= queue.length ? t.study.finishSession : t.flashcards.next}
-                {index + 1 < queue.length && <ArrowRight className="h-4 w-4" />}
-              </Button>
-            ) : (
-              <>
-                <Button disabled={pick === null || reviewing} onClick={() => pick !== null && void handleReview(current, ordering, pick)}>
-                  {reviewing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-                  {t.study.checkAnswer}
-                </Button>
-                {/* Pular: revela o verso sem responder — conta como "errei"
-                    para o SRS (mesma semântica de questão em branco). */}
-                <Button variant="ghost" disabled={reviewing} onClick={() => void handleReview(current, ordering, null)}>
-                  {t.flashcards.skip}
-                </Button>
-              </>
+            <Markdown
+              text={current.stem}
+              className="mt-4 max-w-[68ch] font-display text-[15px] font-normal leading-[1.55] tracking-[-0.006em] sm:text-base"
+            />
+
+            {/* Statement-selection: as alternativas SÃO o enunciado —
+                lista estática com letras, sem clique. */}
+            {current.frontIncludesOptions && (
+              <div className="mt-4 space-y-2" aria-label={t.flashcards.statementsLabel}>
+                {ordering.options.map((option, i) => (
+                  <div
+                    key={i}
+                    className="flex min-h-[54px] w-full items-center gap-4 rounded-[10px] border border-border bg-card px-4 py-2.5 text-left"
+                  >
+                    <span
+                      aria-hidden
+                      className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-[6px] border border-[var(--noos-border-strong)] font-mono text-xs font-medium text-muted-foreground"
+                    >
+                      {LETTERS[i]}
+                    </span>
+                    <span className="min-w-0 flex-1 break-words text-[15px] leading-relaxed sm:text-base">{option}</span>
+                  </div>
+                ))}
+              </div>
             )}
-          </div>
-          {/* Linha SRS factual no verso — o agendamento devolvido pelo servidor. */}
-          {currentFeedback && (
-            <p className="font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground" role="status">
-              {f(t.flashcards.nextReview, { when: srsWhen(currentFeedback.intervalDays) })}
-            </p>
+
+            {/* Instrução discreta — apenas na primeira sessão. */}
+            {!hintSeen && (
+              <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
+                {current.frontIncludesOptions ? t.flashcards.hintStatements : t.flashcards.hintRecall}{" "}
+                <span className="hidden sm:inline">{t.flashcards.keyboardHint}</span>
+              </p>
+            )}
+          </article>
+        )}
+
+        {/* VERSO — gabarito destacado entre as alternativas + explicação +
+            fonte + ID pública (reuso do QuestionCard em modo feedback,
+            sem seleção: só a correta acende). */}
+        {revealed && (
+          <article className="rounded-[14px] border bg-card p-5 shadow-[var(--shadow-rest)] sm:p-6">
+            <QuestionCard
+              question={{ ...current, options: ordering.options }}
+              selectedIndex={null}
+              feedback={{
+                correct: true,
+                correctIndex: revealed.correctIndex,
+                explanationEn: revealed.explanationEn,
+                explanationPt: revealed.explanationPt,
+                referenceUrl: revealed.referenceUrl,
+                referenceTitle: revealed.referenceTitle,
+              }}
+              showMeta
+            />
+          </article>
+        )}
+
+        {/* Rodapé: Ver resposta (frente) · Julgamento com projeção (verso) */}
+        <div className="mt-6 border-t pt-4">
+          {!revealed ? (
+            <Button
+              size="lg"
+              className="w-full sm:w-auto"
+              disabled={revealing}
+              onClick={() => {
+                markHintSeen();
+                void handleReveal(current, ordering);
+              }}
+            >
+              {revealing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Eye className="h-4 w-4" />}
+              {t.flashcards.reveal}
+            </Button>
+          ) : (
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-wrap items-center gap-3">
+                {/* Julgamento binário com a projeção SRS impressa no botão
+                    (padrão Anki — o aluno vê o efeito antes de decidir). */}
+                <Button variant="outline" size="lg" disabled={grading} onClick={() => void handleGrade(false)}>
+                  {grading ? <Loader2 className="h-4 w-4 animate-spin" /> : <XCircle className="h-4 w-4" />}
+                  {t.flashcards.gradeWrong} · {projLabel(revealed.wrongDays)}
+                </Button>
+                <Button size="lg" disabled={grading} onClick={() => void handleGrade(true)}>
+                  <CheckCircle2 className="h-4 w-4" />
+                  {t.flashcards.gradeRight} · {projLabel(revealed.rightDays)}
+                </Button>
+              </div>
+              <p className="font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-muted-foreground sm:text-right">
+                {t.flashcards.keyboardHint}
+              </p>
+            </div>
           )}
         </div>
       </div>

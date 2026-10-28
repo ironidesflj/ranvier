@@ -12,6 +12,7 @@ import {
   LineChart,
   MoreHorizontal,
   RotateCcw,
+  Route,
   Settings2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,7 @@ import { StudyView } from "@/components/app/study-view";
 import { ExamView } from "@/components/app/exam-view";
 import { ResultsView } from "@/components/app/results-view";
 import { FlashcardsView } from "@/components/app/flashcards-view";
+import { TrailsView } from "@/components/app/trails-view";
 import { ProgressView } from "@/components/app/progress-view";
 import { GuideView } from "@/components/app/guide-view";
 import { AboutView } from "@/components/app/about-view";
@@ -95,6 +97,9 @@ function Rail() {
   const queryClient = useQueryClient();
 
   const items: { view: View; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+    /* v1.8.0 — Trilhas é o 1º destino: a resposta ao "por onde começo?"
+       (spec §5.6 — Estudar · Flashcards · Exame · Progresso seguem). */
+    { view: "trails", label: t.trails.title, icon: Route },
     { view: "study", label: t.shell.study, icon: BookOpen },
     { view: "flashcards", label: t.flashcards.title, icon: Layers },
     { view: "cert", label: t.shell.exam, icon: GraduationCap },
@@ -213,6 +218,9 @@ function MobileBottomNav({ onMore }: { onMore: () => void }) {
   }
 
   const items: { key: string; label: string; icon: React.ComponentType<{ className?: string }>; onClick: () => void; active: boolean }[] = [
+    /* v1.8.0 — 6 destinos + Mais no mobile (375 verificado na Task 19 com
+       6 botões; Trilhas entra como primeiro, spec §5.6). */
+    { key: "trails", label: t.trails.title, icon: Route, onClick: () => navigate("trails"), active: view === "trails" },
     { key: "study", label: t.shell.study, icon: BookOpen, onClick: () => navigate("study"), active: view === "study" },
     { key: "flashcards", label: t.flashcards.title, icon: Layers, onClick: () => navigate("flashcards"), active: view === "flashcards" },
     { key: "cert", label: t.shell.exam, icon: GraduationCap, onClick: () => navigate("cert"), active: view === "cert" },
@@ -391,6 +399,7 @@ export function RanvierApp() {
       {view === "exam" && <ExamView />}
       {view === "results" && <ResultsView />}
       {view === "flashcards" && <FlashcardsView />}
+      {view === "trails" && <TrailsView />}
       {view === "progress" && <ProgressView />}
       {view === "guide" && <GuideView />}
       {view === "about" && <AboutView />}

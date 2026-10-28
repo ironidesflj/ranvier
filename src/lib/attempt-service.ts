@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { ownerWhere } from "@/lib/session";
+import { completedQuestionIds, sortTrailQuestions } from "@/lib/trail-core";
 import type {
   AnswerFeedback,
   AttemptDetail,
@@ -144,6 +145,19 @@ export async function startAttempt(args: StartArgs): Promise<StartAttemptRespons
       picked.push(...rest.slice(0, cert.questionCount - picked.length));
     }
     selectedIds = shuffle(picked);
+  } else if (args.mode === "TRAIL") {
+    // TRAIL (v1.8.0 — spec §5.4): um único domínio, próximas questões
+    // NÃO-concluídas na ordem da rampa (E→M→H, chave estável) — sem shuffle:
+    // a sequência é o produto. Progresso derivado (qualquer modo conta).
+    const codes = args.domainCodes ?? [];
+    if (codes.length !== 1) throw new ServiceError(400, "Trail sessions require exactly one domain");
+    const domain = cert.domains.find((d) => d.code === codes[0]);
+    if (!domain) throw new ServiceError(400, "Unknown domain for this certification");
+    const completed = await completedQuestionIds(cert.id);
+    const pending = sortTrailQuestions(domain.questions).filter((q) => !completed.has(q.id));
+    if (pending.length === 0) throw new ServiceError(400, "Trail already complete — practice freely in study mode");
+    const limit = Math.min(Math.max(args.limit ?? 20, 1), 50, pending.length);
+    selectedIds = pending.slice(0, limit).map((q) => q.id);
   } else {
     // STUDY: filtered random sample
     const domains = args.domainCodes?.length
@@ -435,7 +449,9 @@ export async function getProgress(): Promise<ProgressResponse> {
   });
   const completed = attempts.filter((a) => a.status === "COMPLETED");
   const exams = completed.filter((a) => a.mode === "EXAM");
-  const studies = completed.filter((a) => a.mode === "STUDY");
+  /* Sessões de estudo = STUDY + TRAIL (v1.8.0: tranche de trilha é sessão
+     de estudo — mesmo comportamento de correção/feedback). */
+  const studies = completed.filter((a) => a.mode === "STUDY" || a.mode === "TRAIL");
 
   const answers = await db.attemptAnswer.findMany({
     where: { attempt: where },

@@ -4,14 +4,17 @@ import type {
   AttemptResult,
   FlashcardDrawResponse,
   FlashcardDrawScope,
-  FlashcardReviewResponse,
+  FlashcardGradeResponse,
+  FlashcardRevealResponse,
   FlashcardsSummary,
   Lang,
   MeResponse,
+  Mode,
   ProgressResponse,
   PublicCertification,
   PublicUser,
   StartAttemptResponse,
+  TrailsSummary,
 } from "@/lib/types";
 
 class ApiError extends Error {
@@ -55,7 +58,7 @@ export const api = {
 
   startAttempt: (body: {
     certSlug: string;
-    mode: "STUDY" | "EXAM";
+    mode: Mode;
     domainCodes?: number[];
     limit?: number;
     questionIds?: string[];
@@ -81,11 +84,23 @@ export const api = {
   flashcardsDraw: (body: { certSlug: string; domainCodes?: number[]; limit?: number; scope: FlashcardDrawScope }) =>
     fetchJson<FlashcardDrawResponse>("/api/flashcards/draw", { method: "POST", body: JSON.stringify(body) }),
 
-  flashcardsReview: (questionId: string, selectedIndex: number | null) =>
-    fetchJson<FlashcardReviewResponse>("/api/flashcards/review", {
+  /* v1.8.0 — reveal (leitura: verso + projeções) e grade (escrita: SM-2
+     com a autoavaliação binária) substituem o antigo review. */
+  flashcardsReveal: (questionId: string) =>
+    fetchJson<FlashcardRevealResponse>("/api/flashcards/reveal", {
       method: "POST",
-      body: JSON.stringify({ questionId, selectedIndex }),
+      body: JSON.stringify({ questionId }),
     }),
+
+  flashcardsGrade: (questionId: string, remembered: boolean) =>
+    fetchJson<FlashcardGradeResponse>("/api/flashcards/grade", {
+      method: "POST",
+      body: JSON.stringify({ questionId, remembered }),
+    }),
+
+  /* v1.8.0 — trilhas: progresso derivado por dono. */
+  trails: (certSlug: string, lang: Lang) =>
+    fetchJson<TrailsSummary>(`/api/trails?certSlug=${encodeURIComponent(certSlug)}&lang=${lang}`),
 
   me: () => fetchJson<MeResponse>("/api/auth/me"),
 

@@ -1,12 +1,18 @@
 # current-state.md — estado verificado
 
-Última atualização: **2026-10-27 · v1.7.0** (lote: flashcards com repetição
-espaçada — tabela `FlashcardState`, SM-2 simplificado local, 3 rotas de API,
-view `#/flashcards`, CTA na Home e bloco no Progresso; spec:
-`spec-v1.7.0-flashcards.md`, **aprovada pelo fundador e implementada** —
-animação do símbolo §14 excluída por decisão dele, reanálise pendente).
-**Ainda não publicada**: aguarda sync GitHub + deploy com passo de banco
-(`docs/DEPLOY.md` §5, nota v1.7.0). Lote anterior: v1.6.0 = transparência
+Última atualização: **2026-10-27 · v1.8.0** (lote: trilhas de estudo +
+sessão de flashcards V2 — spec `spec-v1.8.0-trilhas-flashcards.md`,
+**aprovada pelo fundador ("gostei, pode seguir") e implementada** no
+mesmo dia, worklog Task 21; **ainda não publicada** — aguarda sync GitHub
++ deploy com passo de banco, `docs/DEPLOY.md` §5 nota v1.8.0. Correção
+embarcada do SW: network-first para dados owner-scoped — spec §13).
+Lote anterior: **v1.7.0** (flashcards com repetição espaçada — tabela
+`FlashcardState`, SM-2 simplificado local, rotas de API, view
+`#/flashcards`; **nunca publicada**: a sessão foi rejeitada pelo fundador
+antes do deploy ("não vi diferença entre os flashcards e o modo estudo")
+e o desenho dela foi substituído pela V2 acima; a tabela `FlashcardState`,
+o SRS, o merge e o cascade da v1.7.0 permanecem válidos e embarcados).
+Lote anterior: v1.6.0 = transparência
 de privacidade + performance de carregamento + prep.ts portátil (publicada
 e verificada ao vivo, Task 17); v1.5.1 = OG/social preview (não publicada —
 embarcou na v1.6.0); v1.5.0 = Convergência Axon (fatias 2, 3 e 4 sobre o
@@ -16,8 +22,9 @@ do fundador.
 
 ## Versão e artefatos
 
-- App: **v1.7.0** (`src/lib/version.ts` = fonte única; `package.json`,
-  `public/sw.js`, `public/offline.html` no mesmo lote).
+- App: **v1.8.0** (`src/lib/version.ts` = fonte única; `package.json`,
+  `public/sw.js` (cache `ranvier-v1.8.0`, com a correção network-first),
+  `public/offline.html` no mesmo lote).
 - Banco: 300 questões (S1=19, S2=59, S3=69, S4=43, S5=31, S6=33, S7=46),
   1 certificação (Databricks Data Engineer Associate, blueprint May/2026),
   IDs públicas congeladas RAN-DBDEA-00001..00300, 6 simulados disjuntos.
@@ -25,17 +32,37 @@ do fundador.
   por dono — userId XOR anonId, cascades User/Question, índices por
   dono+dueAt); questões/seed/manifesto INTOCADOS (validate:questions 300 ·
   validate:manifest 300/0/0 verificados pós-lote).
-- Flashcards (v1.7.0): 1 questão = 1 cartão; SM-2 simplificado local
-  (`src/lib/srs.ts` — errar/pular vence AGORA e re-entra na sessão, 1×;
-  acerto escala 1d → 3d → intervalo×ease, teto 180d); rotas
-  `/api/flashcards` (summary), `/draw` (devidas+novas, até 50), `/review`
-  (correção server-side — gabarito nunca viaja no draw); merge no
-  login/register (colisão: mais `reps` vence) e cascade no DELETE LGPD —
-  ambos verificados no sandbox; view `#/flashcards` com barra de sessão,
-  linha SRS factual e resumo honesto; CTA no bilhete da Home ("N para hoje")
+- Flashcards (v1.7.0 → **sessão V2 na v1.8.0**): 1 questão = 1 cartão;
+  SM-2 simplificado local (`src/lib/srs.ts` — "errei" vence AGORA e
+  re-entra na sessão 1×; acerto escala 1d → 3d → intervalo×ease, teto 180d;
+  **intocado na V2**). **V2 (spec v1.8.0 §3):** frente de EVOCAÇÃO sem
+  alternativas (282/300; 18 "statement-selection" com as afirmações na
+  frente como enunciado — flag `frontIncludesOptions` computado no servidor
+  por lista curada de chaves); fluxo revelar → julgar (Errei/Acerte com a
+  projeção SRS impressa no botão, calculada no servidor) → auto-avançar;
+  teclado Espaço/1/2; virar sem julgar NÃO registra revisão. Rotas:
+  `/api/flashcards` (summary), `/draw` (devidas+novas, até 50, com o flag),
+  **`/reveal` (leitura: verso + projeções) + `/grade` (escrita: SM-2 com a
+  autoavaliação binária) — substituíram o `/review` da v1.7.0 nunca
+  publicada**; gabarito nunca viaja no draw. Merge no login/register
+  (colisão: mais `reps` vence) e cascade no DELETE LGPD — ambos verificados
+  no sandbox; view `#/flashcards`; CTA no bilhete da Home ("N para hoje")
   e bloco no Progresso (em rotação/para hoje/maduros).
-- PWA: manifest (tema papel #f7fbf9), sw.js stale-while-revalidate
-  (`ranvier-v1.7.0`), offline.html, ícones com monograma R.
+- Trilhas (v1.8.0): 7 domínios oficiais como rota ordenada (rampa E→M→H com
+  desempate por chave estável); **progresso 100% derivado de
+  AttemptAnswer** (acerto em qualquer modo conta — verificado cross-modo
+  no sandbox: resposta no Estudar elevou a trilha); modo **TRAIL** no
+  attempt existente (mode é String — sem migração); `GET /api/trails`
+  (lang pt/en, percentual ponderado pelos pesos oficiais); view `#/trilhas`
+  com cabeçalho de rota, 7 cards, tranches 10/20/30/50 e Continuar;
+  **Trilhas é o 1º destino do rail** (Trilhas · Estudar · Flashcards ·
+  Exame · Progresso · Revisão; mobile 6 + Mais); CTA factual no bilhete da
+  Home e bloco "Rota de estudo" no Progresso.
+- PWA: manifest (tema papel #f7fbf9), sw.js (`ranvier-v1.8.0`) com
+  **network-first para dados owner-scoped** (v1.8.0 §13 — correção do
+  stale-while-revalidate que deixava contadores uma fetch atrás) e SWR
+  apenas para dados públicos (catalog/health/manifestos), offline.html,
+  ícones com monograma R.
 - Social preview (v1.5.1→v1.6.0): og:image 1200×630 "bilhete de exame"
   (`public/og/`, gerada por `bun run og`), twitter summary_large_image,
   canonical + og:locale pt_BR/en_US no `layout.tsx`.
@@ -255,10 +282,11 @@ do fundador.
 
 ## Onde estão as evidências
 
-- `worklog.md` (registro vivo, Task IDs 0–19) — diffs, comandos, medições.
+- `worklog.md` (registro vivo, Task IDs 0–21) — diffs, comandos, medições.
   Task 17 = verificação ao vivo da v1.6.0 publicada; Task 18 = correção
-  factual do dossiê + avaliação §14 + spec v1.7.0 (flashcards) aguardando
-  aprovação.
+  factual do dossiê + avaliação §14 + spec v1.7.0; Task 19 = implementação
+  v1.7.0 (sandbox); Task 20 = estudo + spec v1.8.0; Task 21 = implementação
+  v1.8.0 (trilhas + flashcards V2 + correção do SW) verificada no sandbox.
 - `download/ranvier-v1.3.1.*` (bundle/patch/zip) — artefatos da leva anterior
   (cada leva gera os próprios artefatos quando o fundador pedir).
 - `docs/sdd/fatias-dossie.md` — instantâneo do ecossistema Noos trazido pelo

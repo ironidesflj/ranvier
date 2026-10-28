@@ -198,9 +198,10 @@ export const dict = {
       sessionStats: "{correct}/{answered} acertos",
       skipped: "pulada",
     },
-    /* Flashcards — repetição espaçada (v1.7.0 — spec
-       docs/sdd/spec-v1.7.0-flashcards.md). Números factuais apenas — nada de
-       streak/XP/confete (anti-filosofia do patch §1). */
+    /* Flashcards — repetição espaçada (v1.7.0 → SESSÃO V2 na v1.8.0 —
+       spec docs/sdd/spec-v1.8.0-trilhas-flashcards.md §3: evocação na
+       frente, julgamento binário com projeção, auto-avançar). Números
+       factuais apenas — nada de streak/XP/confete (patch §1). */
     flashcards: {
       title: "Flashcards",
       subtitle: "Repetição espaçada: cada questão volta na hora certa.",
@@ -217,12 +218,17 @@ export const dict = {
       start: "Virar cartões",
       cardOf: "Cartão {current} de {total}",
       sessionStats: "{correct}/{answered} acertos",
-      next: "Próximo cartão",
-      skip: "Pular",
-      nextReview: "Próxima revisão: {when}",
+      reveal: "Ver resposta",
+      hintRecall: "Responda de cabeça antes de virar o cartão.",
+      hintStatements: "Aponte a afirmação correta de cabeça e vire o cartão.",
+      statementsLabel: "Afirmações",
+      gradeWrong: "Errei",
+      gradeRight: "Acertei",
+      projToday: "volta hoje",
+      projTomorrow: "amanhã",
+      projInDays: "em {days} dias",
+      keyboardHint: "Espaço vira · 1 errei · 2 acertei",
       dueToday: "de volta à fila hoje",
-      dueTomorrow: "amanhã",
-      dueInDays: "em {days} dias",
       summaryTitle: "Sessão de flashcards",
       summaryStats: "{seen} cartões vistos · {correct} acertos · {reentries} retornos",
       queueEmpty: "A fila desta sessão acabou.",
@@ -231,6 +237,32 @@ export const dict = {
       newSession: "Nova sessão",
       toastStarted: "Sessão de flashcards iniciada.",
       toastFinished: "Fila de hoje concluída.",
+    },
+    /* Trilhas de estudo (v1.8.0 — spec docs/sdd/spec-v1.8.0-trilhas-
+       flashcards.md §5): os 7 domínios oficiais como rota ordenada;
+       progresso 100% derivado dos AttemptAnswer. Fatos apenas. */
+    trails: {
+      title: "Trilhas",
+      subtitle: "Os 7 domínios oficiais como rota de estudo — do fácil ao difícil, com progresso salvo em qualquer modo.",
+      routeLabel: "Rota {cert}",
+      overall: "Progresso da rota",
+      routeNext: "Próxima: {name}",
+      routeComplete: "Rota completa — cada domínio já teve todas as questões acertadas ao menos uma vez.",
+      routeCompleteCta: "Ir para o simulado",
+      trancheLabel: "Sessões de",
+      weightLabel: "Peso no exame: {percent}%",
+      progressLabel: "{done}/{total} questões",
+      start: "Iniciar",
+      continue: "Continuar",
+      complete: "Concluída",
+      practiceFree: "Praticar livre",
+      homeStart: "Comece pela rota · {count, plural, =0 {todas as questões} one {# questão} other {# questões}}",
+      homeContinue: "Continuar: {name} · {done}/{total}",
+      homePercent: "Trilhas · {percent}%",
+      homeComplete: "Rota completa · 100%",
+      progressBlockTitle: "Rota de estudo",
+      progressBlockDesc: "{done} de {total} questões concluídas",
+      progressBlockTrails: "Trilhas concluídas",
     },
     exam: {
       title: "Simulado",
@@ -312,7 +344,7 @@ export const dict = {
       practiceCta: "Praticar erros",
       resume: "Retomar",
       review: "Revisar",
-      mode: { STUDY: "Estudo", EXAM: "Simulado" },
+      mode: { STUDY: "Estudo", EXAM: "Simulado", TRAIL: "Trilha" },
       status: { IN_PROGRESS: "Em andamento", COMPLETED: "Concluída" },
       notEnoughData: "Responda mais questões para destravar o radar por domínio.",
       anonymousNote: "Você está no modo anônimo: o progresso fica salvo neste navegador. Crie uma conta gratuita para sincronizar entre dispositivos.",
@@ -411,7 +443,8 @@ export const dict = {
       title: "O que há de novo",
       subtitle: "Avisamos uma única vez por atualização — depois, é só estudar.",
       items: [
-        "Flashcards com repetição espaçada: cada questão do banco agora é um cartão — responda de memória e o Ranvier agenda a volta dele na hora certa (SM-2 simplificado, sem precisar de conta).",
+        "Trilhas de estudo: os 7 domínios oficiais viraram uma rota com progresso salvo — cada trilha avança do fácil ao difícil, e acertos no Estudar ou no simulado também contam.",
+        "Flashcards redesenhados: o cartão agora mostra só a pergunta — responda de cabeça, vire, veja o gabarito e se julgue (errei/acertei); o Ranvier agenda a volta de cada cartão na hora certa.",
       ],
       close: "Entendi",
     },
@@ -459,6 +492,7 @@ export const dict = {
     toast: {
       started: "Simulado iniciado. Boa sorte!",
       sessionStarted: "Sessão de estudo iniciada.",
+      trailStarted: "Trilha iniciada — a sequência segue a rampa de dificuldade.",
       submitted: "Simulado entregue.",
       sessionFinished: "Sessão encerrada.",
       error: "Erro de comunicação com o servidor.",
@@ -677,9 +711,10 @@ export const dict = {
       sessionStats: "{correct}/{answered} correct",
       skipped: "skipped",
     },
-    /* Flashcards — spaced repetition (v1.7.0 — spec
-       docs/sdd/spec-v1.7.0-flashcards.md). Factual numbers only — no
-       streak/XP/confetti (patch §1 anti-philosophy). */
+    /* Flashcards — spaced repetition (v1.7.0 → SESSION V2 in v1.8.0 —
+       spec docs/sdd/spec-v1.8.0-trilhas-flashcards.md §3: free recall on
+       the front, binary judgment with projection, auto-advance). Factual
+       numbers only — no streak/XP/confetti (patch §1 anti-philosophy). */
     flashcards: {
       title: "Flashcards",
       subtitle: "Spaced repetition: each question comes back at the right time.",
@@ -696,12 +731,17 @@ export const dict = {
       start: "Start cards",
       cardOf: "Card {current} of {total}",
       sessionStats: "{correct}/{answered} correct",
-      next: "Next card",
-      skip: "Skip",
-      nextReview: "Next review: {when}",
+      reveal: "See answer",
+      hintRecall: "Answer in your head before turning the card.",
+      hintStatements: "Point to the correct statement in your head, then turn the card.",
+      statementsLabel: "Statements",
+      gradeWrong: "Missed",
+      gradeRight: "Knew it",
+      projToday: "back today",
+      projTomorrow: "tomorrow",
+      projInDays: "in {days} days",
+      keyboardHint: "Space flips · 1 missed · 2 knew it",
       dueToday: "back in the queue today",
-      dueTomorrow: "tomorrow",
-      dueInDays: "in {days} days",
       summaryTitle: "Flashcards session",
       summaryStats: "{seen} cards seen · {correct} correct · {reentries} came back",
       queueEmpty: "This session's queue is done.",
@@ -710,6 +750,32 @@ export const dict = {
       newSession: "New session",
       toastStarted: "Flashcards session started.",
       toastFinished: "Today's queue is done.",
+    },
+    /* Study trails (v1.8.0 — spec docs/sdd/spec-v1.8.0-trilhas-
+       flashcards.md §5): the 7 official domains as an ordered route;
+       progress 100% derived from AttemptAnswer. Facts only. */
+    trails: {
+      title: "Trails",
+      subtitle: "The 7 official domains as a study route — easy to hard, with progress saved across every mode.",
+      routeLabel: "{cert} route",
+      overall: "Route progress",
+      routeNext: "Next: {name}",
+      routeComplete: "Route complete — every domain has had all questions answered correctly at least once.",
+      routeCompleteCta: "Take the practice exam",
+      trancheLabel: "Sessions of",
+      weightLabel: "Exam weight: {percent}%",
+      progressLabel: "{done}/{total} questions",
+      start: "Start",
+      continue: "Continue",
+      complete: "Complete",
+      practiceFree: "Practice freely",
+      homeStart: "Start with the route · {count, plural, =0 {all questions} one {# question} other {# questions}}",
+      homeContinue: "Continue: {name} · {done}/{total}",
+      homePercent: "Trails · {percent}%",
+      homeComplete: "Route complete · 100%",
+      progressBlockTitle: "Study route",
+      progressBlockDesc: "{done} of {total} questions completed",
+      progressBlockTrails: "Trails completed",
     },
     exam: {
       title: "Practice Exam",
@@ -791,7 +857,7 @@ export const dict = {
       practiceCta: "Practice missed questions",
       resume: "Resume",
       review: "Review",
-      mode: { STUDY: "Study", EXAM: "Exam" },
+      mode: { STUDY: "Study", EXAM: "Exam", TRAIL: "Trail" },
       status: { IN_PROGRESS: "In progress", COMPLETED: "Completed" },
       notEnoughData: "Answer more questions to unlock the domain radar.",
       anonymousNote: "You are in anonymous mode: progress is saved in this browser. Create a free account to sync across devices.",
@@ -890,7 +956,8 @@ export const dict = {
       title: "What's new",
       subtitle: "We show this once per update — then it's back to studying.",
       items: [
-        "Flashcards with spaced repetition: every question in the bank is now a card — answer from memory and Ranvier schedules its return at the right time (simplified SM-2, no account needed).",
+        "Study trails: the 7 official domains are now a route with saved progress — each trail moves from easy to hard, and correct answers in Study or the practice exam count too.",
+        "Flashcards redesigned: the card now shows only the question — answer from memory, flip, check the key, and grade yourself (missed/knew it); Ranvier schedules each card's return at the right time.",
       ],
       close: "Got it",
     },
@@ -938,6 +1005,7 @@ export const dict = {
     toast: {
       started: "Practice exam started. Good luck!",
       sessionStarted: "Study session started.",
+      trailStarted: "Trail started — the sequence follows the difficulty ramp.",
       submitted: "Exam submitted.",
       sessionFinished: "Session finished.",
       error: "Communication error with the server.",

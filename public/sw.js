@@ -16,8 +16,14 @@
  *    edits. This keeps dev mode always-fresh while production caches offline.
  *  - Brand assets (/brand, /icons, favicon, offline.html): cache-first always —
  *    stable files versioned by VERSION (bump it when changing them).
- *  - API GETs + /manifest.jsonl: stale-while-revalidate (instant offline reads,
- *    background refresh when online).
+ *  - PUBLIC data (/api/catalog, /api/health, manifest files):
+ *    stale-while-revalidate (instant offline reads, background refresh).
+ *  - OWNER-SCOPED data GETs (attempts, progress, flashcards summary, trails,
+ *    auth/me): NETWORK-FIRST with cache fallback (v1.8.0 fix). These payloads
+ *    change with every answered question/graded card — serving a stale cache
+ *    entry made counters lag one fetch behind (founder-visible in flashcards
+ *    and trails). Network-first keeps them fresh when online; the cache
+ *    fallback preserves offline readability (goal #2 below).
  *  - Everything else (POST/PUT/DELETE, cross-origin): untouched.
  *
  * Lifecycle: no skipWaiting on purpose — a study session / running exam in an
@@ -26,7 +32,7 @@
  * take control (the page reloads once via the controllerchange listener in
  * pwa-provider.tsx so the initial load gets cached).
  */
-const VERSION = "ranvier-v1.7.0";
+const VERSION = "ranvier-v1.8.0";
 const SHELL_CACHE = `ranvier-shell-${VERSION}`;
 const ASSET_CACHE = `ranvier-assets-${VERSION}`;
 const DATA_CACHE = `ranvier-data-${VERSION}`;
@@ -55,6 +61,12 @@ const isDataUrl = (pathname) =>
   pathname.startsWith("/api/") ||
   pathname === "/manifest.jsonl" ||
   pathname === "/manifest.webmanifest";
+
+/* Public, owner-independent payloads — same for every visitor, safe to serve
+   one fetch stale (edge-cached upstream anyway). */
+const isPublicDataUrl = (pathname) =>
+  pathname.startsWith("/api/catalog") ||
+  pathname.startsWith("/api/health");
 
 const isImmutable = (response) => (response.headers.get("cache-control") ?? "").includes("immutable");
 
@@ -97,7 +109,13 @@ self.addEventListener("fetch", (event) => {
   }
 
   if (isDataUrl(url.pathname)) {
-    event.respondWith(staleWhileRevalidate(event, DATA_CACHE, request));
+    if (isPublicDataUrl(url.pathname)) {
+      // Public data: instant stale read + background refresh.
+      event.respondWith(staleWhileRevalidate(event, DATA_CACHE, request));
+    } else {
+      // Owner-scoped data (v1.8.0 fix): fresh when online, cache when offline.
+      event.respondWith(networkFirst(DATA_CACHE, request));
+    }
     return;
   }
 
@@ -178,4 +196,24 @@ async function staleWhileRevalidate(event, cacheName, request) {
     status: 503,
     headers: { "Content-Type": "application/json; charset=utf-8" },
   });
+}
+
+/** Owner-scoped data (v1.8.0): network-first — counters must reflect the
+ *  last answer/grade immediately; cache is the offline fallback only. */
+async function networkFirst(cacheName, request) {
+  const cache = await caches.open(cacheName);
+  try {
+    const response = await fetch(request);
+    if (response && response.ok) {
+      cache.put(request, response.clone()).catch(() => {});
+    }
+    return response;
+  } catch {
+    const cached = await cache.match(request);
+    if (cached) return cached;
+    return new Response(JSON.stringify({ error: "offline" }), {
+      status: 503,
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+    });
+  }
 }

@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 
-export type View = "home" | "cert" | "study" | "exam" | "results" | "flashcards" | "progress" | "guide" | "about" | "settings";
+export type View = "home" | "cert" | "study" | "exam" | "results" | "flashcards" | "trails" | "progress" | "guide" | "about" | "settings";
 
 /**
  * Certificação ativa (patch v1.1 §9 — modelo multi-certificação, "uma por
@@ -37,7 +37,18 @@ interface AppState {
   studyDomainCode: number | null;
   /** Explicit question ids for "practice missed questions" sessions (review queue). */
   studyQuestionIds: string[] | null;
-  navigate: (view: View, opts?: { attemptId?: string; domainCode?: number | null; questionIds?: string[] | null }) => void;
+  /** Trail tranche to AUTO-START in the study view (v1.8.0 — mode TRAIL):
+   *  same pattern as studyQuestionIds; cleared right after the attempt starts. */
+  studyTrail: { domainCode: number; limit: number } | null;
+  navigate: (
+    view: View,
+    opts?: {
+      attemptId?: string;
+      domainCode?: number | null;
+      questionIds?: string[] | null;
+      trail?: { domainCode: number; limit: number } | null;
+    }
+  ) => void;
   syncFromHash: () => void;
   /** Hydrate the active cert from localStorage (post-mount, avoids SSR mismatch). */
   initCert: () => void;
@@ -55,6 +66,8 @@ function parseHash(): { view: View; attemptId: string | null } {
     estudar: "study",
     study: "study",
     flashcards: "flashcards",
+    trilhas: "trails",
+    trails: "trails",
     simulado: "exam",
     exam: "exam",
     resultado: "results",
@@ -82,6 +95,7 @@ function hashFor(view: View, attemptId?: string | null): string {
     cert: "/certificacao",
     study: "/estudar",
     flashcards: "/flashcards",
+    trails: "/trilhas",
     exam: `/simulado/${attemptId ?? ""}`,
     results: `/resultado/${attemptId ?? ""}`,
     progress: "/progresso",
@@ -98,6 +112,7 @@ export const useAppStore = create<AppState>((set) => ({
   certSlug: DEFAULT_CERT_SLUG,
   studyDomainCode: null,
   studyQuestionIds: null,
+  studyTrail: null,
   navigate: (view, opts) => {
     const attemptId = opts?.attemptId ?? null;
     if (typeof window !== "undefined") {
@@ -108,6 +123,7 @@ export const useAppStore = create<AppState>((set) => ({
       attemptId,
       studyDomainCode: opts?.domainCode !== undefined ? opts.domainCode : null,
       studyQuestionIds: opts?.questionIds !== undefined ? opts.questionIds : null,
+      studyTrail: opts?.trail !== undefined ? opts.trail : null,
     });
     if (typeof window !== "undefined") window.scrollTo({ top: 0 });
   },

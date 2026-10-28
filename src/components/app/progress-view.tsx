@@ -11,6 +11,7 @@ import {
   LogIn,
   Play,
   Radar as RadarIcon,
+  Route,
   Target,
   TrendingUp,
 } from "lucide-react";
@@ -52,6 +53,13 @@ export function ProgressView() {
   const { data: fcSummary } = useQuery({
     queryKey: ["flashcards-summary", certSlug],
     queryFn: () => api.flashcardsSummary(certSlug),
+    staleTime: 0,
+    refetchOnMount: "always",
+  });
+  /* Trilhas (v1.8.0): rota ponderada — mesmo payload da view de trilhas. */
+  const { data: trailsSummary } = useQuery({
+    queryKey: ["trails", certSlug, lang],
+    queryFn: () => api.trails(certSlug, lang),
     staleTime: 0,
     refetchOnMount: "always",
   });
@@ -145,6 +153,44 @@ export function ProgressView() {
           ))}
         </div>
       </section>
+
+      {/* Trilhas (v1.8.0) — bloco Rota: percentual ponderado + fatos
+          derivados; CTA para a rota completa. Nada inventado (patch §1). */}
+      {trailsSummary && trailsSummary.trails.length > 0 && (
+        <section className="mb-8">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Route className="h-4 w-4 text-primary" />
+                {t.trails.progressBlockTitle}
+              </CardTitle>
+              <CardDescription>
+                {f(t.trails.progressBlockDesc, {
+                  done: trailsSummary.trails.reduce((a, tr) => a + tr.completed, 0),
+                  total: trailsSummary.trails.reduce((a, tr) => a + tr.total, 0),
+                })}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-wrap items-center gap-x-8 gap-y-3">
+              <div>
+                <p className="text-xl font-bold tabular-nums tracking-tight">{Math.round(trailsSummary.overallPercent)}%</p>
+                <p className="text-[11px] leading-tight text-muted-foreground">{t.trails.overall}</p>
+              </div>
+              <div>
+                <p className="text-xl font-bold tabular-nums tracking-tight">
+                  {trailsSummary.trails.filter((tr) => tr.state === "complete").length}
+                  <span className="text-muted-foreground">/{trailsSummary.trails.length}</span>
+                </p>
+                <p className="text-[11px] leading-tight text-muted-foreground">{t.trails.progressBlockTrails}</p>
+              </div>
+              <Button size="sm" variant="outline" className="sm:ml-auto" onClick={() => navigate("trails")}>
+                <Route className="h-4 w-4" />
+                {t.trails.title}
+              </Button>
+            </CardContent>
+          </Card>
+        </section>
+      )}
 
       {/* Flashcards (v1.7.0) — bloco factual do SRS: em rotação, para hoje,
           maduros. Só números que existem na tabela; CTA quando há fila. */}
@@ -317,7 +363,10 @@ export function ProgressView() {
                           })}
                         </TableCell>
                         <TableCell className="text-right">
-                          {a.status === "COMPLETED" || a.mode === "STUDY" ? (
+                          {/* TRAIL em andamento = sessão de estudo (v1.8.0):
+                              segue para o results, como STUDY — não para o
+                              fluxo de retomar simulado. */}
+                          {a.status === "COMPLETED" || a.mode !== "EXAM" ? (
                             <Button variant="ghost" size="sm" onClick={() => navigate("results", { attemptId: a.id })}>
                               {a.status === "COMPLETED" ? t.progress.review : t.progress.status.COMPLETED}
                             </Button>

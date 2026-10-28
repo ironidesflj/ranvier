@@ -178,18 +178,30 @@ bun run db:generate
 
 > **Manutenção futura:** sempre que um model mudar, atualize **os dois schemas** (`prisma/schema.prisma` e `prisma/schema.prod.prisma`), e re-aplique em prod com os passos (1)→(3) desta seção. Cuidado: `prisma db push` aplica o schema como está — um model removido/alterado pode **droppar colunas e tabelas**. Revise o diff do schema antes de rodar contra o banco com dados reais.
 
-> **DEPLOY DA v1.7.0 (flashcards) — passo de banco OBRIGATÓRIO:** este lote
-> adiciona a tabela `FlashcardState` (estado de repetição espaçada por dono).
-> O deploy pede os passos (1)→(2) da seção 5 (`db:generate:prod` →
-> `db:push:prod` — **aditivo**: nenhuma tabela existente é alterada; o seed
-> (3) é idempotente e pode ser re-rodado sem efeito colateral). Sem a tabela,
-> `/api/flashcards` responde 500 e a view de flashcards mostra erro — o resto
-> do app funciona. Verificação pós-deploy:
+> **DEPLOY DA v1.8.0 (trilhas + flashcards V2) — passo de banco OBRIGATÓRIO:**
+> este lote adiciona a tabela `FlashcardState` (estado de repetição espaçada
+> por dono) — **a v1.7.0 nunca foi publicada**, então a tabela entra no Neon
+> pela primeira vez aqui. Trilhas **não** mexem no banco (progresso derivado
+> dos AttemptAnswer existentes). O deploy pede os passos (1)→(2) da seção 5
+> (`db:generate:prod` → `db:push:prod` — **aditivo**: nenhuma tabela
+> existente é alterada; o seed (3) é idempotente e pode ser re-rodado sem
+> efeito colateral). Sem a tabela, `/api/flashcards` responde 500 e a view
+> de flashcards mostra erro — o resto do app funciona. Verificação
+> pós-deploy:
 > `curl -sS "https://<SEU_APP>.vercel.app/api/flashcards?certSlug=databricks-data-engineer-associate"`
 > → `{"certSlug":"databricks-data-engineer-associate","dueCount":0,"newCount":300,"totalCards":300,"matureCount":0}`
-> para um visitante novo. Recomendação repetida da v1.6.0: `DATABASE_URL`
-> **pooled** do Neon (`-pooler.` no host) — cada revisão de cartão é uma
-> escrita no banco; sem pooler, cada virada de cartão paga handshake.
+> para um visitante novo; e
+> `curl -sS "https://<SEU_APP>.vercel.app/api/trails?certSlug=databricks-data-engineer-associate&lang=pt"`
+> → 7 trilhas, `overallPercent: 0`, `total` 19/59/69/43/31/33/46.
+> **Nota v1.8.0:** com o fluxo V2 cada cartão = 1 leitura (`/reveal`) + 1
+> escrita (`/grade`), e trilhas adicionam leituras derivadas — a
+> recomendação do `DATABASE_URL` **pooled** do Neon (`-pooler.` no host,
+> pendência desde a v1.6.0) fica ainda mais importante: sem pooler, cada
+> virada de cartão paga handshake de conexão.
+> **Service worker:** o SW da v1.8.0 mudou de estratégia para dados por dono
+> (network-first) — visitantes que já tinham o SW antigo trocam para o novo
+> ao fechar as abas (ciclo de vida sem skipWaiting, por design; a ativação
+> limpa os caches antigos).
 
 ---
 

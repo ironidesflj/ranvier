@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowRight, Award, BookOpenCheck, History, Layers, LineChart, Loader2, Play, ShieldCheck } from "lucide-react";
+import { ArrowRight, Award, BookOpenCheck, History, Layers, LineChart, Loader2, Play, Route, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLang } from "@/components/app/language-provider";
@@ -70,6 +70,30 @@ export function HomeView() {
   });
   const fcDue = fcSummary?.dueCount ?? 0;
   const fcAvailable = fcDue + (fcSummary?.newCount ?? 0);
+
+  /* Trilhas (v1.8.0): CTA factual do bilhete — “Comece pela rota · N
+     questões” (nada iniciado), “Continuar: {trilha} · {done}/{total}” ou o
+     percentual ponderado da rota. Progresso derivado por dono. */
+  const { data: trailsSummary } = useQuery({
+    queryKey: ["trails", cert?.slug, lang],
+    queryFn: () => api.trails(cert!.slug, lang),
+    enabled: Boolean(cert?.slug) && langReady,
+    staleTime: 0,
+    refetchOnMount: "always",
+  });
+  const trailList = trailsSummary?.trails ?? [];
+  const trailStarted = trailList.some((tr) => tr.state !== "not_started");
+  const trailRouteComplete = trailList.length > 0 && trailList.every((tr) => tr.state === "complete");
+  const trailNext = trailList.find((tr) => tr.state === "in_progress") ?? null;
+  const trailLabel = !trailsSummary
+    ? null
+    : trailRouteComplete
+      ? t.trails.homeComplete
+      : trailNext
+        ? f(t.trails.homeContinue, { name: trailNext.name, done: trailNext.completed, total: trailNext.total })
+        : trailStarted
+          ? f(t.trails.homePercent, { percent: Math.round(trailsSummary.overallPercent) })
+          : f(t.trails.homeStart, { count: cert?.totalQuestions ?? 0 });
 
   const startExam = useMutation({
     mutationFn: () => api.startAttempt({ certSlug: cert?.slug ?? certSlug, mode: "EXAM" }),
@@ -172,7 +196,15 @@ export function HomeView() {
                     <dt className="text-xs uppercase tracking-wide text-muted-foreground">{t.home.ticket.lastSession}</dt>
                     <dd className="font-mono text-sm font-medium tabular-nums">
                       {lastAttempt && lastAttempt.percent != null
-                        ? f(t.home.ticket.sessionScore, { percent: Math.round(lastAttempt.percent), mode: lastAttempt.mode === "EXAM" ? t.exam.title : t.study.title })
+                        ? f(t.home.ticket.sessionScore, {
+                            percent: Math.round(lastAttempt.percent),
+                            mode:
+                              lastAttempt.mode === "EXAM"
+                                ? t.exam.title
+                                : lastAttempt.mode === "TRAIL"
+                                  ? t.trails.title
+                                  : t.study.title,
+                          })
                         : t.home.ticket.noSession}
                     </dd>
                   </div>
@@ -205,6 +237,20 @@ export function HomeView() {
                     <span className="truncate">
                       {fcDue > 0 ? f(t.flashcards.homeDue, { count: fcDue }) : f(t.flashcards.homeNew, { count: fcSummary.newCount })}
                     </span>
+                    <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+                  </Button>
+                )}
+
+                {/* Trilhas — CTA factual (v1.8.0): rota, continuação ou 100%. */}
+                {trailLabel && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-2 w-full"
+                    onClick={() => navigate("trails")}
+                  >
+                    <Route className="h-4 w-4" />
+                    <span className="truncate">{trailLabel}</span>
                     <ArrowRight className="h-3.5 w-3.5" aria-hidden />
                   </Button>
                 )}

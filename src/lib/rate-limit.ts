@@ -70,8 +70,11 @@ export const LIMITS = {
   answer: { limit: 300, windowMs: 5 * 60_000 },
   submit: { limit: 60, windowMs: 5 * 60_000 },
   read: { limit: 300, windowMs: 60_000 },
-  /* v1.7.0 — flashcards: draw é 1 por sessão (mas re-draws acontecem);
-     review é 1 por cartão (com re-entradas, uma sessão de 50 bate ~100). */
+  /* v1.7.0 → v1.8.0 — flashcards: draw é 1 por sessão (mas re-draws
+     acontecem); reveal+grade são 1 de cada por cartão (uma sessão de 50
+     com re-entradas bate ~100 de cada). Trails: leitura derivada leve. */
   flashcardsDraw: { limit: 60, windowMs: 5 * 60_000 },
-  flashcardsReview: { limit: 300, windowMs: 5 * 60_000 },
+  flashcardsReveal: { limit: 300, windowMs: 5 * 60_000 },
+  flashcardsGrade: { limit: 300, windowMs: 5 * 60_000 },
+  trails: { limit: 60, windowMs: 5 * 60_000 },
 } as const;

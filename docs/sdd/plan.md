@@ -21,10 +21,30 @@
 - **v1.7.0 — Flashcards com repetição espaçada**: spec **APROVADA pelo
   fundador em 27/out/2026** ("aprovado, exceto a animação") e **implementada
   no mesmo dia** (worklog Task 19 — código completo e verificado no sandbox;
-  aguarda sync GitHub + deploy com passo de banco, receita em `docs/DEPLOY.md`
-  §5/nota v1.7.0). A animação do símbolo (§14) foi **excluída do lote por
+  nunca publicada). A animação do símbolo (§14) foi **excluída do lote por
   decisão do fundador**: "preciso reanalisar ela depois" — segue como item
-  pendente abaixo.
+  pendente abaixo. **Pós-implementação:** o fundador experimentou a sessão e
+  **rejeitou o desenho dela antes do deploy** ("não vi diferença entre os
+  flashcards e o modo estudo — pergunta e resposta, mesma coisa") — o
+  desenho da sessão é substituído pela spec v1.8.0 (abaixo); a tabela
+  `FlashcardState`, o SRS, o merge e o cascade permanecem válidos.
+- **v1.8.0 — Trilhas de estudo + Sessão de flashcards V2**: spec
+  **APROVADA pelo fundador em 27/out/2026** ("gostei, pode seguir") e
+  **implementada no mesmo dia** (worklog Task 21 — código completo e
+  verificado no sandbox; aguarda sync GitHub + deploy com passo de banco,
+  receita em `docs/DEPLOY.md` §5/nota v1.8.0). Conteúdo: (I) estudo que
+  confirmou a crítica do fundador (v1.7.0 = reconhecimento igual ao Estudar)
+  e redesign da sessão para **evocação livre** (frente sem alternativas em
+  282/300 cartões; 18 cartões "statement-selection" mantêm as afirmações na
+  frente como enunciado; fluxo revelar → julgar (Errei/Acerte com projeção
+  SRS nos botões) → auto-avançar; sem botão Pular; teclado 1/2;
+  API /reveal + /grade); (II) **trilhas** = 7 domínios oficiais como
+  currículo ordenado (rampa E→M→H, tranches de 10–50) com progresso
+  **100% derivado de AttemptAnswer** (zero tabela nova) e modo TRAIL no
+  attempt existente. **Correção embarcada (QA):** SW network-first para
+  dados owner-scoped (spec §13 — contadores ficavam uma fetch atrás).
+  Deploy: v1.8.0 direto (passo de banco da FlashcardState embutido — a
+  sessão rejeitada da v1.7.0 nunca chega à produção).
 
 ## Fechado (entregue)
 
@@ -76,8 +96,11 @@
   (d) staleTime 24h. **Resta**: (a) env `DATABASE_URL` pooled do Neon (passo
   do deploy, maior ganho para chamadas autenticadas) e (e) bootstrap inline
   no HTML (opcional, só se o diagnóstico persistir após (a)).
-- ~~V2 — flashcards~~ → **implementado na v1.7.0** (ver Autorizado).
-- V2 — trilhas de estudo personalizadas (após flashcards).
+- ~~V2 — flashcards~~ → **implementado na v1.7.0** (ver Autorizado; sessão
+  redesenhada na spec v1.8.0).
+- ~~V2 — trilhas de estudo personalizadas~~ → **spec escrita (v1.8.0,
+  junto com o redesign da sessão de flashcards), aguardando aprovação do
+  fundador** — ver Autorizado.
 - Novas certificações em produção (a UI "em breve" já lista: **AI-900**,
   **DP-900**, **PL-300**, **SC-900**, **AZ-104**) — arquitetura multi-cert
   pronta desde a v1.4.0 (`ranvier:cert`, seletor, progresso por cert por

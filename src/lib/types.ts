@@ -1,7 +1,9 @@
 /** Shared client/server DTO types. Never include correctIndex in public question DTOs. */
 
 export type Lang = "en" | "pt";
-export type Mode = "STUDY" | "EXAM";
+/** Attempt mode. TRAIL (v1.8.0) = sequenced study tranche on one domain —
+ *  behaves like STUDY (immediate feedback, no timer); progress is derived. */
+export type Mode = "STUDY" | "EXAM" | "TRAIL";
 export type Difficulty = "EASY" | "MEDIUM" | "HARD";
 
 export interface PublicDomain {
@@ -166,7 +168,9 @@ export interface MeResponse {
 }
 
 /* ------------------------------------------------------------------ */
-/* Flashcards (v1.7.0 — spec docs/sdd/spec-v1.7.0-flashcards.md)       */
+/* Flashcards (v1.7.0 → V2 em v1.8.0 — spec docs/sdd/                  */
+/* spec-v1.8.0-trilhas-flashcards.md: evocação na frente, julgamento   */
+/* binário do aluno, reveal/grade divididos)                           */
 /* ------------------------------------------------------------------ */
 
 export type FlashcardDrawScope = "mixed" | "due" | "new";
@@ -183,21 +187,66 @@ export interface FlashcardsSummary {
   matureCount: number;
 }
 
+/** Drawn card: PublicQuestion + the front-layout flag (server-computed).
+ *  Statement-selection questions (spec §3.1) carry their options on the
+ *  FRONT as part of the prompt — the flag is decided by a curated key list
+ *  server-side; the client never guesses. */
+export interface FlashcardDrawnCard extends PublicQuestion {
+  frontIncludesOptions: boolean;
+}
+
 export interface FlashcardDrawResponse {
-  cards: PublicQuestion[];
+  cards: FlashcardDrawnCard[];
   drewCount: number;
 }
 
-export interface FlashcardReviewResponse {
-  correct: boolean;
+/** Reveal (read-only): the card back + SRS projections for the judgment
+ *  buttons (spec §3.2/§4). Grading happens separately — a revealed card
+ *  left without judgment records NO review. */
+export interface FlashcardRevealResponse {
   correctIndex: number;
   explanationEn: string;
   explanationPt: string;
   referenceUrl: string | null;
   referenceTitle: string | null;
-  /** SRS outcome (factual line on the card back). */
+  /** intervalDays the card would get on each judgment (same srs.ts math). */
+  projection: {
+    wrong: { intervalDays: number };
+    right: { intervalDays: number };
+  };
+}
+
+/** Grade (write): apply SM-2 with the student's self-assessment. */
+export interface FlashcardGradeResponse {
   intervalDays: number;
   reps: number;
   lapses: number;
   nextDueAt: string;
+}
+
+/* ------------------------------------------------------------------ */
+/* Trilhas (v1.8.0 — spec docs/sdd/spec-v1.8.0-trilhas-flashcards.md)   */
+/* ------------------------------------------------------------------ */
+
+export interface TrailInfo {
+  code: number;
+  /** Localized domain name (lang param). */
+  name: string;
+  weightPercent: number;
+  /** Official outline bullets, localized. */
+  outline: string[];
+  /** Enabled questions in the domain. */
+  total: number;
+  /** Questions this owner answered correctly at least once (any mode). */
+  completed: number;
+  state: "not_started" | "in_progress" | "complete";
+  /** Stable seed key of the next non-completed question (informational). */
+  nextUp: string | null;
+}
+
+export interface TrailsSummary {
+  certSlug: string;
+  /** Weighted by the official blueprint domain weights. */
+  overallPercent: number;
+  trails: TrailInfo[];
 }

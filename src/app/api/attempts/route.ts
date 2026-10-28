@@ -6,7 +6,8 @@ import { rateLimit, LIMITS } from "@/lib/rate-limit";
 
 const startSchema = z.object({
   certSlug: z.string().min(1).max(120),
-  mode: z.enum(["STUDY", "EXAM"]),
+  /** TRAIL (v1.8.0): sequenced tranche on one domain — requires domainCodes=[code]. */
+  mode: z.enum(["STUDY", "EXAM", "TRAIL"]),
   domainCodes: z.array(z.number().int().min(1).max(20)).max(20).optional(),
   limit: z.number().int().min(1).max(50).optional(),
   questionIds: z.array(z.string().min(1).max(64)).max(50).optional(),

@@ -15,7 +15,7 @@ import { api, ApiError } from "@/lib/api-client";
 import { orderOptions, type OptionOrdering } from "@/lib/option-order";
 import { QuestionCard, type FeedbackState } from "@/components/app/question-card";
 import { QueryError } from "@/components/app/query-error";
-import type { PublicQuestion, StartAttemptResponse } from "@/lib/types";
+import type { Mode, PublicQuestion, StartAttemptResponse } from "@/lib/types";
 
 type Phase = "config" | "session" | "summary";
 
@@ -35,7 +35,7 @@ type Phase = "config" | "session" | "summary";
  */
 export function StudyView() {
   const { t, f, lang, langReady } = useLang();
-  const { navigate, studyDomainCode, studyQuestionIds, certSlug } = useAppStore();
+  const { navigate, studyDomainCode, studyQuestionIds, studyTrail, certSlug } = useAppStore();
   const queryClient = useQueryClient();
 
   const { data, isPending, isError, isFetching, refetch, error } = useQuery({
@@ -71,19 +71,27 @@ export function StudyView() {
   }, [studyDomainCode, cert]);
 
   const start = useMutation({
-    mutationFn: (vars: { domainCodes?: number[]; limit?: number; questionIds?: string[] }) =>
+    mutationFn: (vars: { mode?: Mode; domainCodes?: number[]; limit?: number; questionIds?: string[] }) =>
       api.startAttempt({
         certSlug: cert?.slug ?? certSlug,
-        mode: "STUDY",
-        ...vars,
+        mode: vars.mode ?? "STUDY",
+        domainCodes: vars.domainCodes,
+        limit: vars.limit,
+        questionIds: vars.questionIds,
       }),
-    onSuccess: (res) => {
+    onSuccess: (res, vars) => {
       setSession(res);
       setIndex(0);
       setAnswers({});
       setPick(null);
       setPhase("session");
-      toast.success(studyQuestionIds?.length ? t.toast.practiceStarted : t.toast.sessionStarted);
+      toast.success(
+        vars?.mode === "TRAIL"
+          ? t.toast.trailStarted
+          : studyQuestionIds?.length
+            ? t.toast.practiceStarted
+            : t.toast.sessionStarted
+      );
       window.scrollTo({ top: 0 });
     },
     onError: () => toast.error(t.toast.error),
@@ -97,12 +105,24 @@ export function StudyView() {
     }
   }, [studyQuestionIds, cert, phase, start, navigate]);
 
+  // Auto-start TRAIL tranche arriving from the trails view (v1.8.0 — same
+  // pattern as the review queue: the study machine runs the whole session).
+  useEffect(() => {
+    if (studyTrail && cert && phase === "config" && !start.isPending) {
+      start.mutate({ mode: "TRAIL", domainCodes: [studyTrail.domainCode], limit: studyTrail.limit });
+      navigate("study", { trail: null });
+    }
+  }, [studyTrail, cert, phase, start, navigate]);
+
   const submit = useMutation({
     mutationFn: (attemptId: string) => api.submit(attemptId),
     onSuccess: (_res, attemptId) => {
       toast.success(t.toast.sessionFinished);
       void queryClient.invalidateQueries({ queryKey: ["progress"] });
       void queryClient.invalidateQueries({ queryKey: ["attempts"] });
+      /* Trilhas (v1.8.0): o progresso deriva dos AttemptAnswer — invalidar
+         para a rota refletir a tranche recém-respondida. */
+      void queryClient.invalidateQueries({ queryKey: ["trails"] });
       navigate("results", { attemptId });
     },
     onError: () => toast.error(t.toast.error),
@@ -281,7 +301,7 @@ export function StudyView() {
                 <span className="hidden sm:inline">{t.nav.home}</span>
               </Button>
               <p className="truncate font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
-                {session.certification.shortName} · {t.study.title}
+                {session.certification.shortName} · {session.mode === "TRAIL" ? t.trails.title : t.study.title}
               </p>
             </div>
             <div className="flex shrink-0 items-center gap-3">
