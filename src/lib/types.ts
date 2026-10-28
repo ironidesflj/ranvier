@@ -164,3 +164,40 @@ export interface PublicUser {
 export interface MeResponse {
   user: PublicUser | null;
 }
+
+/* ------------------------------------------------------------------ */
+/* Flashcards (v1.7.0 — spec docs/sdd/spec-v1.7.0-flashcards.md)       */
+/* ------------------------------------------------------------------ */
+
+export type FlashcardDrawScope = "mixed" | "due" | "new";
+
+export interface FlashcardsSummary {
+  certSlug: string;
+  /** Cards with state and dueAt <= now. */
+  dueCount: number;
+  /** Enabled questions with no state for this owner yet. */
+  newCount: number;
+  /** Enabled questions for the certification. */
+  totalCards: number;
+  /** Cards with intervalDays >= 21 (stable-ish memory). */
+  matureCount: number;
+}
+
+export interface FlashcardDrawResponse {
+  cards: PublicQuestion[];
+  drewCount: number;
+}
+
+export interface FlashcardReviewResponse {
+  correct: boolean;
+  correctIndex: number;
+  explanationEn: string;
+  explanationPt: string;
+  referenceUrl: string | null;
+  referenceTitle: string | null;
+  /** SRS outcome (factual line on the card back). */
+  intervalDays: number;
+  reps: number;
+  lapses: number;
+  nextDueAt: string;
+}

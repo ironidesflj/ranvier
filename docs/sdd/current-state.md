@@ -1,24 +1,41 @@
 # current-state.md — estado verificado
 
-Última atualização: **2026-10-27 · v1.6.0** (lote: transparência de
-privacidade + performance de carregamento + prep.ts portátil; spec:
-`spec-v1.6.0-privacy-performance.md`). Lote anterior: v1.5.1 = OG/social
-preview (não publicada — embarcou na v1.6.0); v1.5.0 = Convergência Axon
-(fatias 2, 3 e 4 sobre o pacote `@ironidesflj/axon`, publicada). Lotes mais
-antigos: v1.3.x = identidade visual; v1.4.0 = patch de design v1.1; v1.4.1 =
-4 ajustes de UI do fundador.
+Última atualização: **2026-10-27 · v1.7.0** (lote: flashcards com repetição
+espaçada — tabela `FlashcardState`, SM-2 simplificado local, 3 rotas de API,
+view `#/flashcards`, CTA na Home e bloco no Progresso; spec:
+`spec-v1.7.0-flashcards.md`, **aprovada pelo fundador e implementada** —
+animação do símbolo §14 excluída por decisão dele, reanálise pendente).
+**Ainda não publicada**: aguarda sync GitHub + deploy com passo de banco
+(`docs/DEPLOY.md` §5, nota v1.7.0). Lote anterior: v1.6.0 = transparência
+de privacidade + performance de carregamento + prep.ts portátil (publicada
+e verificada ao vivo, Task 17); v1.5.1 = OG/social preview (não publicada —
+embarcou na v1.6.0); v1.5.0 = Convergência Axon (fatias 2, 3 e 4 sobre o
+pacote `@ironidesflj/axon`, publicada). Lotes mais antigos: v1.3.x =
+identidade visual; v1.4.0 = patch de design v1.1; v1.4.1 = 4 ajustes de UI
+do fundador.
 
 ## Versão e artefatos
 
-- App: **v1.6.0** (`src/lib/version.ts` = fonte única; `package.json`,
+- App: **v1.7.0** (`src/lib/version.ts` = fonte única; `package.json`,
   `public/sw.js`, `public/offline.html` no mesmo lote).
 - Banco: 300 questões (S1=19, S2=59, S3=69, S4=43, S5=31, S6=33, S7=46),
   1 certificação (Databricks Data Engineer Associate, blueprint May/2026),
   IDs públicas congeladas RAN-DBDEA-00001..00300, 6 simulados disjuntos.
-  **Sem mudanças de schema e de questões** na v1.5.0/v1.5.1/v1.6.0 (só
-  contrato/versão/metadados/UI).
+  **Mudança de schema na v1.7.0:** tabela NOVA `FlashcardState` (estado SRS
+  por dono — userId XOR anonId, cascades User/Question, índices por
+  dono+dueAt); questões/seed/manifesto INTOCADOS (validate:questions 300 ·
+  validate:manifest 300/0/0 verificados pós-lote).
+- Flashcards (v1.7.0): 1 questão = 1 cartão; SM-2 simplificado local
+  (`src/lib/srs.ts` — errar/pular vence AGORA e re-entra na sessão, 1×;
+  acerto escala 1d → 3d → intervalo×ease, teto 180d); rotas
+  `/api/flashcards` (summary), `/draw` (devidas+novas, até 50), `/review`
+  (correção server-side — gabarito nunca viaja no draw); merge no
+  login/register (colisão: mais `reps` vence) e cascade no DELETE LGPD —
+  ambos verificados no sandbox; view `#/flashcards` com barra de sessão,
+  linha SRS factual e resumo honesto; CTA no bilhete da Home ("N para hoje")
+  e bloco no Progresso (em rotação/para hoje/maduros).
 - PWA: manifest (tema papel #f7fbf9), sw.js stale-while-revalidate
-  (`ranvier-v1.6.0`), offline.html, ícones com monograma R.
+  (`ranvier-v1.7.0`), offline.html, ícones com monograma R.
 - Social preview (v1.5.1→v1.6.0): og:image 1200×630 "bilhete de exame"
   (`public/og/`, gerada por `bun run og`), twitter summary_large_image,
   canonical + og:locale pt_BR/en_US no `layout.tsx`.
@@ -238,8 +255,13 @@ antigos: v1.3.x = identidade visual; v1.4.0 = patch de design v1.1; v1.4.1 =
 
 ## Onde estão as evidências
 
-- `worklog.md` (registro vivo, Task IDs 0–16) — diffs, comandos, medições.
+- `worklog.md` (registro vivo, Task IDs 0–19) — diffs, comandos, medições.
+  Task 17 = verificação ao vivo da v1.6.0 publicada; Task 18 = correção
+  factual do dossiê + avaliação §14 + spec v1.7.0 (flashcards) aguardando
+  aprovação.
 - `download/ranvier-v1.3.1.*` (bundle/patch/zip) — artefatos da leva anterior
   (cada leva gera os próprios artefatos quando o fundador pedir).
 - `docs/sdd/fatias-dossie.md` — instantâneo do ecossistema Noos trazido pelo
-  fundador (27/out/2026), atualizado nas adoções de fatia.
+  fundador (27/out/2026), atualizado nas adoções de fatia e corrigido
+  factualmente na Task 18 (DBDEA/IDs reais; exemplos az-900 anotados como
+  didáticos do guia).

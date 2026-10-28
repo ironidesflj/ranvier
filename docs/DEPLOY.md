@@ -19,7 +19,7 @@
 - **Ranvier** ("by Noos") — app gratuito de estudos/simulados para a certificação **Databricks Certified Data Engineer Associate**, parte do ecossistema **Noos** (hub: `noos.study`, com fallback gratuito `https://noos-hub.vercel.app`).
 - **Stack:** Next.js 16 (App Router, rota única `/` com hash-routing), TypeScript, Tailwind 4, shadcn/ui, Prisma.
 - **Banco:** SQLite no sandbox (`prisma/schema.prisma`) · **produção = Neon Postgres** (`prisma/schema.prod.prisma`, mesmos models, provider `postgresql`). Os dois arquivos são mantidos sincronizados a cada mudança de model — se você alterar um, altere o outro.
-- **Contrato do hub:** `public/manifest.jsonl` (116 linhas, uma por questão, com ID pública `RAN-DBDEA-#####` e checksum) — servido como arquivo estático e publicado por CI (seção 7).
+- **Contrato do hub:** `public/manifest.jsonl` (300 linhas, uma por questão, com ID pública `RAN-DBDEA-#####` e checksum) — servido como arquivo estático e publicado por CI (seção 7).
 - **Regras do ecossistema que o deploy preserva:** núcleo de estudo **gratuito para sempre, sem paywall**; o app é dono das questões e do progresso, o hub é dono das discussões; anúncios (se habilitados) **apenas** na página de resultado e zonas estáticas de rodapé; privacidade: **sem rastreamento individual** (analytics no máximo agregado/anônimo).
 
 ### 1.2 Contas necessárias (todas com free tier suficiente)
@@ -43,7 +43,7 @@ Confirme que o projeto roda no sandbox antes de mexer em produção (a partir da
 ```bash
 bun install                     # dependências (+ postinstall gera o client Prisma sqlite)
 bun run db:push                 # cria/atualiza o SQLite local (db/custom.db, via .env)
-bun scripts/seed.ts             # seed idempotente: 1 certificação + 7 domínios + 116 questões
+bun scripts/seed.ts             # seed idempotente: 1 certificação + 7 domínios + 300 questões
 bun scripts/validate-questions.ts   # deve terminar com 0 erros (estrutura + IDs públicas)
 bun run dev                     # http://localhost:3000
 ```
@@ -158,10 +158,10 @@ bun run db:generate:prod
 # (2) cria as tabelas no Neon (usa o schema prod; SEM --accept-data-loss, por design)
 DATABASE_URL="<SUA_CONNECTION_STRING_NEON_POOLED>" bun run db:push:prod
 
-# (3) popula: 1 certificação + 7 domínios + 116 questões (idempotente)
+# (3) popula: 1 certificação + 7 domínios + 300 questões (idempotente)
 DATABASE_URL="<SUA_CONNECTION_STRING_NEON_POOLED>" bun scripts/seed.ts
 
-# (4) VERIFICAÇÃO: deve imprimir "questions: 116" (roda enquanto o client prod está ativo)
+# (4) VERIFICAÇÃO: deve imprimir "questions: 300" (roda enquanto o client prod está ativo)
 DATABASE_URL="<SUA_CONNECTION_STRING_NEON_POOLED>" bun -e 'const {PrismaClient}=require("@prisma/client");const db=new PrismaClient();db.question.count().then(async n=>{console.log("questions:",n);console.log("certifications:",await db.certification.count());await db.$disconnect()})'
 
 # (5) VOLTA o client local para o schema SQLite — sem isto, `bun run dev` quebra (engine mismatch)
@@ -178,6 +178,19 @@ bun run db:generate
 
 > **Manutenção futura:** sempre que um model mudar, atualize **os dois schemas** (`prisma/schema.prisma` e `prisma/schema.prod.prisma`), e re-aplique em prod com os passos (1)→(3) desta seção. Cuidado: `prisma db push` aplica o schema como está — um model removido/alterado pode **droppar colunas e tabelas**. Revise o diff do schema antes de rodar contra o banco com dados reais.
 
+> **DEPLOY DA v1.7.0 (flashcards) — passo de banco OBRIGATÓRIO:** este lote
+> adiciona a tabela `FlashcardState` (estado de repetição espaçada por dono).
+> O deploy pede os passos (1)→(2) da seção 5 (`db:generate:prod` →
+> `db:push:prod` — **aditivo**: nenhuma tabela existente é alterada; o seed
+> (3) é idempotente e pode ser re-rodado sem efeito colateral). Sem a tabela,
+> `/api/flashcards` responde 500 e a view de flashcards mostra erro — o resto
+> do app funciona. Verificação pós-deploy:
+> `curl -sS "https://<SEU_APP>.vercel.app/api/flashcards?certSlug=databricks-data-engineer-associate"`
+> → `{"certSlug":"databricks-data-engineer-associate","dueCount":0,"newCount":300,"totalCards":300,"matureCount":0}`
+> para um visitante novo. Recomendação repetida da v1.6.0: `DATABASE_URL`
+> **pooled** do Neon (`-pooler.` no host) — cada revisão de cartão é uma
+> escrita no banco; sem pooler, cada virada de cartão paga handshake.
+
 ---
 
 ## 6. Verificação pós-deploy
@@ -191,14 +204,14 @@ curl -sS -o /dev/null -w "%{http_code}\n" https://<SEU_APP>.vercel.app/
 # 2) o catálogo responde JSON (certificação DBDEA com domínios; SEM campos de gabarito)
 curl -sS https://<SEU_APP>.vercel.app/api/catalog | head -c 400
 
-# 2b) saúde do banco — deve retornar {"status":"ok","db":"ok",..."questions":116}
+# 2b) saúde do banco — deve retornar {"status":"ok","db":"ok",..."questions":300}
 #     503/db:error = DATABASE_URL ausente/errada, engine errado (build sem build:vercel) ou schema não-aplicado (db:push:prod) → ver §5 e §11
 curl -sS -w "\nHTTP %{http_code}\n" https://<SEU_APP>.vercel.app/api/health
 
-# 3) o contrato do hub serve as 116 questões
-curl -sS https://<SEU_APP>.vercel.app/manifest.jsonl | wc -l          # → 116
+# 3) o contrato do hub serve as 300 questões
+curl -sS https://<SEU_APP>.vercel.app/manifest.jsonl | wc -l          # → 300
 curl -sS https://<SEU_APP>.vercel.app/manifest.jsonl | head -c 120    # → começa com {"id":"RAN-DBDEA-00001",...
-curl -sS https://<SEU_APP>.vercel.app/manifest.jsonl | tail -n 1 | head -c 60   # → ...{"id":"RAN-DBDEA-00116",...
+curl -sS https://<SEU_APP>.vercel.app/manifest.jsonl | tail -n 1 | head -c 60   # → ...{"id":"RAN-DBDEA-00300",...
 
 # 4) headers de segurança estão ativos (X-Content-Type-Options: nosniff, X-Frame-Options: DENY, ...)
 curl -sSI https://<SEU_APP>.vercel.app/ | grep -iE 'x-frame|x-content-type|referrer-policy'
@@ -242,7 +255,7 @@ Se **qualquer** item falhar → seção 11 antes de prosseguir.
 
 - GitHub → aba **Actions** → workflow **manifest** verde no último push relevante.
 - No histórico de commits do `main`, o commit do bot aparece quando o banco mudou.
-- `curl -sS https://<SEU_APP>.vercel.app/manifest.jsonl | wc -l` → **116** (hoje).
+- `curl -sS https://<SEU_APP>.vercel.app/manifest.jsonl | wc -l` → **300** (hoje).
 - Divergência local × deploy: `diff <(curl -sS https://<SEU_APP>.vercel.app/manifest.jsonl) public/manifest.jsonl` → vazio.
 
 ### 7.3 Como adicionar novas questões (receita exata)
@@ -256,7 +269,7 @@ bun scripts/generate-manifest.ts --assign
 
 # 3) ATUALIZE a contagem esperada no validador se as totais por domínio mudarem:
 #    scripts/validate-questions.ts → const expected = { 1: 8, 2: 24, 3: 25, 4: 18, 5: 12, 6: 12, 7: 17 }
-#    (hoje: 116 no total; o validador ERRA se as contagens divergirem — de propósito)
+#    (hoje: 300 no total; o validador ERRA se as contagens divergirem — de propósito)
 
 # 4) valide o banco inteiro
 bun scripts/validate-questions.ts
@@ -315,8 +328,8 @@ Cada item tem verificação **objetiva**. Marque só o que passou. \(☐ = a faz
 | ☐ | **Badge "by Noos"** — 11–13 px, endosso 32–40% do nome, dois temas | Rodapé em **claro e escuro**: marca compacta com ~12 px (positivo no claro, negativo no escuro) + texto *by Noos* a **9 px** (nome do app no rodapé está a 24 px → 37,5%, dentro da faixa). Inspecionar elemento: `text-[9px]` + imgs `width=12 height=12`. A palavra é "Noos" — sem acento, sem CAPS, sem tradução, em qualquer idioma. |
 | ☐ | **Nome do app prevalece** | "Ranvier" é o título/hero em toda tela; o badge aparece **uma única vez** (rodapé), em cor suave (`text-muted-foreground`), nunca como título nem botão primário. |
 | ☐ | **Cor de domínio #246cad** | Botões/acentos primários em claro: inspecionar → `--primary` resolve para `--noos-ranvier` = `#246cad` (em dark, variante noturna da mesma família de matiz). `view-source:` da home contém `<meta name="theme-color" media="(prefers-color-scheme: light)" content="#246cad">`. |
-| ☐ | **IDs públicas em 100% das questões** | `curl -sS https://<SEU_APP>.vercel.app/manifest.jsonl \| wc -l` → **116**; primeira linha `RAN-DBDEA-00001`, última `RAN-DBDEA-00116` (formato `RAN-DBDEA-#####`). Local: `bun scripts/validate-questions.ts` → 0 erros. |
-| ☐ | **manifest.jsonl publicado por CI** | Aba Actions: workflow **manifest** verde no último push de conteúdo; arquivo publicado contém os campos completos por linha — `id`, `exam`, `topics`, `difficulty`, `lang`, `version`, `checksum` (`sha256:…`), `aliases`, `snapshot` — e as 116 linhas casam com `public/manifest.jsonl` local (`diff` vazio). |
+| ☐ | **IDs públicas em 100% das questões** | `curl -sS https://<SEU_APP>.vercel.app/manifest.jsonl \| wc -l` → **300**; primeira linha `RAN-DBDEA-00001`, última `RAN-DBDEA-00300` (formato `RAN-DBDEA-#####`). Local: `bun scripts/validate-questions.ts` → 0 erros. |
+| ☐ | **manifest.jsonl publicado por CI** | Aba Actions: workflow **manifest** verde no último push de conteúdo; arquivo publicado contém os campos completos por linha — `id`, `exam`, `topics`, `difficulty`, `lang`, `version`, `checksum` (`sha256:…`), `aliases`, `snapshot` — e as 300 linhas casam com `public/manifest.jsonl` local (`diff` vazio). |
 | ☐ | **Deep-link Comunidade funcional** | Num card de questão, clicar Comunidade → abre `https://noos-hub.vercel.app/pt/q/RAN-DBDEA-00001` (UI PT) ou `https://noos-hub.vercel.app/en/q/RAN-DBDEA-00001` (UI EN). Até `noos.study` existir, o fallback é a URL canônica esperada. |
 | ☐ | **Política de idioma** | Primeira visita com device PT → UI PT; device EN → UI EN; troca manual **persiste** após reload (`localStorage` `ct-lang`); questões sempre EN; `document.documentElement.lang` reflete o idioma (`pt-BR`/`en`). |
 | ☐ | **Anúncios conforme a política** | Padrão: `NEXT_PUBLIC_ADSENSE_CLIENT` vazio → `view-source:` **sem** `adsbygoogle` e sem bloco de anúncio em nenhuma tela. Se habilitado: blocos **apenas** na página de resultados e zonas estáticas de rodapé (home/guide), rotulados, **nunca** dentro de estudo/simulado ativos. |

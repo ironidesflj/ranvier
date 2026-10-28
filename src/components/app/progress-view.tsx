@@ -6,6 +6,7 @@ import {
   BookOpenCheck,
   CheckCircle2,
   History,
+  Layers,
   Loader2,
   LogIn,
   Play,
@@ -30,7 +31,7 @@ import { QueryError } from "@/components/app/query-error";
 
 export function ProgressView() {
   const { t, f, lang } = useLang();
-  const { navigate } = useAppStore();
+  const { navigate, certSlug } = useAppStore();
   const [authOpen, setAuthOpen] = useState(false);
 
   const { data: progress, isLoading: progressLoading, isError: progressError, isFetching: progressFetching, refetch: refetchProgress, error: progressErr } = useQuery({
@@ -44,6 +45,13 @@ export function ProgressView() {
   const { data: attemptsData, isLoading: attemptsLoading } = useQuery({
     queryKey: ["attempts"],
     queryFn: api.listAttempts,
+    staleTime: 0,
+    refetchOnMount: "always",
+  });
+  /* Flashcards (v1.7.0): números factuais do SRS do dono. */
+  const { data: fcSummary } = useQuery({
+    queryKey: ["flashcards-summary", certSlug],
+    queryFn: () => api.flashcardsSummary(certSlug),
     staleTime: 0,
     refetchOnMount: "always",
   });
@@ -137,6 +145,41 @@ export function ProgressView() {
           ))}
         </div>
       </section>
+
+      {/* Flashcards (v1.7.0) — bloco factual do SRS: em rotação, para hoje,
+          maduros. Só números que existem na tabela; CTA quando há fila. */}
+      {fcSummary && (
+        <section className="mb-8">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Layers className="h-4 w-4 text-primary" />
+                {t.flashcards.title}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-wrap items-center gap-x-8 gap-y-3">
+              <div>
+                <p className="text-xl font-bold tabular-nums tracking-tight">{fcSummary.totalCards - fcSummary.newCount}</p>
+                <p className="text-[11px] leading-tight text-muted-foreground">{t.flashcards.inRotation}</p>
+              </div>
+              <div>
+                <p className="text-xl font-bold tabular-nums tracking-tight">{fcSummary.dueCount}</p>
+                <p className="text-[11px] leading-tight text-muted-foreground">{t.flashcards.dueTodayLabel}</p>
+              </div>
+              <div>
+                <p className="text-xl font-bold tabular-nums tracking-tight">{fcSummary.matureCount}</p>
+                <p className="text-[11px] leading-tight text-muted-foreground">{t.flashcards.mature}</p>
+              </div>
+              {fcSummary.dueCount + fcSummary.newCount > 0 && (
+                <Button size="sm" variant="outline" className="sm:ml-auto" onClick={() => navigate("flashcards")}>
+                  <Layers className="h-4 w-4" />
+                  {fcSummary.dueCount > 0 ? f(t.flashcards.homeDue, { count: fcSummary.dueCount }) : f(t.flashcards.homeNew, { count: fcSummary.newCount })}
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        </section>
+      )}
 
       {/* Domain radar */}
       <section className="mb-8">

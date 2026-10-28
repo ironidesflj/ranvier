@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 
-export type View = "home" | "cert" | "study" | "exam" | "results" | "progress" | "guide" | "about" | "settings";
+export type View = "home" | "cert" | "study" | "exam" | "results" | "flashcards" | "progress" | "guide" | "about" | "settings";
 
 /**
  * Certificação ativa (patch v1.1 §9 — modelo multi-certificação, "uma por
@@ -54,6 +54,7 @@ function parseHash(): { view: View; attemptId: string | null } {
     certification: "cert",
     estudar: "study",
     study: "study",
+    flashcards: "flashcards",
     simulado: "exam",
     exam: "exam",
     resultado: "results",
@@ -80,6 +81,7 @@ function hashFor(view: View, attemptId?: string | null): string {
     home: "/",
     cert: "/certificacao",
     study: "/estudar",
+    flashcards: "/flashcards",
     exam: `/simulado/${attemptId ?? ""}`,
     results: `/resultado/${attemptId ?? ""}`,
     progress: "/progresso",

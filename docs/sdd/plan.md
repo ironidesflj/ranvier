@@ -2,29 +2,35 @@
 
 ## Autorizado (em curso)
 
-- **Deploy da v1.6.0** (fundador/GPT local, receita `docs/DEPLOY.md`):
-  1) sincronizar o lote (código v1.6.0 + `prep.ts` portátil + commitar
-  `scripts/generate-icons.ts`/`generate-og.ts` se ainda não estiverem no
-  remoto); 2) **trocar `DATABASE_URL` pela connection string pooled do Neon**
-  (`-pooler.` no host — item (a) do menu de performance, zero código);
-  3) redeploy padrão (sem passo de DB) e conferir `/api/health` = 300 ·
-  `/og/og-image.png` = 200 · `/api/catalog` com `cache-control: s-maxage`.
-  (O deploy da v1.5.0 foi concluído em 2026-10-27 — produção confirmada ao
-  vivo com health 300 e checksums canônicos no `/manifest.jsonl`, linha 1
-  `sha256:95e20047…`; a v1.5.1 não chegou a ser publicada — seu conteúdo
-  (OG) embarcou na v1.6.0.)
+- ~~Deploy da v1.6.0~~ — **concluído pelo fundador e verificado ao vivo**
+  (worklog Task 17: health 300, OG 200, manifesto byte-idêntico, borda HIT
+  ~35ms, 1 fetch de catalog, privacidade PT/EN, popup 3 itens, mobile sem
+  overflow, zero erros de console). O passo (a) — `DATABASE_URL` pooled do
+  Neon (`-pooler.` no host) — segue pendente no console da Vercel (maior
+  ganho restante para chamadas autenticadas; com flashcards V2 passará a
+  pesar ainda mais, pois cada revisão será uma escrita no banco).
 - **Fase 1 — acender o hub** (passo do mantenedor, fora do repo do app):
   committar o conteúdo de `public/manifest.jsonl` como `manifestos/RAN.jsonl`
   no repo do hub; o deploy seguinte acende 300 páginas PT/EN em
-  `noos.study/{lang}/q/{ID}` + redirects de alias + sitemap.
+  `noos.study/{lang}/q/{ID}` + redirects de alias + sitemap. **Timing definido
+  pelo fundador em 27/out/2026: "2 e 3 eu farei depois, quando eu for mexer
+  no noos" — sem urgência.**
 - **Fase 2 — fatia 5 completa**: setar `NEXT_PUBLIC_NOOS_HUB_URL=https://noos.study`
   nas envs da Vercel junto/com o hub aceso (badge e Comunidade apontam ao
-  canônico vivo).
+  canônico vivo). Idem timing acima.
+- **v1.7.0 — Flashcards com repetição espaçada**: spec **APROVADA pelo
+  fundador em 27/out/2026** ("aprovado, exceto a animação") e **implementada
+  no mesmo dia** (worklog Task 19 — código completo e verificado no sandbox;
+  aguarda sync GitHub + deploy com passo de banco, receita em `docs/DEPLOY.md`
+  §5/nota v1.7.0). A animação do símbolo (§14) foi **excluída do lote por
+  decisão do fundador**: "preciso reanalisar ela depois" — segue como item
+  pendente abaixo.
 
 ## Fechado (entregue)
 
-- **v1.6.0** (2026-10-27, spec `spec-v1.6.0-privacy-performance.md`):
-  transparência de privacidade (seção "Privacidade e segurança" no Sobre com
+- **v1.6.0** (2026-10-27, spec `spec-v1.6.0-privacy-performance.md`,
+  **publicada e verificada ao vivo** — Task 17): transparência de
+  privacidade (seção "Privacidade e segurança" no Sobre com
   5 fatos auditados + reasseguro no modal de login com link) + performance
   (fim do duplo fetch de catalog via `langReady`, staleTime 24h, cache de
   borda s-maxage no `/api/catalog`) + fix de portabilidade do `prep.ts`
@@ -70,17 +76,31 @@
   (d) staleTime 24h. **Resta**: (a) env `DATABASE_URL` pooled do Neon (passo
   do deploy, maior ganho para chamadas autenticadas) e (e) bootstrap inline
   no HTML (opcional, só se o diagnóstico persistir após (a)).
-- V2 — flashcards.
-- V2 — trilhas de estudo personalizadas.
+- ~~V2 — flashcards~~ → **implementado na v1.7.0** (ver Autorizado).
+- V2 — trilhas de estudo personalizadas (após flashcards).
 - Novas certificações em produção (a UI "em breve" já lista: **AI-900**,
   **DP-900**, **PL-300**, **SC-900**, **AZ-104**) — arquitetura multi-cert
   pronta desde a v1.4.0 (`ranvier:cert`, seletor, progresso por cert por
   construção); entrar com blueprint + banco de questões próprio.
-- Atualizar o dossiê da equipe de design (o guia Noos e o patch v1.1 ainda
-  descrevem Ranvier como "Azure · AZ-900"; o app real é Databricks DBDEA —
-  o patch v1.1 foi adaptado na aplicação).
-- Avaliar traço do símbolo animado no carregamento (600–800ms, patch v1.1
-  §14) — opcional, decisão do fundador.
+  **Ordem definida pelo fundador 27/out/2026: POR ÚLTIMO — "quando não
+  tiver mais nada pra mexer no app".**
+- ~~Atualizar o dossiê da equipe de design~~ — **parte in-repo fechada na
+  Task 18** (`docs/sdd/fatias-dossie.md` §§1–2 corrigidos: DBDEA, IDs reais,
+  registro marcado como desatualizado; nota no §6 sobre os exemplos az-900
+  do guia). O que resta é **externo ao repo**: o guia Noos e o patch v1.1
+  pertencem à equipe de design — encaminhar a correção quando conveniente
+  (não bloqueia nada; a adaptação já está documentada na spec v1.4.0).
+- ~~Avaliar traço do símbolo animado no carregamento~~ — **avaliado na
+  Task 18** (patch v1.1 §14): desenhar o traço do símbolo via
+  `stroke-dashoffset` (600–800ms) na primeira carga/skeletons é **viável,
+  pequeno (1 componente + keyframes, 2 temas) e sem conflito com a
+  anti-filosofia** (movimento de marca ≠ recompensa). Ponto honesto
+  pós-v1.6.0: a carga ficou rápida (borda ~35ms) e a animação duraria mais
+  que a espera — precisa cortar no ready (máx ~800ms, nunca atrasa
+  conteúdo, respeita `prefers-reduced-motion`). **Decisão do fundador
+  27/out/2026: EXCLUÍDA da v1.7.0 — "preciso reanalisar ela depois"**;
+  fica este item como lembrete vivo da reanálise pendente (embarcar em
+  lote futuro ou engavetar de vez).
 
 ## Propostas aguardando decisão do fundador
 

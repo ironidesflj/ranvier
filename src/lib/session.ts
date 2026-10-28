@@ -95,3 +95,55 @@ export async function mergeAnonAttemptsIntoUser(userId: string): Promise<number>
   });
   return res.count;
 }
+
+/**
+ * Merge anonymous flashcard SRS state into a user account (v1.7.0 —
+ * spec docs/sdd/spec-v1.7.0-flashcards.md §4).
+ *
+ * Collision rule (same question reviewed both anonymously and on the
+ * account): keep the row with MORE `reps` (more history wins); tie → keep
+ * the account's row. Deterministic, no history silently lost.
+ */
+export async function mergeAnonFlashcardsIntoUser(userId: string): Promise<number> {
+  const jar = await cookies();
+  const anonId = jar.get(ANON_COOKIE)?.value;
+  if (!anonId) return 0;
+
+  const anonRows = await db.flashcardState.findMany({ where: { anonId, userId: null } });
+  if (anonRows.length === 0) return 0;
+
+  const anonQuestionIds = anonRows.map((r) => r.questionId);
+  const userRows = await db.flashcardState.findMany({ where: { userId, questionId: { in: anonQuestionIds } } });
+  const userByQuestion = new Map(userRows.map((r) => [r.questionId, r]));
+
+  let merged = 0;
+  await db.$transaction(async (tx) => {
+    for (const anon of anonRows) {
+      const userRow = userByQuestion.get(anon.questionId);
+      if (!userRow) {
+        // No collision: the anonymous row simply becomes the user's.
+        await tx.flashcardState.update({ where: { id: anon.id }, data: { userId, anonId: null } });
+        merged += 1;
+      } else if (anon.reps > userRow.reps) {
+        // Anonymous history is richer: carry its SRS state onto the user row.
+        await tx.flashcardState.update({
+          where: { id: userRow.id },
+          data: {
+            ease: anon.ease,
+            intervalDays: anon.intervalDays,
+            reps: anon.reps,
+            lapses: anon.lapses,
+            dueAt: anon.dueAt,
+            lastReviewedAt: anon.lastReviewedAt,
+          },
+        });
+        await tx.flashcardState.delete({ where: { id: anon.id } });
+        merged += 1;
+      } else {
+        // Account history wins (or ties): drop the anonymous duplicate.
+        await tx.flashcardState.delete({ where: { id: anon.id } });
+      }
+    }
+  });
+  return merged;
+}

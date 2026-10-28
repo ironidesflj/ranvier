@@ -3,7 +3,7 @@
 **Para quem é este documento:** qualquer agent ou assistente (Claude, GPT,
 Gemini, outro) que vá trabalhar no repositório do app **Ranvier** e que não
 conheça o ecossistema **Noos**. Se você foi apontado para evoluir o app e não
-faz ideia do que sejam "fatias", `RAN-AZ900-00042` ou `GLI-` — está tudo aqui.
+faz ideia do que sejam "fatias", `RAN-DBDEA-00042` ou `GLI-` — está tudo aqui.
 
 **Como usar:** cole este arquivo **inteiro** como primeira mensagem da sessão.
 Depois: (1) leia as fontes canônicas do §3; (2) confirme o estado real no
@@ -14,6 +14,15 @@ janela de colagem for pequena, cole pelo menos o §11 (bloco mínimo).
 das fatias pertence ao guia canônico (§3); a LEI pertence à constitution (§3).
 Este dossiê manda apenas em **estado** e **ponteiros**. Em conflito:
 **constitution > guia > este dossiê**.
+
+> **ATUALIZAÇÃO 27/out/2026 (noite) — correção factual + v1.6.0 no ar:** este
+> dossiê herdava do guia o exemplo “AZ-900” e chegava a dizer que o app era
+> “questões da prova AZ-900 (Cloud)” — **erro**: o produto real é **DBDEA
+> (Databricks Certified Data Engineer Associate)**, IDs `RAN-DBDEA-00001..00300`,
+> aliases vazios. Corrigido nos §§1–2 com nota no §6. Também já está no ar o
+> lote v1.6.0 (privacidade in-app + performance: cache de borda no catalog,
+> fim do duplo fetch, staleTime 24h; OG/social preview da v1.5.1 embarcou
+> nele — ver `docs/sdd/spec-v1.6.0-privacy-performance.md`).
 
 > **ATUALIZAÇÃO 27/out/2026 (tarde) — app Ranvier, lote v1.5.0:** as fatias
 > **2, 3 e 4 foram ADOTADAS** (ver §4). O gerador de manifesto agora emite
@@ -50,7 +59,8 @@ entre quem desenhou o contrato e quem vai evoluir o app.
   `manifest.jsonl`, checksum SHA-256 e helpers de deep-link. É **o contrato**
   entre os apps e o hub. Zero dependência de runtime; **nunca** é serviço —
   sempre pacote linkado no build.
-- **Ranvier** — o app deste dossiê: questões da prova **AZ-900 (Cloud)**, no
+- **Ranvier** — o app deste dossiê: questões da prova **DBDEA (Databricks
+  Certified Data Engineer Associate)** — IDs reais `RAN-DBDEA-00001..00300` —, no
   ar em **https://ranvier-seven.vercel.app/#/**, gerenciador de pacotes
   **Bun**. É o **consumidor #1 do Axon** (out/2026) — o precedente de tudo.
 - **Synapse** — app irmão (ISTQB/CTFL), também em produção.
@@ -58,8 +68,10 @@ entre quem desenhou o contrato e quem vai evoluir o app.
   você **não mexe neles** — você consome o contrato.
 
 Registro oficial da família (fonte única de status, viva):
-**https://noos.study/noos.registry.json** — RAN: "em produção", domínio
-"Cloud", alias `GLI-`; biblioteca `@ironidesflj/axon` 0.2.2 "publicada".
+**https://noos.study/noos.registry.json** — RAN: "em produção". ⚠️ O registro
+ainda lista domínio "Cloud"/alias `GLI-` para RAN — **desatualizado** (o app
+real é DBDEA, aliases vazios); correção no lado do hub é pendência do
+mantenedor. Biblioteca `@ironidesflj/axon` 0.2.2 "publicada".
 
 ## 3. Fontes canônicas PÚBLICAS (leia antes de duvidar deste dossiê)
 
@@ -140,6 +152,12 @@ um dia.** O estado de hoje é:
 Resumo executivo. O detalhe com exemplos de código mora no guia (§3) — em
 conflito, o guia vence. Cada fatia entra **sozinha, atrás de feature flag**,
 e nenhuma toca o banco de questões por si só.
+
+> **Nota sobre os exemplos deste §6:** eles citam `az-900`/`RAN-AZ900-…`
+porque **transcrevem os exemplos didáticos do guia** (o mecanismo é o mesmo
+para qualquer prova). No Ranvier **real**, a prova normalizada é `dbdea` —
+as IDs publicadas são `RAN-DBDEA-00001..00300`, o campo `aliases` está vazio
+e `GLI-` nunca foi publicada.
 
 **Fatia 1 — Linkar** ✅ **FEITA.** Pin exato + lockfile commitado + registro
 no current-state. Aceitação já batida: lint, typecheck e CI verdes;

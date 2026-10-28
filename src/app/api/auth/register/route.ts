@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { hashPassword } from "@/lib/auth";
-import { mergeAnonAttemptsIntoUser, setSessionCookie } from "@/lib/session";
+import { mergeAnonAttemptsIntoUser, mergeAnonFlashcardsIntoUser, setSessionCookie } from "@/lib/session";
 import { rateLimit, LIMITS } from "@/lib/rate-limit";
 import { tooMany } from "@/lib/api-helpers";
 
@@ -36,6 +36,7 @@ export async function POST(req: Request) {
     });
     await setSessionCookie(user.id);
     const merged = await mergeAnonAttemptsIntoUser(user.id);
+    await mergeAnonFlashcardsIntoUser(user.id); // v1.7.0 — SRS state follows the account
     return NextResponse.json({ user, mergedAttempts: merged }, { status: 201 });
   } catch (err) {
     console.error("[api] register error:", err);

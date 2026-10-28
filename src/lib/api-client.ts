@@ -2,6 +2,10 @@ import type {
   AttemptDetail,
   AttemptListItem,
   AttemptResult,
+  FlashcardDrawResponse,
+  FlashcardDrawScope,
+  FlashcardReviewResponse,
+  FlashcardsSummary,
   Lang,
   MeResponse,
   ProgressResponse,
@@ -70,6 +74,18 @@ export const api = {
   submit: (attemptId: string) => fetchJson<AttemptResult>(`/api/attempts/${attemptId}/submit`, { method: "POST" }),
 
   progress: () => fetchJson<ProgressResponse>("/api/progress"),
+
+  flashcardsSummary: (certSlug: string) =>
+    fetchJson<FlashcardsSummary>(`/api/flashcards?certSlug=${encodeURIComponent(certSlug)}`),
+
+  flashcardsDraw: (body: { certSlug: string; domainCodes?: number[]; limit?: number; scope: FlashcardDrawScope }) =>
+    fetchJson<FlashcardDrawResponse>("/api/flashcards/draw", { method: "POST", body: JSON.stringify(body) }),
+
+  flashcardsReview: (questionId: string, selectedIndex: number | null) =>
+    fetchJson<FlashcardReviewResponse>("/api/flashcards/review", {
+      method: "POST",
+      body: JSON.stringify({ questionId, selectedIndex }),
+    }),
 
   me: () => fetchJson<MeResponse>("/api/auth/me"),
 

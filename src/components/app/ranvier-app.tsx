@@ -8,6 +8,7 @@ import {
   GraduationCap,
   Github,
   Globe,
+  Layers,
   LineChart,
   MoreHorizontal,
   RotateCcw,
@@ -28,6 +29,7 @@ import { CertView } from "@/components/app/cert-view";
 import { StudyView } from "@/components/app/study-view";
 import { ExamView } from "@/components/app/exam-view";
 import { ResultsView } from "@/components/app/results-view";
+import { FlashcardsView } from "@/components/app/flashcards-view";
 import { ProgressView } from "@/components/app/progress-view";
 import { GuideView } from "@/components/app/guide-view";
 import { AboutView } from "@/components/app/about-view";
@@ -94,6 +96,7 @@ function Rail() {
 
   const items: { view: View; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
     { view: "study", label: t.shell.study, icon: BookOpen },
+    { view: "flashcards", label: t.flashcards.title, icon: Layers },
     { view: "cert", label: t.shell.exam, icon: GraduationCap },
     { view: "progress", label: t.shell.progress, icon: LineChart },
   ];
@@ -211,6 +214,7 @@ function MobileBottomNav({ onMore }: { onMore: () => void }) {
 
   const items: { key: string; label: string; icon: React.ComponentType<{ className?: string }>; onClick: () => void; active: boolean }[] = [
     { key: "study", label: t.shell.study, icon: BookOpen, onClick: () => navigate("study"), active: view === "study" },
+    { key: "flashcards", label: t.flashcards.title, icon: Layers, onClick: () => navigate("flashcards"), active: view === "flashcards" },
     { key: "cert", label: t.shell.exam, icon: GraduationCap, onClick: () => navigate("cert"), active: view === "cert" },
     { key: "progress", label: t.shell.progress, icon: LineChart, onClick: () => navigate("progress"), active: view === "progress" },
     { key: "review", label: t.shell.review, icon: RotateCcw, onClick: () => void startReview(), active: false },
@@ -228,13 +232,13 @@ function MobileBottomNav({ onMore }: { onMore: () => void }) {
           onClick={item.onClick}
           aria-current={item.active ? "page" : undefined}
           className={cn(
-            "flex min-h-[56px] flex-1 flex-col items-center justify-center gap-1 pt-1.5 text-[10px] font-medium transition-colors",
+            "flex min-h-[56px] min-w-0 flex-1 flex-col items-center justify-center gap-1 pt-1.5 text-[10px] font-medium transition-colors",
             item.active ? "text-app-ink" : "text-muted-foreground"
           )}
         >
           <span className={cn("h-0.5 w-8", item.active ? "bg-app" : "bg-transparent")} aria-hidden />
           <item.icon className="h-5 w-5" aria-hidden />
-          {item.label}
+          <span className="w-full truncate px-0.5 text-center">{item.label}</span>
         </button>
       ))}
       {/* "Mais" — Ajustes e configurações profundas no sheet (v1.1 §8.6) */}
@@ -386,6 +390,7 @@ export function RanvierApp() {
       {view === "study" && <StudyView />}
       {view === "exam" && <ExamView />}
       {view === "results" && <ResultsView />}
+      {view === "flashcards" && <FlashcardsView />}
       {view === "progress" && <ProgressView />}
       {view === "guide" && <GuideView />}
       {view === "about" && <AboutView />}

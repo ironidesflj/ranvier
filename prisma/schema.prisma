@@ -24,6 +24,7 @@ model User {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   attempts     Attempt[]
+  flashcards   FlashcardState[]
 }
 
 model Certification {
@@ -88,6 +89,34 @@ model Question {
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   answers        AttemptAnswer[]
+  flashcards     FlashcardState[]
+}
+
+// v1.7.0 — Flashcards (spec docs/sdd/spec-v1.7.0-flashcards.md):
+// spaced-repetition state per owner (userId XOR anonId, same pattern as
+// Attempt). One row per owner+question (uniqueness enforced in the service —
+// a composite unique index with NULLs is not portable SQLite↔Postgres).
+// Cascades: account deletion wipes SRS state (LGPD); question deletion too.
+// correctIndex is NEVER stored here — grading stays server-side per review.
+model FlashcardState {
+  id             String    @id @default(cuid())
+  userId         String?
+  user           User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  anonId         String?
+  questionId     String
+  question       Question  @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  ease           Float     @default(2.5)
+  intervalDays   Int       @default(0)
+  reps           Int       @default(0)
+  lapses         Int       @default(0)
+  dueAt          DateTime  @default(now())
+  lastReviewedAt DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([userId, dueAt])
+  @@index([anonId, dueAt])
+  @@index([questionId])
 }
 
 model Attempt {

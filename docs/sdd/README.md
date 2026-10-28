@@ -25,7 +25,7 @@ evidência de conclusão vivem no repositório, não em conversa.
 
 ## Contrato Axon
 
-- Prefixo reservado: **RAN-DBDEA** (IDs públicas `RAN-DBDEA-00001..00116`).
+- Prefixo reservado: **RAN-DBDEA** (IDs públicas `RAN-DBDEA-00001..00300`).
 - Deep-links: `https://noos-hub.vercel.app/{lang}/q/{publicId}` (fallback
   canônico gratuito até `noos.study` existir; override via
   `NEXT_PUBLIC_NOOS_HUB_URL`).

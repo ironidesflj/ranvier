@@ -70,4 +70,8 @@ export const LIMITS = {
   answer: { limit: 300, windowMs: 5 * 60_000 },
   submit: { limit: 60, windowMs: 5 * 60_000 },
   read: { limit: 300, windowMs: 60_000 },
+  /* v1.7.0 — flashcards: draw é 1 por sessão (mas re-draws acontecem);
+     review é 1 por cartão (com re-entradas, uma sessão de 50 bate ~100). */
+  flashcardsDraw: { limit: 60, windowMs: 5 * 60_000 },
+  flashcardsReview: { limit: 300, windowMs: 5 * 60_000 },
 } as const;

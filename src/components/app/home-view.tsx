@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowRight, Award, BookOpenCheck, History, LineChart, Loader2, Play, ShieldCheck } from "lucide-react";
+import { ArrowRight, Award, BookOpenCheck, History, Layers, LineChart, Loader2, Play, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLang } from "@/components/app/language-provider";
@@ -58,6 +58,18 @@ export function HomeView() {
   });
   const lastAttempt = attemptsData?.attempts.find((a) => a.status === "COMPLETED") ?? null;
   const inProgress = attemptsData?.attempts.find((a) => a.status === "IN_PROGRESS") ?? null;
+
+  /* Flashcards (v1.7.0): número factual do dono para o CTA do bilhete —
+     “N para hoje” quando há vencidas; “N cartões” quando só há novas. */
+  const { data: fcSummary } = useQuery({
+    queryKey: ["flashcards-summary", cert?.slug],
+    queryFn: () => api.flashcardsSummary(cert!.slug),
+    enabled: Boolean(cert?.slug),
+    staleTime: 0,
+    refetchOnMount: "always",
+  });
+  const fcDue = fcSummary?.dueCount ?? 0;
+  const fcAvailable = fcDue + (fcSummary?.newCount ?? 0);
 
   const startExam = useMutation({
     mutationFn: () => api.startAttempt({ certSlug: cert?.slug ?? certSlug, mode: "EXAM" }),
@@ -177,6 +189,22 @@ export function HomeView() {
                   >
                     <History className="h-4 w-4" />
                     {t.home.landing.continueSession}
+                    <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+                  </Button>
+                )}
+
+                {/* Flashcards — CTA factual (v1.7.0): “N para hoje” ou “N cartões” */}
+                {fcSummary && fcAvailable > 0 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-2 w-full"
+                    onClick={() => navigate("flashcards")}
+                  >
+                    <Layers className="h-4 w-4" />
+                    <span className="truncate">
+                      {fcDue > 0 ? f(t.flashcards.homeDue, { count: fcDue }) : f(t.flashcards.homeNew, { count: fcSummary.newCount })}
+                    </span>
                     <ArrowRight className="h-3.5 w-3.5" aria-hidden />
                   </Button>
                 )}

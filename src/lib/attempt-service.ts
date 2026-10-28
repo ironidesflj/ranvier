@@ -186,7 +186,9 @@ export async function startAttempt(args: StartArgs): Promise<StartAttemptRespons
   };
 }
 
-function toPublicQuestion(q: { id: string; publicId: string; stem: string; options: string; difficulty: string; domain: { code: number; name: string; namePt: string } }): PublicQuestion {
+/** Canonical public question DTO mapper (shared with the flashcards service —
+ *  NEVER includes correctIndex; grading is server-side only). */
+export function toPublicQuestion(q: { id: string; publicId: string; stem: string; options: string; difficulty: string; domain: { code: number; name: string; namePt: string } }): PublicQuestion {
   return {
     id: q.id,
     publicId: q.publicId,
