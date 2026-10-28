@@ -1,33 +1,37 @@
 import { db } from "@/lib/db";
 import { ownerWhere } from "@/lib/session";
 import { toPublicQuestion, ServiceError } from "@/lib/attempt-service";
-import { applyReview, SRS_INITIAL_STATE, type SrsState } from "@/lib/srs";
+import { applyReview, SRS_INITIAL_STATE, type SrsReviewResult, type SrsState } from "@/lib/srs";
 import type {
   FlashcardDrawScope,
   FlashcardDrawResponse,
   FlashcardDrawnCard,
   FlashcardGradeResponse,
   FlashcardRevealResponse,
+  FlashcardSyncEvent,
+  FlashcardSyncResponse,
   FlashcardsSummary,
 } from "@/lib/types";
 
 /**
- * Flashcard service (v1.7.0 → V2 na v1.8.0 — docs/sdd/
- * spec-v1.8.0-trilhas-flashcards.md §§3–4).
+ * Flashcard service (v1.7.0 → V2 na v1.8.0 → offline na v1.10.0 — docs/sdd/
+ * spec-v1.8.0-trilhas-flashcards.md §§3–4 + spec-v1.10.0-flashcards-offline.md).
  *
  * Um cartão = uma questão do banco. O ESTADO de repetição espaçada é por
- * dono (userId XOR anonId — mesmo padrão de Attempt); a CORREÇÃO continua
- * 100% server-side: correctIndex só viaja no REVEAL (depois de o aluno virar
- * o cartão), nunca no draw (reuso do toPublicQuestion).
+ * dono (userId XOR anonId — mesmo padrão de Attempt).
  *
- * V2 — fluxo em dois passos:
- *   draw → [frente: evocação] → REVEAL (leitura: verso + projeções SRS) →
- *   GRADE (escrita: autoavaliação binária do aluno aplica o SM-2).
- * Virar e abandonar sem julgar NÃO registra revisão (o cartão segue devido).
+ * v1.10.0 — o DRAW devolve a carta COMPLETA (verso embutido: gabarito,
+ * explicações, fonte e projeções SRS) para que a sessão iniciada online
+ * CONTINUE OFFLINE. Modelo de ameaça (spec §2): a avaliação de flashcard é
+ * AUTO-DECLARADA — não existe correção server-side a proteger; quem inspecionar
+ * o devtools para ver o gabarito antes de virar sabotageia o próprio treino
+ * de evocação. Estudar/Exame permanecem 100% server-side (índice canônico,
+ * nunca pré-buscado). O julgamento offline acumula na fila local do cliente e
+ * sincroniza em lote (/sync); online, /grade continua valendo.
  *
- * Unicidade dono+questão é garantida AQUI (findFirst → update/create), como
- * o AttemptAnswer faz — índice único composto com NULL não é portável entre
- * SQLite e Postgres no Prisma.
+ * Unicidade dono+questão é garantida AQUI (estado determinístico
+ * owner+question com convergência em conflito único), índice único composto
+ * com NULL não é portável entre SQLite e Postgres no Prisma.
  */
 
 /**
@@ -180,19 +184,48 @@ export async function drawFlashcards(args: DrawArgs): Promise<FlashcardDrawRespo
     include: { domain: true },
   });
   const byId = new Map(questions.map((q) => [q.id, q]));
+
+  /* v1.10.0 — estados do dono para as cartas sorteadas: as projeções SRS são
+     computadas AQUI (mesma matemática de srs.ts, sem persistir) e viajam no
+     draw junto com o verso completo. Uma consulta, N cartas. */
+  const states = await db.flashcardState.findMany({
+    where: { ...where, questionId: { in: queueIds } },
+    select: { questionId: true, ease: true, intervalDays: true, reps: true, lapses: true },
+  });
+  const stateByQ = new Map(states.map((s) => [s.questionId, s]));
+
   const cards: FlashcardDrawnCard[] = queueIds
     .map((id) => byId.get(id))
     .filter((q): q is NonNullable<typeof q> => Boolean(q))
-    .map((q) => ({
-      ...toPublicQuestion(q),
-      frontIncludesOptions: OPTION_DEPENDENT_KEYS.has(q.key),
-    }));
+    .map((q) => {
+      const existing = stateByQ.get(q.id);
+      const prev: SrsState = existing
+        ? { ease: existing.ease, intervalDays: existing.intervalDays, reps: existing.reps, lapses: existing.lapses }
+        : SRS_INITIAL_STATE;
+      const wrong = applyReview(prev, false);
+      const right = applyReview(prev, true);
+      return {
+        ...toPublicQuestion(q),
+        frontIncludesOptions: OPTION_DEPENDENT_KEYS.has(q.key),
+        // v1.10.0 — o verso EMBUTIDO no draw (spec §3): reveal local.
+        correctIndex: q.correctIndex,
+        explanationEn: q.explanationEn,
+        explanationPt: q.explanationPt,
+        referenceUrl: q.referenceUrl,
+        referenceTitle: q.referenceTitle,
+        projection: {
+          wrong: { intervalDays: wrong.intervalDays },
+          right: { intervalDays: right.intervalDays },
+        },
+      };
+    });
 
   return { cards, drewCount: cards.length };
 }
 
 // ---------------------------------------------------------------------------
-// Reveal (read-only: card back + SRS projections) — spec v1.8.0 §4
+// Reveal (READ-ONLY, DEPRECATED for the app since v1.10.0 — the client turns
+// cards locally from the draw payload; endpoint stays live as published API)
 // ---------------------------------------------------------------------------
 
 export async function revealFlashcard(questionId: string): Promise<FlashcardRevealResponse> {
@@ -225,7 +258,124 @@ export async function revealFlashcard(questionId: string): Promise<FlashcardReve
 }
 
 // ---------------------------------------------------------------------------
-// Grade (write: apply SM-2 with the student's self-assessment)
+// Sync (v1.10.0 — replay of the offline judgment queue, spec §3)
+// ---------------------------------------------------------------------------
+
+/**
+ * Replays queued judgments IN ORDER as SM-2 reviews. SM-2 é um FOLD: eventos
+ * da mesma carta aplicam sequencialmente EM MEMÓRIA e a carta recebe UMA
+ * escrita final (O(cartas distintas) escritas em vez de O(eventos) viagens
+ * ao banco — ≤200 eventos num lote ficam baratos mesmo no Neon).
+ *
+ * O instante de cada revisão é o `occurredAt` do evento (quando o aluno
+ * julgou offline), não o now do servidor — histórico honesto: julgou ontem
+ * com intervalo de 1 dia, a carta vence HOJE, não amanhã.
+ *
+ * Conflito multi-dispositivo (spec §4): eventos aplicam sobre o estado
+ * corrente no servidor, em ordem de chegada — mesmo contrato de quem usa
+ * duas abas. Dupla aplicação (200 perdido pós-apply): janela de milissegundos,
+ * consequência = 1 passo extra de SM-2 numa carta autoavaliada — aceito e
+ * documentado na spec.
+ */
+export async function syncFlashcards(events: FlashcardSyncEvent[], certSlug?: string): Promise<FlashcardSyncResponse> {
+  const owner = await ownerWhere();
+
+  const byQuestion = new Map<string, FlashcardSyncEvent[]>();
+  for (const ev of events) {
+    const bucket = byQuestion.get(ev.questionId);
+    if (bucket) bucket.push(ev);
+    else byQuestion.set(ev.questionId, [ev]);
+  }
+
+  const questionIds = [...byQuestion.keys()];
+  const questions = await db.question.findMany({
+    where: { id: { in: questionIds }, enabled: true },
+    select: { id: true },
+  });
+  const validIds = new Set(questions.map((q) => q.id));
+
+  const states = await db.flashcardState.findMany({
+    where: { ...owner, questionId: { in: questionIds } },
+    select: { id: true, questionId: true, ease: true, intervalDays: true, reps: true, lapses: true },
+  });
+  const stateByQ = new Map(states.map((s) => [s.questionId, s]));
+
+  let applied = 0;
+  let skipped = 0;
+  const now = new Date();
+
+  for (const [questionId, bucket] of byQuestion) {
+    /* Questão removida/desabilitada desde a construção da fila: pula e
+       REPORTA (nunca descarte silencioso — o cliente mostra o número). */
+    if (!validIds.has(questionId)) {
+      skipped += bucket.length;
+      continue;
+    }
+
+    const existing = stateByQ.get(questionId);
+    let state: SrsState = existing
+      ? { ease: existing.ease, intervalDays: existing.intervalDays, reps: existing.reps, lapses: existing.lapses }
+      : SRS_INITIAL_STATE;
+    let last: SrsReviewResult | null = null;
+    let lastAt = now;
+
+    for (const ev of bucket) {
+      const parsed = new Date(ev.occurredAt);
+      const when = Number.isNaN(parsed.getTime()) ? now : parsed;
+      last = applyReview(state, ev.remembered, when);
+      state = { ease: last.ease, intervalDays: last.intervalDays, reps: last.reps, lapses: last.lapses };
+      lastAt = when;
+      applied++;
+    }
+    if (!last) continue;
+
+    const data = {
+      ease: state.ease,
+      intervalDays: state.intervalDays,
+      reps: state.reps,
+      lapses: state.lapses,
+      dueAt: last.dueAt,
+      lastReviewedAt: lastAt,
+    };
+
+    if (existing) {
+      await db.flashcardState.update({ where: { id: existing.id }, data });
+    } else {
+      const id = stateId(owner, questionId);
+      try {
+        await db.flashcardState.create({
+          data: {
+            id,
+            // dono — userId XOR anonId (mesmo padrão do Attempt)
+            ...(owner.userId !== null ? { userId: owner.userId } : { anonId: owner.anonId }),
+            questionId,
+            ...data,
+          },
+        });
+      } catch (err) {
+        // Concurrent syncs converge on the deterministic owner+question ID.
+        if (!(err instanceof Error) || !err.message.includes("Unique constraint")) throw err;
+        await db.flashcardState.update({ where: { id }, data });
+      }
+    }
+  }
+
+  /* Resumo fresco quando o cliente mandou a cert ativa — economiza uma
+     viagem de invalidação; cert inválida não derruba o sync (summary null). */
+  let summary: FlashcardsSummary | null = null;
+  if (certSlug) {
+    try {
+      summary = await getFlashcardsSummary(certSlug);
+    } catch {
+      summary = null;
+    }
+  }
+
+  return { applied, skipped, summary };
+}
+
+// ---------------------------------------------------------------------------
+// Grade (write: apply SM-2 with the student's self-assessment) — online path
 // ---------------------------------------------------------------------------
 
 export async function gradeFlashcard(questionId: string, remembered: boolean): Promise<FlashcardGradeResponse> {
@@ -293,4 +443,10 @@ export async function gradeFlashcard(questionId: string, remembered: boolean): P
     lapses: next.lapses,
     nextDueAt: next.dueAt.toISOString(),
   };
+}
+
+export async function reviewFlashcard(questionId: string, selectedIndex: number | null): Promise<FlashcardGradeResponse> {
+  const question = await db.question.findUnique({ where: { id: questionId }, select: { correctIndex: true, enabled: true } });
+  if (!question?.enabled) throw new ServiceError(404, "Question not found");
+  return gradeFlashcard(questionId, selectedIndex !== null && selectedIndex === question.correctIndex);
 }

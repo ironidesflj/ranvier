@@ -5,10 +5,24 @@
 - ~~Deploy da v1.6.0~~ — **concluído pelo fundador e verificado ao vivo**
   (worklog Task 17: health 300, OG 200, manifesto byte-idêntico, borda HIT
   ~35ms, 1 fetch de catalog, privacidade PT/EN, popup 3 itens, mobile sem
-  overflow, zero erros de console). O passo (a) — `DATABASE_URL` pooled do
-  Neon (`-pooler.` no host) — segue pendente no console da Vercel (maior
-  ganho restante para chamadas autenticadas; com flashcards V2 passará a
-  pesar ainda mais, pois cada revisão será uma escrita no banco).
+  overflow, zero erros de console).
+- ~~Deploy da v1.8.0/v1.8.1 + passo de banco + Neon pooled~~ — **concluídos
+  pelo fundador em 28/out/2026** ("1,2,3,4 e 5 já foram feitos… testei aqui
+  tá ok"): sync GitHub, `db:push:prod` (tabela `FlashcardState`), redeploy,
+  verificações e **`DATABASE_URL` pooled do Neon configurado** — o item (a)
+  pendente desde a v1.6.0 está FECHADO. A ressalva do verso dos flashcards
+  virou a v1.8.1 (Task 22), embarcada no mesmo deploy dele.
+- **Auditoria de segurança do fundador (28/out/2026, commit `17d1588`,
+  docs/audits/2026-10-28-audit-fixes.md)** — 5 correções em produção:
+  SW owner-scoped network-only (troca de dispositivo compartilhado),
+  `SESSION_SECRET` fail-closed em produção, `FlashcardState` com ID
+  determinístico dono+questão (convergência em conflito único), SDD
+  ressincronizado (300 questões/Axon 0.2.1) e **rate limit compartilhado no
+  Neon** (buckets atômicos entre instâncias — a limitação por-instância da
+  v1.6.0 está fechada). Trade-off deliberado dele: dado owner-scoped sem
+  leitura offline no SW. Sandbox ressincronizado a partir do GitHub
+  (byte-idêntico, worklog Task 23) — o GitHub passa a ser também fonte de
+  sincronização de volta.
 - **Fase 1 — acender o hub** (passo do mantenedor, fora do repo do app):
   committar o conteúdo de `public/manifest.jsonl` como `manifestos/RAN.jsonl`
   no repo do hub; o deploy seguinte acende 300 páginas PT/EN em
@@ -102,13 +116,32 @@
 
 ## Pendente (próximos passos naturais)
 
+- ~~**v1.9.0 — Glossário bilíngue**~~ — **APROVADA E IMPLEMENTADA (Task 24,
+  28/out/2026)**: specs aprovadas pelo fundador; `spec-v1.9.0-glossario.md`
+  com as deviações registradas no header. 94 verbetes por varredura real do
+  banco, gloss PT/EN com fonte oficial da allowlist (50/76 URLs usadas),
+  dado estático `src/data/glossary.ts` (offline por construção, zero
+  banco/API), view `#/glossario` com busca instantânea insensível a
+  acentos + filtro S1–S7, gate novo `validate:glossary` (PASS, 0 findings),
+  rail Glossário após Progresso (mobile: Revisão → sheet Mais).
+- ~~**v1.10.0 — Flashcards offline**~~ — **APROVADA E IMPLEMENTADA (Task
+  24, 28/out/2026)**: draw devolve o payload completo (gabarito da própria
+  sessão — modelo de ameaça documentado no §2 da spec), reveal virou local
+  (o app parou de chamar `/reveal`; endpoint deprecated mas no ar), fila
+  localStorage `ranvier:fc-queue` cap 200 + novo `POST /api/flashcards/sync`
+  (fold por carta com `occurredAt`, `{applied, skipped, summary}`, rate
+  limit 120/5min), badge factual offline, draw bloqueado offline com retry,
+  sync nos gatilhos online/foco/mount/fim-de-sessão. v1.9.0 e v1.10.0
+  embarcaram JUNTAS no bump v1.10.0 (popup com 2 itens).
+
 - **Performance de carregamento** (pedido do fundador 2026-10-27): diagnóstico
   medido em produção (worklog Task 15) — shell rápido, gargalo na camada de
   dados (~500ms quente / 1,4–2,4s frio ×2 chamadas na 1ª visita). **Feitos
   na v1.6.0**: (b) cache de borda no catalog, (c) fim do duplo fetch,
-  (d) staleTime 24h. **Resta**: (a) env `DATABASE_URL` pooled do Neon (passo
-  do deploy, maior ganho para chamadas autenticadas) e (e) bootstrap inline
-  no HTML (opcional, só se o diagnóstico persistir após (a)).
+  (d) staleTime 24h. ~~Resta: (a) env `DATABASE_URL` pooled do Neon~~ —
+  **FEITO em 28/out/2026 pelo fundador** (junto com o deploy v1.8.x; ver
+  Auditoria acima). (e) bootstrap inline no HTML: opcional, só se o
+  diagnóstico persistir — reavaliar sob demanda.
 - ~~V2 — flashcards~~ → **implementado na v1.7.0** (ver Autorizado; sessão
   redesenhada na spec v1.8.0).
 - ~~V2 — trilhas de estudo personalizadas~~ → **spec escrita (v1.8.0,
@@ -120,8 +153,15 @@
   construção); entrar com blueprint + banco de questões próprio.
   **Ordem definida pelo fundador 27/out/2026: POR ÚLTIMO — "quando não
   tiver mais nada pra mexer no app".** **Escolha definida 28/out/2026:
-  a próxima é a AZ-900 (Azure Fundamentals)** — e o login Microsoft entra
-  junto com a 1ª certificação Microsoft (ver seção Autenticação).
+  a próxima é a AZ-900 (Azure Fundamentals)** — coerente com a esfera do
+  Ranvier no registro oficial do Noos (`noos.registry.json`: RAN = domínio
+  "Cloud"; o domínio nasceu do conceito original AZ-900/GLI-). Mapeamento
+  de esferas para revisão futura da lista "em breve": AZ-900/AZ-104 →
+  Ranvier (Cloud); SC-900 → Myelin (Segurança); AI-900/DP-900/PL-300 →
+  Engram (Dados · AI, "no horizonte"). DBDEA permanece no Ranvier (IDs
+  congelados; Databricks é plataforma cloud; migração quebraria o contrato
+  de IDs). Login Microsoft entra junto com a 1ª certificação Microsoft
+  (ver seção Autenticação).
 - ~~Atualizar o dossiê da equipe de design~~ — **parte in-repo fechada na
   Task 18** (`docs/sdd/fatias-dossie.md` §§1–2 corrigidos: DBDEA, IDs reais,
   registro marcado como desatualizado; nota no §6 sobre os exemplos az-900

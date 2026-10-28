@@ -238,6 +238,20 @@ export const dict = {
       newSession: "Nova sessão",
       toastStarted: "Sessão de flashcards iniciada.",
       toastFinished: "Fila de hoje concluída.",
+      /* v1.10.0 — fila offline de julgamentos (spec docs/sdd/
+         spec-v1.10.0-flashcards-offline.md §5): honestidade sobre o estado
+         da rede; números factuais, nada inventado. */
+      offline: {
+        badgeOffline: "Offline · {count, plural, =0 {nenhum julgamento na fila} one {# julgamento na fila} other {# julgamentos na fila}}",
+        badgePending: "{count, plural, =0 {fila vazia · sincronizando…} one {# julgamento na fila · sincronizando…} other {# julgamentos na fila · sincronizando…}}",
+        summaryQueued: "{count, plural, =0 {nenhum julgamento pendente.} one {# julgamento será sincronizado quando a conexão voltar.} other {# julgamentos serão sincronizados quando a conexão voltar.}}",
+        drawBlockedTitle: "Sem conexão",
+        drawBlockedDesc: "A fila de cartas nasce no servidor — abra a sessão online; depois, ela continua mesmo sem rede.",
+        drawBlockedRetry: "Tentar de novo",
+        toastSynced: "{count, plural, =0 {nada a sincronizar.} one {# julgamento sincronizado.} other {# julgamentos sincronizados.}}",
+        toastSkipped: "{count, plural, =0 {} one {# julgamento ignorado — a questão não existe mais.} other {# julgamentos ignorados — as questões não existem mais.}}",
+        toastQueueDropped: "Fila local cheia (200) — o julgamento mais antigo foi descartado.",
+      },
     },
     /* Trilhas de estudo (v1.8.0 — spec docs/sdd/spec-v1.8.0-trilhas-
        flashcards.md §5): os 7 domínios oficiais como rota ordenada;
@@ -264,6 +278,26 @@ export const dict = {
       progressBlockTitle: "Rota de estudo",
       progressBlockDesc: "{done} de {total} questões concluídas",
       progressBlockTrails: "Trilhas concluídas",
+    },
+    /* Glossário bilíngue (v1.9.0 — spec docs/sdd/spec-v1.9.0-glossario.md):
+       CONSULTA, não modo de estudo — busca instantânea, dado estático,
+       offline por construção. */
+    glossary: {
+      title: "Glossário",
+      subtitle: "Consulta rápida do vocabulário da prova — termos em inglês, como no exame, definições no seu idioma.",
+      searchLabel: "Buscar termo",
+      searchPlaceholder: "Termo, apelido ou definição…",
+      searchHint: "/",
+      domainsLabel: "Domínios",
+      filterAll: "Todos",
+      domains: ["Plataforma", "Ingestão", "Transformação", "Jobs", "CI/CD", "Troubleshooting", "Governança"],
+      countAll: "{total} verbetes",
+      countFiltered: "{total} verbetes · {shown, plural, =0 {nenhum resultado} one {# resultado} other {# resultados}}",
+      emptyTitle: "Nada encontrado",
+      emptyDesc: "Nenhum verbete casa com esta busca ou filtro.",
+      emptyClear: "Limpar busca e filtro",
+      source: "Fonte oficial",
+      offlineNote: "Funciona offline — dado estático no app",
     },
     exam: {
       title: "Simulado",
@@ -444,7 +478,8 @@ export const dict = {
       title: "O que há de novo",
       subtitle: "Avisamos uma única vez por atualização — depois, é só estudar.",
       items: [
-        "Flashcards: o verso do cartão agora mostra só a resposta — direto ao ponto, sem a lista de alternativas.",
+        "Glossário de consulta: 94 verbetes do vocabulário da prova, com definições bilíngues e fonte oficial — funciona offline.",
+        "Flashcards offline: sessões iniciadas online continuam sem rede; os julgamentos sincronizam sozinhos quando a conexão volta.",
       ],
       close: "Entendi",
     },
@@ -751,6 +786,20 @@ export const dict = {
       newSession: "New session",
       toastStarted: "Flashcards session started.",
       toastFinished: "Today's queue is done.",
+      /* v1.10.0 — offline grade queue (spec docs/sdd/
+         spec-v1.10.0-flashcards-offline.md §5): network-state honesty,
+         factual numbers only. */
+      offline: {
+        badgeOffline: "Offline · {count, plural, =0 {no grades queued} one {# grade queued} other {# grades queued}}",
+        badgePending: "{count, plural, =0 {queue empty · syncing…} one {# grade queued · syncing…} other {# grades queued · syncing…}}",
+        summaryQueued: "{count, plural, =0 {no pending grades.} one {# grade will sync when you are back online.} other {# grades will sync when you are back online.}}",
+        drawBlockedTitle: "No connection",
+        drawBlockedDesc: "The card queue is born on the server — start the session online; after that it keeps going without network.",
+        drawBlockedRetry: "Try again",
+        toastSynced: "{count, plural, =0 {nothing to sync.} one {# grade synced.} other {# grades synced.}}",
+        toastSkipped: "{count, plural, =0 {} one {# grade skipped — the question no longer exists.} other {# grades skipped — those questions no longer exist.}}",
+        toastQueueDropped: "Local queue full (200) — the oldest grade was dropped.",
+      },
     },
     /* Study trails (v1.8.0 — spec docs/sdd/spec-v1.8.0-trilhas-
        flashcards.md §5): the 7 official domains as an ordered route;
@@ -777,6 +826,26 @@ export const dict = {
       progressBlockTitle: "Study route",
       progressBlockDesc: "{done} of {total} questions completed",
       progressBlockTrails: "Trails completed",
+    },
+    /* Bilingual glossary (v1.9.0 — spec docs/sdd/spec-v1.9.0-glossario.md):
+       REFERENCE, not a study mode — instant search, static data, offline
+       by construction. */
+    glossary: {
+      title: "Glossary",
+      subtitle: "Quick reference for the exam vocabulary — terms in English, as in the exam, definitions in your language.",
+      searchLabel: "Search terms",
+      searchPlaceholder: "Term, alias or definition…",
+      searchHint: "/",
+      domainsLabel: "Domains",
+      filterAll: "All",
+      domains: ["Platform", "Ingestion", "Transformation", "Jobs", "CI/CD", "Troubleshooting", "Governance"],
+      countAll: "{total} entries",
+      countFiltered: "{total} entries · {shown, plural, =0 {no results} one {# result} other {# results}}",
+      emptyTitle: "Nothing found",
+      emptyDesc: "No entry matches this search or filter.",
+      emptyClear: "Clear search and filter",
+      source: "Official source",
+      offlineNote: "Works offline — static data in the app",
     },
     exam: {
       title: "Practice Exam",
@@ -957,7 +1026,8 @@ export const dict = {
       title: "What's new",
       subtitle: "We show this once per update — then it's back to studying.",
       items: [
-        "Flashcards: the back of the card now shows just the answer — straight to the point, no option list.",
+        "Reference glossary: 94 exam-vocabulary entries with bilingual definitions and official sources — works offline.",
+        "Offline flashcards: sessions started online keep going without network; grades sync by themselves when connectivity returns.",
       ],
       close: "Got it",
     },

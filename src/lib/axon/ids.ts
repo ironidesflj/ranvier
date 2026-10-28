@@ -16,3 +16,4 @@ export { generateId, validateId, validateAliasId, aliasOf } from "@ironidesflj/a
 
 /** Ranvier's public namespace prefix (hub registry: SYN, RAN, MYE, THA, ENG). */
 export const APP_ID_PREFIX = "RAN" as const;
+export const QUESTION_ID_PATTERN = /^RAN-[A-Z0-9]+-\d{5}$/;

@@ -1,4 +1,9 @@
-/** Shared client/server DTO types. Never include correctIndex in public question DTOs. */
+/** Shared client/server DTO types. Never include correctIndex in PUBLIC
+ *  question DTOs (Study/Exam keep server-side scoring). ONE deliberate
+ *  exception: the flashcard DRAW payload (v1.10.0 — spec docs/sdd/
+ *  spec-v1.10.0-flashcards-offline.md §2) embeds the card back so a session
+ *  started online can continue offline; the threat model (self-assessed
+ *  recall, no server-side correction to protect) is documented there. */
 
 export type Lang = "en" | "pt";
 /** Attempt mode. TRAIL (v1.8.0) = sequenced study tranche on one domain —
@@ -187,12 +192,25 @@ export interface FlashcardsSummary {
   matureCount: number;
 }
 
-/** Drawn card: PublicQuestion + the front-layout flag (server-computed).
- *  Statement-selection questions (spec §3.1) carry their options on the
- *  FRONT as part of the prompt — the flag is decided by a curated key list
- *  server-side; the client never guesses. */
+/** Drawn card (v1.10.0 — offline sessions): PublicQuestion + the front-layout
+ *  flag (server-computed) + the FULL card back — correctIndex, bilingual
+ *  explanations, reference and SRS projections — so the client turns the card
+ *  LOCALLY (one code path online and offline; /reveal stops being called by
+ *  the app). Statement-selection questions (spec §3.1) carry their options on
+ *  the FRONT; the flag is decided by a curated key list server-side. */
 export interface FlashcardDrawnCard extends PublicQuestion {
   frontIncludesOptions: boolean;
+  correctIndex: number;
+  explanationEn: string;
+  explanationPt: string;
+  referenceUrl: string | null;
+  referenceTitle: string | null;
+  /** Interval the card would get on each judgment — SM-2 over the owner's
+   *  state at draw time (same srs.ts math, computed without persisting). */
+  projection: {
+    wrong: { intervalDays: number };
+    right: { intervalDays: number };
+  };
 }
 
 export interface FlashcardDrawResponse {
@@ -200,9 +218,10 @@ export interface FlashcardDrawResponse {
   drewCount: number;
 }
 
-/** Reveal (read-only): the card back + SRS projections for the judgment
- *  buttons (spec §3.2/§4). Grading happens separately — a revealed card
- *  left without judgment records NO review. */
+/** Reveal (read-only, DEPRECATED for the app since v1.10.0): the card back +
+ *  SRS projections. The endpoint stays live as published API (removal only
+ *  in a future version with notice); the app now turns cards locally from the
+ *  draw payload. Kept in sync with FlashcardDrawnCard's embedded back. */
 export interface FlashcardRevealResponse {
   correctIndex: number;
   explanationEn: string;
@@ -222,6 +241,25 @@ export interface FlashcardGradeResponse {
   reps: number;
   lapses: number;
   nextDueAt: string;
+}
+
+/** Offline sync (v1.10.0 — spec §3): replay of locally queued judgments.
+ *  Events apply IN ORDER as reviews (same gradeFlashcard semantics); 200 OK
+ *  clears the client queue. `certSlug` (optional) returns a fresh summary so
+ *  the client can invalidate/refetch in one round trip. */
+export interface FlashcardSyncEvent {
+  questionId: string;
+  remembered: boolean;
+  /** ISO timestamp of when the student judged the card offline. */
+  occurredAt: string;
+}
+
+export interface FlashcardSyncResponse {
+  /** Events applied (each one = one SM-2 review). */
+  applied: number;
+  /** Events skipped (question missing/disabled since the queue was built). */
+  skipped: number;
+  summary: FlashcardsSummary | null;
 }
 
 /* ------------------------------------------------------------------ */

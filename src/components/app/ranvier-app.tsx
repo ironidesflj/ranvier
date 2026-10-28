@@ -5,6 +5,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   BookOpen,
+  BookText,
   GraduationCap,
   Github,
   Globe,
@@ -33,6 +34,7 @@ import { ResultsView } from "@/components/app/results-view";
 import { FlashcardsView } from "@/components/app/flashcards-view";
 import { TrailsView } from "@/components/app/trails-view";
 import { ProgressView } from "@/components/app/progress-view";
+import { GlossaryView } from "@/components/app/glossary-view";
 import { GuideView } from "@/components/app/guide-view";
 import { AboutView } from "@/components/app/about-view";
 import { SettingsView } from "@/components/app/settings-view";
@@ -104,6 +106,9 @@ function Rail() {
     { view: "flashcards", label: t.flashcards.title, icon: Layers },
     { view: "cert", label: t.shell.exam, icon: GraduationCap },
     { view: "progress", label: t.shell.progress, icon: LineChart },
+    /* v1.9.0 — Glossário após Progresso (spec §4): consulta, não modo de
+       estudo. Ícone BookText — BookOpen já pertence ao Estudar. */
+    { view: "glossary", label: t.glossary.title, icon: BookText },
   ];
 
   /* Revisão: entra na fila de revisão (questões erradas) — se vazia,
@@ -200,32 +205,17 @@ function Rail() {
 function MobileBottomNav({ onMore }: { onMore: () => void }) {
   const { t } = useLang();
   const { view, navigate } = useAppStore();
-  const queryClient = useQueryClient();
-
-  async function startReview() {
-    try {
-      const progress = await queryClient.fetchQuery({ queryKey: ["progress"], queryFn: api.progress });
-      const ids = progress?.reviewQuestionIds ?? [];
-      if (ids.length > 0) {
-        navigate("study", { questionIds: ids });
-      } else {
-        toast.info(t.shell.reviewEmpty);
-        navigate("progress");
-      }
-    } catch {
-      toast.error(t.toast.error);
-    }
-  }
 
   const items: { key: string; label: string; icon: React.ComponentType<{ className?: string }>; onClick: () => void; active: boolean }[] = [
-    /* v1.8.0 — 6 destinos + Mais no mobile (375 verificado na Task 19 com
-       6 botões; Trilhas entra como primeiro, spec §5.6). */
+    /* v1.9.0 (spec §4): 6 fixos + Mais — o Glossário entra nos fixos e a
+       Revisão passa a viver só no sheet Mais (transitória como sempre).
+       375 verificado: 6 botões + Mais cabem (mesmo padrão da Task 19). */
     { key: "trails", label: t.trails.title, icon: Route, onClick: () => navigate("trails"), active: view === "trails" },
     { key: "study", label: t.shell.study, icon: BookOpen, onClick: () => navigate("study"), active: view === "study" },
     { key: "flashcards", label: t.flashcards.title, icon: Layers, onClick: () => navigate("flashcards"), active: view === "flashcards" },
     { key: "cert", label: t.shell.exam, icon: GraduationCap, onClick: () => navigate("cert"), active: view === "cert" },
     { key: "progress", label: t.shell.progress, icon: LineChart, onClick: () => navigate("progress"), active: view === "progress" },
-    { key: "review", label: t.shell.review, icon: RotateCcw, onClick: () => void startReview(), active: false },
+    { key: "glossary", label: t.glossary.title, icon: BookText, onClick: () => navigate("glossary"), active: view === "glossary" },
   ];
 
   return (
@@ -401,6 +391,7 @@ export function RanvierApp() {
       {view === "flashcards" && <FlashcardsView />}
       {view === "trails" && <TrailsView />}
       {view === "progress" && <ProgressView />}
+      {view === "glossary" && <GlossaryView />}
       {view === "guide" && <GuideView />}
       {view === "about" && <AboutView />}
       {view === "settings" && <SettingsView />}

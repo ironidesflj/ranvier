@@ -1,6 +1,6 @@
 {
   "name": "ranvier",
-  "version": "1.8.1",
+  "version": "1.10.0",
   "private": true,
   "scripts": {
     "dev": "next dev -p 3000 2>&1 | tee dev.log",
@@ -17,6 +17,7 @@
     "db:reset": "prisma migrate reset",
     "db:seed": "bun scripts/seed.ts",
     "validate:questions": "bun scripts/validate-questions.ts",
+    "validate:glossary": "bun scripts/validate-glossary.ts",
     "ci:gate": "bun scripts/ci_gate/gate.ts src/data --strict",
     "ci:gate:selftest": "bun scripts/ci_gate/selftest.ts",
     "manifest": "bun scripts/generate-manifest.ts",

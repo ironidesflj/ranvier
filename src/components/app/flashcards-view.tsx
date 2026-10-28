@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeft, CheckCircle2, ExternalLink, Eye, Layers, Loader2, MessageCircle, Play, Target, XCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle2, ExternalLink, Eye, Layers, Loader2, MessageCircle, Play, Target, WifiOff, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -14,6 +14,8 @@ import { useLang } from "@/components/app/language-provider";
 import { useAppStore } from "@/store/app-store";
 import { api, ApiError } from "@/lib/api-client";
 import { orderOptions, type OptionOrdering } from "@/lib/option-order";
+import { applyReview, SRS_INITIAL_STATE } from "@/lib/srs";
+import { appendEvent, clearQueue, readQueue } from "@/lib/fc-queue";
 import { LETTERS } from "@/components/app/question-card";
 import { discussionUrl } from "@/lib/axon/deep-links";
 import { QueryError } from "@/components/app/query-error";
@@ -35,9 +37,23 @@ interface RevealedCard {
   rightDays: number;
 }
 
+/** Projeção de carta re-entrante (julgada "Errei" nesta sessão): o estado
+ *  pós-lapse é determinístico — reps zeram, ease cai 0.2 — então o próximo
+ *  "Acertei" vale 1 dia e "Errei" volta hoje, INDEPENDENTE do estado prévio
+ *  da carta. Computado com a mesma matemática pura de srs.ts, importada
+ *  também no cliente (zero duplicação — spec v1.10.0 §4). */
+const RELAPSE_PROJECTION = (() => {
+  const postLapse = applyReview(SRS_INITIAL_STATE, false);
+  return {
+    wrong: { intervalDays: applyReview(postLapse, false).intervalDays },
+    right: { intervalDays: applyReview(postLapse, true).intervalDays },
+  };
+})();
+
 /**
  * Flashcards com repetição espaçada — SESSÃO V2 (v1.8.0 — spec
- * docs/sdd/spec-v1.8.0-trilhas-flashcards.md §3).
+ * docs/sdd/spec-v1.8.0-trilhas-flashcards.md §3) → OFFLINE na v1.10.0
+ * (spec docs/sdd/spec-v1.10.0-flashcards-offline.md).
  *
  * Divisão de trabalho com os outros modos: Estudar/Exame treinam
  * RECONHECIMENTO (alternativas clicáveis, correção server-side); o
@@ -48,11 +64,11 @@ interface RevealedCard {
  *   frente (evocação) → "Ver resposta" → verso (SÓ a resposta + explicação) →
  *   [ Errei · volta hoje ]  [ Acertei · amanhã/em N dias ] → próximo cartão.
  *
- * As projeções SRS vêm do SERVIDOR no reveal (mesma matemática de srs.ts,
- * função pura aplicada sem persistir) — o aluno vê o efeito de cada
- * julgamento antes de decidir (padrão Anki). Julgar = avançar. "Errei"
- * re-entra na fila da própria sessão (1× por cartão — garantia de término).
- * Virar e abandonar sem julgar NÃO registra revisão (o cartão segue devido).
+ * v1.10.0 — o verso (gabarito + explicações + projeções) viaja no DRAW: virar
+ * é leitura LOCAL (um só caminho de código, online ou offline). O julgamento
+ * escreve online (/grade) ou acumula na fila local (spec §§3–4) e sincroniza
+ * nos gatilhos: rede volta, foco da aba, fim de sessão. O draw continua
+ * exigindo rede — a fila de cartas nasce do estado SRS do servidor.
  *
  * Teclado (desktop): Espaço/Enter vira · 1 = errei · 2 = acertei.
  * Nada de streak/XP/confete (patch §1) — o máximo de gamificação é o
@@ -88,10 +104,15 @@ export function FlashcardsView() {
   const [sessionId, setSessionId] = useState("");
   const [index, setIndex] = useState(0);
   const [revealed, setRevealed] = useState<RevealedCard | null>(null);
-  const [revealing, setRevealing] = useState(false);
   const [grading, setGrading] = useState(false);
   const [results, setResults] = useState<Record<string, boolean>>({});
   const [requeued, setRequeued] = useState<Set<string>>(new Set());
+  /* v1.10.0 — estado de rede honesto + fila local de julgamentos (spec §5). */
+  const [offlineQueue, setOfflineQueue] = useState(0);
+  const [netOffline, setNetOffline] = useState(false);
+  const [drawOffline, setDrawOffline] = useState(false);
+  const syncingRef = useRef(false);
+  const trySyncRef = useRef<() => void>(() => {});
 
   const draw = useMutation({
     mutationFn: () => api.flashcardsDraw({ certSlug: cert?.slug ?? certSlug, scope, limit: Number(count) }),
@@ -101,6 +122,7 @@ export function FlashcardsView() {
         void queryClient.invalidateQueries({ queryKey: ["flashcards-summary"] });
         return;
       }
+      setDrawOffline(false);
       setQueue(res.cards);
       setSessionId(`fc-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`);
       setIndex(0);
@@ -111,7 +133,12 @@ export function FlashcardsView() {
       toast.success(t.flashcards.toastStarted);
       window.scrollTo({ top: 0 });
     },
-    onError: () => toast.error(t.toast.error),
+    onError: (err) => {
+      /* Rede ausente (status 0): bloqueio honesto da spec §5 — a fila de
+         cartas nasce no servidor. Outros HTTP: erro genérico como hoje. */
+      if (err instanceof ApiError && err.status === 0) setDrawOffline(true);
+      else toast.error(t.toast.error);
+    },
   });
 
   const current = queue[index] ?? null;
@@ -120,36 +147,86 @@ export function FlashcardsView() {
     [current, sessionId],
   );
 
-  /* V2: reveal é LEITURA — verso + projeções; sem escrita de estado. */
-  async function handleReveal(card: FlashcardDrawnCard, ord: OptionOrdering) {
-    if (revealing || revealed) return;
-    setRevealing(true);
+  /* v1.10.0 — reveal LOCAL (spec §3): o verso (gabarito + explicações +
+     projeções) veio no draw; virar é leitura de memória — um só caminho de
+     código, online ou offline, sem chamada. Carta re-entrante usa a projeção
+     pós-lapse (o payload do draw reflete o estado no momento do sorteio). */
+  function handleReveal(card: FlashcardDrawnCard, ord: OptionOrdering) {
+    if (revealed) return;
+    const proj = requeued.has(card.id) ? RELAPSE_PROJECTION : card.projection;
+    setRevealed({
+      correctIndex: ord.toDisplay(card.correctIndex),
+      explanationEn: card.explanationEn,
+      explanationPt: card.explanationPt,
+      referenceUrl: card.referenceUrl,
+      referenceTitle: card.referenceTitle,
+      wrongDays: proj.wrong.intervalDays,
+      rightDays: proj.right.intervalDays,
+    });
+  }
+
+  /* v1.10.0 — escrita do julgamento (spec §§3–4): online → POST /grade;
+     offline (ou fetch falhando) → evento na fila local — o fluxo da sessão é
+     IDÊNTICO nos dois mundos (Espaço vira, 1/2 julgam, auto-avança). Erro
+     HTTP real (4xx/5xx) continua sendo erro: não avança, não enfileira. */
+  async function persistGrade(questionId: string, remembered: boolean): Promise<"done" | "queued" | "failed"> {
+    if (typeof navigator !== "undefined" && navigator.onLine === false) {
+      enqueueLocal(questionId, remembered);
+      return "queued";
+    }
     try {
-      const res = await api.flashcardsReveal(card.id);
-      setRevealed({
-        correctIndex: ord.toDisplay(res.correctIndex),
-        explanationEn: res.explanationEn,
-        explanationPt: res.explanationPt,
-        referenceUrl: res.referenceUrl,
-        referenceTitle: res.referenceTitle,
-        wrongDays: res.projection.wrong.intervalDays,
-        rightDays: res.projection.right.intervalDays,
-      });
-    } catch {
-      toast.error(t.toast.error);
-    } finally {
-      setRevealing(false);
+      await api.flashcardsGrade(questionId, remembered);
+      return "done";
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 0) {
+        enqueueLocal(questionId, remembered);
+        return "queued";
+      }
+      return "failed";
     }
   }
 
-  /* V2: julgamento binário do aluno → escrita SM-2 → auto-avançar.
-     "Errei" re-entra na fila 1× (o estado dele já vence AGORA no servidor). */
+  function enqueueLocal(questionId: string, remembered: boolean) {
+    const { queue: q, dropped } = appendEvent({ questionId, remembered, occurredAt: new Date().toISOString() });
+    setOfflineQueue(q.length);
+    setNetOffline(true); // badge honesto: este dispositivo não alcança o servidor
+    if (dropped > 0) toast.error(t.flashcards.offline.toastQueueDropped);
+  }
+
+  /* Sync da fila (spec §4): um POST; 200 limpa a fila e invalida o resumo.
+     Falha = continua na fila — os gatilhos (online, foco, fim de sessão)
+     tentam de novo. */
+  async function trySync() {
+    if (syncingRef.current) return;
+    const events = readQueue();
+    if (events.length === 0) return;
+    if (typeof navigator !== "undefined" && navigator.onLine === false) return;
+    syncingRef.current = true;
+    try {
+      const slug = cert?.slug ?? certSlug;
+      const res = await api.flashcardsSync(events, slug);
+      clearQueue();
+      setOfflineQueue(0);
+      if (res.summary) queryClient.setQueryData(["flashcards-summary", slug], res.summary);
+      void queryClient.invalidateQueries({ queryKey: ["flashcards-summary"] });
+      toast.success(f(t.flashcards.offline.toastSynced, { count: res.applied }));
+      if (res.skipped > 0) toast.info(f(t.flashcards.offline.toastSkipped, { count: res.skipped }));
+    } catch {
+      /* sem rede ainda — a fila espera o próximo gatilho */
+    } finally {
+      syncingRef.current = false;
+    }
+  }
+  trySyncRef.current = trySync;
+
+  /* v1.10.0 — julgamento binário → escrita online OU fila local → auto-avançar.
+     "Errei" re-entra na fila 1× (o estado dele já vence AGORA). */
   async function handleGrade(remembered: boolean) {
     if (!current || !revealed || grading) return;
     setGrading(true);
     const willRequeue = !remembered && !requeued.has(current.id);
-    try {
-      await api.flashcardsGrade(current.id, remembered);
+    const outcome = await persistGrade(current.id, remembered);
+    if (outcome !== "failed") {
       setResults((prev) => ({ ...prev, [current.id]: remembered }));
       if (willRequeue) {
         setQueue((prev) => [...prev, current]);
@@ -160,22 +237,23 @@ export function FlashcardsView() {
         setPhase("done");
         void queryClient.invalidateQueries({ queryKey: ["flashcards-summary"] });
         toast.success(t.flashcards.toastFinished);
+        if (outcome === "queued") trySyncRef.current(); // fim de sessão é gatilho
       } else {
         setIndex(index + 1);
       }
       setRevealed(null);
       window.scrollTo({ top: 0 });
-    } catch {
+    } else {
       toast.error(t.toast.error);
-    } finally {
-      setGrading(false);
     }
+    setGrading(false);
   }
 
   function finishSession() {
     setPhase("done");
     void queryClient.invalidateQueries({ queryKey: ["flashcards-summary"] });
     toast.success(t.flashcards.toastFinished);
+    trySyncRef.current(); // fim de sessão é gatilho de sync (spec §4)
   }
 
   const seenCount = Object.keys(results).length;
@@ -203,7 +281,66 @@ export function FlashcardsView() {
     }
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [phase, current, ordering, revealed, revealing, grading, index, queue, requeued]);
+  }, [phase, current, ordering, revealed, grading, index, queue, requeued]);
+
+  /* v1.10.0 — gatilhos de sync (spec §4): a rede volta, o foco da aba, o fim
+     da sessão. Estado de rede honesto para os badges (nunca palpite). */
+  useEffect(() => {
+    function onOnline() {
+      setNetOffline(false);
+      trySyncRef.current();
+    }
+    function onOffline() {
+      setNetOffline(true);
+    }
+    function onVisibility() {
+      if (document.visibilityState === "visible") trySyncRef.current();
+    }
+    window.addEventListener("online", onOnline);
+    window.addEventListener("offline", onOffline);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("online", onOnline);
+      window.removeEventListener("offline", onOffline);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, []);
+
+  /* Mount: fila de ontem? Conta honesta já no primeiro render + tentativa
+     de sync se há rede (subir o app conta como foco). */
+  useEffect(() => {
+    const queued = readQueue();
+    setOfflineQueue(queued.length);
+    setNetOffline(typeof navigator !== "undefined" && navigator.onLine === false);
+    if (queued.length > 0 && typeof navigator !== "undefined" && navigator.onLine) {
+      trySyncRef.current();
+    }
+  }, []);
+
+  /* v1.10.0 — draw exige rede (a fila de cartas nasce do estado SRS do
+     servidor — decisão honesta da spec §1/§5): offline, bloqueia com
+     mensagem + retry em vez de queimar a tentativa. */
+  function startDraw() {
+    if (typeof navigator !== "undefined" && navigator.onLine === false) {
+      setDrawOffline(true);
+      return;
+    }
+    draw.mutate();
+  }
+
+  /* Bloqueio honesto do draw offline (spec §5): título, explicação e retry. */
+  function offlineDrawBlock(onRetry: () => void) {
+    return (
+      <div className="rounded-[14px] border border-dashed bg-card p-8 text-center">
+        <WifiOff className="mx-auto mb-3 h-8 w-8 text-muted-foreground" aria-hidden />
+        <h2 className="font-display text-xl font-light tracking-[-0.02em]">{t.flashcards.offline.drawBlockedTitle}</h2>
+        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t.flashcards.offline.drawBlockedDesc}</p>
+        <Button variant="outline" className="mt-5" onClick={onRetry}>
+          {t.flashcards.offline.drawBlockedRetry}
+        </Button>
+      </div>
+    );
+  }
 
   /* Rótulo da projeção SRS (calculada no servidor, formatada aqui). */
   function projLabel(days: number): string {
@@ -259,7 +396,13 @@ export function FlashcardsView() {
         ) : summaryPending ? (
           <Skeleton className="h-48 w-full" />
         ) : summaryError ? (
-          <QueryError onRetry={() => void refetchSummary()} isRetrying={false} code={summaryErr instanceof ApiError ? `HTTP ${summaryErr.status}` : undefined} />
+          summaryErr instanceof ApiError && summaryErr.status === 0 ? (
+            /* Sem rede no resumo = sem rede no draw — o mesmo bloqueio honesto
+               (spec §5), não um QueryError genérico. */
+            offlineDrawBlock(() => void refetchSummary())
+          ) : (
+            <QueryError onRetry={() => void refetchSummary()} isRetrying={false} code={summaryErr instanceof ApiError ? `HTTP ${summaryErr.status}` : undefined} />
+          )
         ) : !summary || totalAvailable === 0 ? (
           /* Fila vazia de verdade: sem vencidas e sem novas — volta amanhã. */
           <div className="rounded-[14px] border border-dashed bg-card p-8 text-center">
@@ -336,10 +479,17 @@ export function FlashcardsView() {
               </Select>
             </div>
 
-            <Button size="lg" className="mt-6 w-full sm:w-auto" disabled={draw.isPending} onClick={() => draw.mutate()}>
+            <Button size="lg" className="mt-6 w-full sm:w-auto" disabled={draw.isPending} onClick={startDraw}>
               {draw.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
               {t.flashcards.start}
             </Button>
+
+            {/* v1.10.0 — resumo carregado ANTES de cair a rede: o clique no
+                início detecta o offline e explica (spec §5) com retry. */}
+            {drawOffline && offlineDrawBlock(() => {
+              setDrawOffline(false);
+              startDraw();
+            })}
           </section>
         )}
       </div>
@@ -542,16 +692,16 @@ export function FlashcardsView() {
         {/* Rodapé: Ver resposta (frente) · Julgamento com projeção (verso) */}
         <div className="mt-6 border-t pt-4">
           {!revealed ? (
+            /* v1.10.0 — virar é LOCAL e instantâneo: sem chamada, sem spinner. */
             <Button
               size="lg"
               className="w-full sm:w-auto"
-              disabled={revealing}
               onClick={() => {
                 markHintSeen();
-                void handleReveal(current, ordering);
+                handleReveal(current, ordering);
               }}
             >
-              {revealing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Eye className="h-4 w-4" />}
+              <Eye className="h-4 w-4" />
               {t.flashcards.reveal}
             </Button>
           ) : (
@@ -573,6 +723,22 @@ export function FlashcardsView() {
               </p>
             </div>
           )}
+
+          {/* v1.10.0 — badge factual de rede (spec §5): offline com fila,
+             ou online com fila pendente sincronizando. Números reais, nunca
+             palpite sobre a conexão. */}
+          {(netOffline || offlineQueue > 0) && (
+            <p
+              className="mt-4 flex items-center gap-2 font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-muted-foreground"
+              role="status"
+              aria-live="polite"
+            >
+              <WifiOff className="h-3.5 w-3.5 shrink-0" aria-hidden />
+              {netOffline
+                ? f(t.flashcards.offline.badgeOffline, { count: offlineQueue })
+                : f(t.flashcards.offline.badgePending, { count: offlineQueue })}
+            </p>
+          )}
         </div>
       </div>
     );
@@ -589,6 +755,11 @@ export function FlashcardsView() {
         <p className="mt-2 text-muted-foreground">
           {f(t.flashcards.summaryStats, { seen: seenCount, correct: correctCount, reentries: reentryCount })}
         </p>
+        {/* v1.10.0 — linha factual quando a sessão terminou com julgamentos
+            na fila (spec §5): o aluno sabe o que ainda falta sincronizar. */}
+        {offlineQueue > 0 && (
+          <p className="mt-2 text-sm text-muted-foreground">{f(t.flashcards.offline.summaryQueued, { count: offlineQueue })}</p>
+        )}
         <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
           <Button variant="outline" onClick={() => setPhase("config")}>
             {t.flashcards.newSession}

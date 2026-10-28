@@ -5,7 +5,8 @@ import type {
   FlashcardDrawResponse,
   FlashcardDrawScope,
   FlashcardGradeResponse,
-  FlashcardRevealResponse,
+  FlashcardSyncEvent,
+  FlashcardSyncResponse,
   FlashcardsSummary,
   Lang,
   MeResponse,
@@ -84,18 +85,21 @@ export const api = {
   flashcardsDraw: (body: { certSlug: string; domainCodes?: number[]; limit?: number; scope: FlashcardDrawScope }) =>
     fetchJson<FlashcardDrawResponse>("/api/flashcards/draw", { method: "POST", body: JSON.stringify(body) }),
 
-  /* v1.8.0 — reveal (leitura: verso + projeções) e grade (escrita: SM-2
-     com a autoavaliação binária) substituem o antigo review. */
-  flashcardsReveal: (questionId: string) =>
-    fetchJson<FlashcardRevealResponse>("/api/flashcards/reveal", {
-      method: "POST",
-      body: JSON.stringify({ questionId }),
-    }),
-
+  /* v1.10.0 — reveal é LOCAL: o verso (gabarito + projeções) viaja no draw;
+     /reveal deixou de ser chamado pelo app (endpoint segue no ar como API
+     publicada — ver spec-v1.10.0 §3). Grade continua sendo a escrita online. */
   flashcardsGrade: (questionId: string, remembered: boolean) =>
     fetchJson<FlashcardGradeResponse>("/api/flashcards/grade", {
       method: "POST",
       body: JSON.stringify({ questionId, remembered }),
+    }),
+
+  /* v1.10.0 — sync da fila offline: um POST com ≤200 eventos; 200 limpa a
+     fila no cliente. certSlug opcional devolve o resumo fresco junto. */
+  flashcardsSync: (events: FlashcardSyncEvent[], certSlug?: string) =>
+    fetchJson<FlashcardSyncResponse>("/api/flashcards/sync", {
+      method: "POST",
+      body: JSON.stringify({ events, certSlug }),
     }),
 
   /* v1.8.0 — trilhas: progresso derivado por dono. */

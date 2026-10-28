@@ -1,13 +1,19 @@
 # current-state.md — estado verificado
 
-Última atualização: **2026-10-28 · v1.8.1** (emenda do verso dos
-flashcards — feedback do fundador **pós-deploy da v1.8.0 em produção**
-("só tem que aparecer a resposta do card"), worklog Task 22, spec v1.8.0
-§14: o verso renderiza RESPOSTA + EXPLICAÇÃO + fonte + ID, sem a lista de
-alternativas; 100% frontend/i18n, sem passo de banco).
-**v1.8.0 está PUBLICADA e testada pelo fundador** (28/out/2026: sync
-GitHub, db:push:prod, redeploy, verificações e Neon pooled concluídos por
-ele — "testei aqui tá ok"; a ressalva do verso virou a v1.8.1 acima).
+Última atualização: **2026-10-28 · v1.9.0 + v1.10.0 APROVADAS E
+IMPLEMENTADAS (Task 24)** — o fundador aprovou ambas as specs ("specs
+aprovadas") e as duas embarcaram juntas no bump **v1.10.0**: glossário
+bilíngue de consulta (94 verbetes, dado estático, offline por construção)
++ flashcards offline (verso embutido no draw, reveal local, fila local de
+julgamentos com sync em lote). Deploy = redeploy simples, **sem passo de
+banco**. Contexto anterior: auditoria própria do fundador publicada
+(commit `17d1588` — SW owner-scoped network-only, `SESSION_SECRET`
+fail-closed, ID determinístico no `FlashcardState`, SDD ressincronizado,
+rate limit compartilhado no Neon) com o sandbox ressincronizado a partir
+do GitHub (Task 23, árvores byte-idênticas).
+Lote anterior: **v1.8.1** (verso do flashcard mostra só a resposta —
+feedback pós-deploy do fundador, Task 22, publicada por ele junto com a
+v1.8.0).
 Lote anterior: **v1.7.0** (flashcards com repetição espaçada — tabela
 `FlashcardState`, SM-2 simplificado local, rotas de API, view
 `#/flashcards`; **nunca publicada**: a sessão foi rejeitada pelo fundador
@@ -23,15 +29,17 @@ identidade visual; v1.4.0 = patch de design v1.1; v1.4.1 = 4 ajustes de UI
 do fundador.
 
 **Decisões do fundador registradas em 28/out/2026:** (1) AZ-900 é a
-próxima certificação (por último na fila, conforme ordem dele);
-(2) explicação pedida dos próximos itens naturais (glossário bilíngue V2,
-fila offline de flashcards) — ver plan.md Pendente.
+próxima certificação — coerente com a esfera Cloud do Ranvier no registro
+oficial do Noos (ver mapeamento de esferas no plan.md); (2) direção
+aprovada: glossário (v1.9.0) e depois flashcards offline (v1.10.0) —
+**especs aprovadas e implementadas na mesma sessão (Task 24)**.
 
 ## Versão e artefatos
 
-- App: **v1.8.1** (`src/lib/version.ts` = fonte única; `package.json`,
-  `public/sw.js` (cache `ranvier-v1.8.1`, com a correção network-first),
-  `public/offline.html` no mesmo lote).
+- App: **v1.10.0** (`src/lib/version.ts` = fonte única; `package.json`,
+  `public/sw.js` (cache `ranvier-v1.10.0`), `public/offline.html` no mesmo
+  lote; popup whatsNew com 2 itens — glossário + flashcards offline — para
+  quem saltou da v1.8.1 direto para a v1.10.0).
 - Banco: 300 questões (S1=19, S2=59, S3=69, S4=43, S5=31, S6=33, S7=46),
   1 certificação (Databricks Data Engineer Associate, blueprint May/2026),
   IDs públicas congeladas RAN-DBDEA-00001..00300, 6 simulados disjuntos.
@@ -39,19 +47,28 @@ fila offline de flashcards) — ver plan.md Pendente.
   por dono — userId XOR anonId, cascades User/Question, índices por
   dono+dueAt); questões/seed/manifesto INTOCADOS (validate:questions 300 ·
   validate:manifest 300/0/0 verificados pós-lote).
-- Flashcards (v1.7.0 → **sessão V2 na v1.8.0**): 1 questão = 1 cartão;
-  SM-2 simplificado local (`src/lib/srs.ts` — "errei" vence AGORA e
-  re-entra na sessão 1×; acerto escala 1d → 3d → intervalo×ease, teto 180d;
-  **intocado na V2**). **V2 (spec v1.8.0 §3):** frente de EVOCAÇÃO sem
+- Flashcards (v1.7.0 → **sessão V2 na v1.8.0** → **OFFLINE na v1.10.0**):
+  1 questão = 1 cartão; SM-2 simplificado local (`src/lib/srs.ts` — "errei"
+  vence AGORA e re-entra na sessão 1×; acerto escala 1d → 3d →
+  intervalo×ease, teto 180d; **funções puras importadas também no cliente
+  desde a v1.10.0**). **V2 (spec v1.8.0 §3):** frente de EVOCAÇÃO sem
   alternativas (282/300; 18 "statement-selection" com as afirmações na
   frente como enunciado — flag `frontIncludesOptions` computado no servidor
   por lista curada de chaves); fluxo revelar → julgar (Errei/Acerte com a
-  projeção SRS impressa no botão, calculada no servidor) → auto-avançar;
-  teclado Espaço/1/2; virar sem julgar NÃO registra revisão. Rotas:
-  `/api/flashcards` (summary), `/draw` (devidas+novas, até 50, com o flag),
-  **`/reveal` (leitura: verso + projeções) + `/grade` (escrita: SM-2 com a
-  autoavaliação binária) — substituíram o `/review` da v1.7.0 nunca
-  publicada**; gabarito nunca viaja no draw. Merge no login/register
+  projeção SRS impressa no botão) → auto-avançar; teclado Espaço/1/2; virar
+  sem julgar NÃO registra revisão. **v1.10.0 (spec própria): o draw devolve
+  a carta COMPLETA** (gabarito + explicações + fonte + projeções — o modelo
+  de ameaça §2 da spec documenta por que é aceitável: flashcard é
+  autoavaliado, Estudar/Exame seguem server-side); **reveal é LOCAL** (o app
+  parou de chamar `/reveal` — endpoint deprecated mas mantido no ar);
+  julgamento escreve online (`/grade`) ou acumula na **fila local
+  `ranvier:fc-queue`** (cap 200, descarte do mais antigo COM toast) e
+  sincroniza via **`POST /api/flashcards/sync`** (lote ≤200, fold por carta
+  com `occurredAt`, `{applied, skipped, summary}`, rate limit 120/5min);
+  badge factual "Offline · N na fila"; draw bloqueado offline com retry.
+  Rotas: `/api/flashcards` (summary), `/draw` (devidas+novas, até 50, com o
+  flag + verso embutido), `/reveal` (deprecated, no ar), `/grade` (escrita
+  online), `/sync` (replay da fila). Merge no login/register
   (colisão: mais `reps` vence) e cascade no DELETE LGPD — ambos verificados
   no sandbox; view `#/flashcards`; CTA no bilhete da Home ("N para hoje")
   e bloco no Progresso (em rotação/para hoje/maduros).
@@ -63,11 +80,24 @@ fila offline de flashcards) — ver plan.md Pendente.
   (lang pt/en, percentual ponderado pelos pesos oficiais); view `#/trilhas`
   com cabeçalho de rota, 7 cards, tranches 10/20/30/50 e Continuar;
   **Trilhas é o 1º destino do rail** (Trilhas · Estudar · Flashcards ·
-  Exame · Progresso · Revisão; mobile 6 + Mais); CTA factual no bilhete da
-  Home e bloco "Rota de estudo" no Progresso.
-- PWA: manifest (tema papel #f7fbf9), sw.js (`ranvier-v1.8.0`) com
-  **network-first para dados owner-scoped** (v1.8.0 §13 — correção do
-  stale-while-revalidate que deixava contadores uma fetch atrás) e SWR
+  Exame · Progresso · Glossário · Revisão; mobile 6 + Mais com Revisão no
+  sheet); CTA factual no bilhete da Home e bloco "Rota de estudo" no
+  Progresso.
+- Glossário bilíngue (**v1.9.0**): 94 verbetes do vocabulário que o banco
+  de 300 questões de fato usa (varredura real Task 23), termos canônicos
+  em inglês + apelidos ("Auto Loader"↔"cloudFiles"; "DLT"↔"Lakeflow
+  Declarative Pipelines"), gloss PT-BR e EN com **fonte oficial da
+  allowlist do CI** (50/76 URLs usadas); dado 100% estático em
+  `src/data/glossary.ts` (compila no bundle — offline por construção, zero
+  banco/API/Query); view `#/glossario` com busca instantânea insensível a
+  acentos/caixa (casa termo + apelidos + glosses nos 2 idiomas), filtro por
+  domínio S1–S7, contagem factual, teclado `/` (desktop), estado vazio
+  honesto; **novo gate `validate:glossary`** (slugs, glosses bilíngues,
+  URL⊂allowlist, domainCodes — PASS com 0 findings).
+- PWA: manifest (tema papel #f7fbf9), sw.js (`ranvier-v1.10.0`) com
+  **network-only para dados owner-scoped** (endurecimento da auditoria
+  28/out — dado privado não fica legível offline de propósito: previne
+  vazamento entre contas num dispositivo compartilhado) e SWR
   apenas para dados públicos (catalog/health/manifestos), offline.html,
   ícones com monograma R.
 - Social preview (v1.5.1→v1.6.0): og:image 1200×630 "bilhete de exame"
@@ -289,12 +319,16 @@ fila offline de flashcards) — ver plan.md Pendente.
 
 ## Onde estão as evidências
 
-- `worklog.md` (registro vivo, Task IDs 0–22) — diffs, comandos, medições.
+- `worklog.md` (registro vivo, Task IDs 0–23) — diffs, comandos, medições.
   Task 17 = verificação ao vivo da v1.6.0 publicada; Task 18 = correção
   factual do dossiê + avaliação §14 + spec v1.7.0; Task 19 = implementação
   v1.7.0 (sandbox); Task 20 = estudo + spec v1.8.0; Task 21 = implementação
   v1.8.0 (trilhas + flashcards V2 + correção do SW) verificada no sandbox;
-  Task 22 = v1.8.1 (verso só-resposta, pós-feedback de produção).
+  Task 22 = v1.8.1 (verso só-resposta, publicada pelo fundador); Task 23 =
+  ressincronização do sandbox com o GitHub pós-auditoria + specs v1.9.0/
+  v1.10.0 + resposta das esferas do Noos.
+- `docs/audits/2026-10-28-audit-fixes.md` — relatório de auditoria do
+  fundador (5 correções, commit `17d1588`).
 - `download/ranvier-v1.3.1.*` (bundle/patch/zip) — artefatos da leva anterior
   (cada leva gera os próprios artefatos quando o fundador pedir).
 - `docs/sdd/fatias-dossie.md` — instantâneo do ecossistema Noos trazido pelo

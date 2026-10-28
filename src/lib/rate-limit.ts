@@ -51,5 +51,7 @@ export const LIMITS = {
   flashcardsDraw: { limit: 60, windowMs: 5 * 60_000 },
   flashcardsReveal: { limit: 300, windowMs: 5 * 60_000 },
   flashcardsGrade: { limit: 300, windowMs: 5 * 60_000 },
+  flashcardsReview: { limit: 300, windowMs: 5 * 60_000 },
+  flashcardsSync: { limit: 120, windowMs: 5 * 60_000 },
   trails: { limit: 60, windowMs: 5 * 60_000 },
 } as const;

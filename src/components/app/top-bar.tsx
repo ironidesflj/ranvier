@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTheme } from "next-themes";
 import { toast } from "sonner";
-import { Languages, LogIn, LogOut, Moon, Sun, UserRound } from "lucide-react";
+import { Languages, LogIn, LogOut, Moon, RotateCcw, Sun, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -201,6 +201,27 @@ export function TopBar() {
 export function MoreSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   const { t } = useLang();
   const { navigate } = useAppStore();
+  const queryClient = useQueryClient();
+
+  /* v1.9.0 (spec §4): a Revisão passa a viver aqui (junto de Ajustes) — o
+     Glossário tomou a 6ª posição fixa da navegação inferior. Mesma lógica
+     da barra de revisão do rail: fila de questões erradas, ou orientação
+     honesta quando vazia. */
+  async function startReview() {
+    try {
+      const progress = await queryClient.fetchQuery({ queryKey: ["progress"], queryFn: api.progress });
+      const ids = progress?.reviewQuestionIds ?? [];
+      onOpenChange(false);
+      if (ids.length > 0) {
+        navigate("study", { questionIds: ids });
+      } else {
+        toast.info(t.shell.reviewEmpty);
+        navigate("progress");
+      }
+    } catch {
+      toast.error(t.toast.error);
+    }
+  }
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -226,6 +247,12 @@ export function MoreSheet({ open, onOpenChange }: { open: boolean; onOpenChange:
           </div>
           <div className="border-t pt-4">
             <AccountControl size="sheet" />
+          </div>
+          <div className="border-t pt-4">
+            <Button variant="outline" size="lg" className="w-full" onClick={() => void startReview()}>
+              <RotateCcw className="h-4 w-4" />
+              {t.shell.review}
+            </Button>
           </div>
           <div className="border-t pt-4">
             <Button variant="outline" size="lg" className="w-full" onClick={() => { onOpenChange(false); navigate("settings"); }}>

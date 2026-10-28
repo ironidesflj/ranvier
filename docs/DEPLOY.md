@@ -209,6 +209,22 @@ bun run db:generate
 > basta sync GitHub → redeploy. Verificação pós-deploy: abrir os flashcards,
 > virar um cartão e conferir que o verso mostra RESPOSTA + EXPLICAÇÃO +
 > fonte, sem a lista de alternativas.
+>
+> **DEPLOY DA v1.10.0 (glossário + flashcards offline — v1.9.0 e v1.10.0
+> juntas):** **SEM passo de banco** (nenhuma tabela nova; a fila offline é
+> localStorage e o sync usa a `FlashcardState` existente). Fluxo: sync
+> GitHub → redeploy. O que muda no tráfego: o `/draw` devolve cada carta
+> completa (gabarito + projeções — modelo de ameaça documentado na spec
+> v1.10.0 §2: flashcard é autoavaliado; Estudar/Exame seguem server-side) e
+> o `/reveal` **deixa de ser chamado pelo app** (endpoint deprecated, mas
+> mantido no ar); novo `POST /api/flashcards/sync` (rate limit 120/5min,
+> lote ≤200 — o pooled do Neon segue recomendado). Verificações
+> pós-deploy: (1) abrir `#/glossario`, buscar "unity catalog" — resultados
+> com fonte oficial, funciona offline (devtools → network offline → a busca
+> continua viva); (2) iniciar sessão de flashcards, virar um cartão (sem
+> chamada a `/reveal` no network), cortar a rede, julgar 2 cartas (badge
+> "Offline · 2 julgamentos na fila"), voltar a rede (toast de
+> sincronização) e conferir o resumo; (3) `/api/health` 300 questões.
 
 ---
 
