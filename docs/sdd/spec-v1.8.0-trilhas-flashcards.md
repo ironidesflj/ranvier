@@ -389,3 +389,37 @@ timing nos QAs anteriores).
 as abas (ciclo de vida sem `skipWaiting`, por design — nunca interrompe
 sessão aberta); a ativação limpa os caches antigos. Documentada na nota
 v1.8.0 do `docs/DEPLOY.md` §5.
+
+## 14 · Emenda v1.8.1 — o verso do flashcard mostra SÓ a resposta
+
+**Feedback do fundador pós-deploy da v1.8.0 (28/out/2026):** "os flashcards —
+ao clicar em ver resposta aparece 4 opções, com a 'correta' isso não faz o
+menor sentido. Só tem que aparecer a resposta do card."
+
+**O diagnóstico:** o §3.3 especificava o verso como o `QuestionCard` em modo
+feedback — enunciado + as 4 alternativas com a correta acesa. Para um
+flashcard de evocação isso re-introduzia na viragem exatamente o formato de
+reconhecimento (lista A–D para escanear) que a frente esconde de propósito:
+o aluno respondeu de cabeça, e a "recompensa" era reler uma lista para
+achar qual acendeu.
+
+**A emenda (v1.8.1, lote 22):** o verso passou a renderizar direto —
+- pills de domínio/dificuldade (mesmo cabeçalho da frente);
+- bloco **RESPOSTA** (container de sucesso, ícone de check): o **texto da
+  alternativa correta**; nas 18 statement-selection, com a **letra** em badge
+  ecoando a lista A–D que a frente exibiu;
+- bloco **EXPLICAÇÃO** (sempre aberta, patch v1.1 §11) + fonte oficial;
+- rodapé com ID pública + Comunidade (inalterado).
+
+As 4 alternativas e a repetição do enunciado SAEM do verso. Nada mais muda:
+frente, fluxo reveal→julgamento, projeções SRS nos botões, auto-avançar,
+teclado, re-entrada 1×, srs.ts/tabela/API/merge/cascade — tudo da v1.8.0.
+`QuestionCard` deixa de ser usado na view (só `LETTERS` e o padrão visual
+permanecem); nenhum outro modo é afetado.
+
+**Artifacts:** bump v1.8.1 nas 5 casas + popup 1 item ("verso mostra só a
+resposta"). Sem passo de banco (mudança 100% frontend/i18n — redeploy
+simples). QA: frente sem alternativas → verso com RESPOSTA+EXPLICAÇÃO+fonte+
+ID e zero `role="listbox"`/`role="option"` no DOM; carta flagiada com letra;
+PT/EN ("Resposta"/"Answer"); teclado Espaço/1/2; fila 20→21 no "Errei";
+mobile 375 sem scroll horizontal; zero erros de console.

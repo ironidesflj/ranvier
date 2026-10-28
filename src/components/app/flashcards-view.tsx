@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeft, CheckCircle2, Eye, Layers, Loader2, Play, Target, XCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle2, ExternalLink, Eye, Layers, Loader2, MessageCircle, Play, Target, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -14,7 +14,8 @@ import { useLang } from "@/components/app/language-provider";
 import { useAppStore } from "@/store/app-store";
 import { api, ApiError } from "@/lib/api-client";
 import { orderOptions, type OptionOrdering } from "@/lib/option-order";
-import { QuestionCard, LETTERS } from "@/components/app/question-card";
+import { LETTERS } from "@/components/app/question-card";
+import { discussionUrl } from "@/lib/axon/deep-links";
 import { QueryError } from "@/components/app/query-error";
 import type { FlashcardDrawnCard, FlashcardDrawScope } from "@/lib/types";
 
@@ -44,7 +45,7 @@ interface RevealedCard {
  * 18 "statement-selection", onde as afirmações SÃO o enunciado), o aluno
  * tenta lembrar, vira o cartão e se julga com honestidade binária:
  *
- *   frente (evocação) → "Ver resposta" → verso (gabarito + explicação) →
+ *   frente (evocação) → "Ver resposta" → verso (SÓ a resposta + explicação) →
  *   [ Errei · volta hoje ]  [ Acertei · amanhã/em N dias ] → próximo cartão.
  *
  * As projeções SRS vêm do SERVIDOR no reveal (mesma matemática de srs.ts,
@@ -447,24 +448,94 @@ export function FlashcardsView() {
           </article>
         )}
 
-        {/* VERSO — gabarito destacado entre as alternativas + explicação +
-            fonte + ID pública (reuso do QuestionCard em modo feedback,
-            sem seleção: só a correta acende). */}
+        {/* VERSO (v1.8.1 — emenda do fundador pós-deploy: "só tem que
+            aparecer a resposta do card") — o texto da alternativa correta
+            em destaque + explicação + fonte + ID pública. As 4 alternativas
+            SAEM do verso: a frente é evocação, re-exibir a lista na viragem
+            re-introduzia o formato de reconhecimento que a sessão evita.
+            Nas 18 statement-selection a letra ecoa a lista A–D da frente. */}
         {revealed && (
           <article className="rounded-[14px] border bg-card p-5 shadow-[var(--shadow-rest)] sm:p-6">
-            <QuestionCard
-              question={{ ...current, options: ordering.options }}
-              selectedIndex={null}
-              feedback={{
-                correct: true,
-                correctIndex: revealed.correctIndex,
-                explanationEn: revealed.explanationEn,
-                explanationPt: revealed.explanationPt,
-                referenceUrl: revealed.referenceUrl,
-                referenceTitle: revealed.referenceTitle,
-              }}
-              showMeta
-            />
+            {/* pills — mesmo cabeçalho da frente */}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full bg-surface-2 px-2.5 py-1 text-xs font-medium">
+                {t.common.domain} {current.domainCode} · {lang === "pt" ? current.domainNamePt : current.domainName}
+              </span>
+              <span className="rounded-full bg-surface-2 px-2.5 py-1 text-xs text-muted-foreground">
+                {t.study.difficulty}: {t.study.difficulties[current.difficulty]}
+              </span>
+            </div>
+
+            {/* RESPOSTA — o gabarito, direto ao ponto */}
+            <div
+              className="mt-4 flex items-start gap-3 rounded-[10px] border border-[var(--noos-success-line)] bg-[var(--noos-success-soft)] p-4 sm:p-5"
+              role="status"
+              aria-live="polite"
+            >
+              <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[var(--noos-success)]" aria-hidden />
+              <div className="min-w-0 flex-1">
+                <p className="font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-[var(--noos-success)]">
+                  {t.flashcards.answerLabel}
+                </p>
+                <div className="mt-1.5 flex items-start gap-3">
+                  {current.frontIncludesOptions && (
+                    <span
+                      aria-hidden
+                      className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-[6px] border border-[var(--noos-success)] bg-[var(--noos-success)] font-mono text-xs font-medium text-white"
+                    >
+                      {LETTERS[revealed.correctIndex]}
+                    </span>
+                  )}
+                  <p className="min-w-0 flex-1 break-words font-display text-[15px] font-medium leading-[1.55] sm:text-base">
+                    {ordering.options[revealed.correctIndex]}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Explicação bilíngue — sempre aberta (patch v1.1 §11) */}
+            <div className="mt-4 space-y-3 rounded-[10px] border p-4 sm:p-5">
+              <div>
+                <p className="mb-1.5 font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+                  {t.study.explanation}
+                </p>
+                <Markdown
+                  text={lang === "pt" ? revealed.explanationPt : revealed.explanationEn}
+                  className="max-w-[68ch] text-[15px] leading-relaxed"
+                />
+              </div>
+              {revealed.referenceUrl && (
+                <a
+                  href={revealed.referenceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 font-mono text-[11px] font-medium text-app-ink underline underline-offset-4 hover:opacity-80"
+                >
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  {t.study.source}: {revealed.referenceTitle ?? revealed.referenceUrl}
+                </a>
+              )}
+            </div>
+
+            {/* Rodapé: ID pública (mono, citável) + Comunidade */}
+            <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t pt-3">
+              <span
+                className="select-all font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground"
+                title={t.study.publicIdTitle}
+              >
+                {current.publicId}
+              </span>
+              <a
+                href={discussionUrl(current.publicId, lang)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 font-mono text-[11px] font-medium text-app-ink transition-opacity hover:opacity-80"
+              >
+                <MessageCircle className="h-3.5 w-3.5" aria-hidden />
+                {t.footer.community}
+                <ExternalLink className="h-3 w-3 opacity-60" aria-hidden />
+              </a>
+            </div>
           </article>
         )}
 

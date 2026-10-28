@@ -1,17 +1,19 @@
 # current-state.md — estado verificado
 
-Última atualização: **2026-10-27 · v1.8.0** (lote: trilhas de estudo +
-sessão de flashcards V2 — spec `spec-v1.8.0-trilhas-flashcards.md`,
-**aprovada pelo fundador ("gostei, pode seguir") e implementada** no
-mesmo dia, worklog Task 21; **ainda não publicada** — aguarda sync GitHub
-+ deploy com passo de banco, `docs/DEPLOY.md` §5 nota v1.8.0. Correção
-embarcada do SW: network-first para dados owner-scoped — spec §13).
+Última atualização: **2026-10-28 · v1.8.1** (emenda do verso dos
+flashcards — feedback do fundador **pós-deploy da v1.8.0 em produção**
+("só tem que aparecer a resposta do card"), worklog Task 22, spec v1.8.0
+§14: o verso renderiza RESPOSTA + EXPLICAÇÃO + fonte + ID, sem a lista de
+alternativas; 100% frontend/i18n, sem passo de banco).
+**v1.8.0 está PUBLICADA e testada pelo fundador** (28/out/2026: sync
+GitHub, db:push:prod, redeploy, verificações e Neon pooled concluídos por
+ele — "testei aqui tá ok"; a ressalva do verso virou a v1.8.1 acima).
 Lote anterior: **v1.7.0** (flashcards com repetição espaçada — tabela
 `FlashcardState`, SM-2 simplificado local, rotas de API, view
 `#/flashcards`; **nunca publicada**: a sessão foi rejeitada pelo fundador
 antes do deploy ("não vi diferença entre os flashcards e o modo estudo")
-e o desenho dela foi substituído pela V2 acima; a tabela `FlashcardState`,
-o SRS, o merge e o cascade da v1.7.0 permanecem válidos e embarcados).
+e o desenho dela foi substituído pela V2 da v1.8.0; a tabela `FlashcardState`,
+o SRS, o merge e o cascade da v1.7.0 permanecem válidos e publicados).
 Lote anterior: v1.6.0 = transparência
 de privacidade + performance de carregamento + prep.ts portátil (publicada
 e verificada ao vivo, Task 17); v1.5.1 = OG/social preview (não publicada —
@@ -20,10 +22,15 @@ pacote `@ironidesflj/axon`, publicada). Lotes mais antigos: v1.3.x =
 identidade visual; v1.4.0 = patch de design v1.1; v1.4.1 = 4 ajustes de UI
 do fundador.
 
+**Decisões do fundador registradas em 28/out/2026:** (1) AZ-900 é a
+próxima certificação (por último na fila, conforme ordem dele);
+(2) explicação pedida dos próximos itens naturais (glossário bilíngue V2,
+fila offline de flashcards) — ver plan.md Pendente.
+
 ## Versão e artefatos
 
-- App: **v1.8.0** (`src/lib/version.ts` = fonte única; `package.json`,
-  `public/sw.js` (cache `ranvier-v1.8.0`, com a correção network-first),
+- App: **v1.8.1** (`src/lib/version.ts` = fonte única; `package.json`,
+  `public/sw.js` (cache `ranvier-v1.8.1`, com a correção network-first),
   `public/offline.html` no mesmo lote).
 - Banco: 300 questões (S1=19, S2=59, S3=69, S4=43, S5=31, S6=33, S7=46),
   1 certificação (Databricks Data Engineer Associate, blueprint May/2026),
@@ -282,11 +289,12 @@ do fundador.
 
 ## Onde estão as evidências
 
-- `worklog.md` (registro vivo, Task IDs 0–21) — diffs, comandos, medições.
+- `worklog.md` (registro vivo, Task IDs 0–22) — diffs, comandos, medições.
   Task 17 = verificação ao vivo da v1.6.0 publicada; Task 18 = correção
   factual do dossiê + avaliação §14 + spec v1.7.0; Task 19 = implementação
   v1.7.0 (sandbox); Task 20 = estudo + spec v1.8.0; Task 21 = implementação
-  v1.8.0 (trilhas + flashcards V2 + correção do SW) verificada no sandbox.
+  v1.8.0 (trilhas + flashcards V2 + correção do SW) verificada no sandbox;
+  Task 22 = v1.8.1 (verso só-resposta, pós-feedback de produção).
 - `download/ranvier-v1.3.1.*` (bundle/patch/zip) — artefatos da leva anterior
   (cada leva gera os próprios artefatos quando o fundador pedir).
 - `docs/sdd/fatias-dossie.md` — instantâneo do ecossistema Noos trazido pelo

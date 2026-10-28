@@ -45,6 +45,19 @@
   dados owner-scoped (spec §13 — contadores ficavam uma fetch atrás).
   Deploy: v1.8.0 direto (passo de banco da FlashcardState embutido — a
   sessão rejeitada da v1.7.0 nunca chega à produção).
+- **v1.8.1 — Emenda do verso dos flashcards**: feedback do fundador
+  **pós-deploy da v1.8.0 em produção** (28/out/2026: passos 1–5 feitos —
+  sync GitHub, db:push:prod, redeploy, verificações, Neon pooled; "testei
+  aqui tá ok, mas os flashcards — ao clicar em ver resposta aparece 4
+  opções, com a 'correta' isso não faz o menor sentido. Só tem que aparecer
+  a resposta do card"). Implementada no mesmo dia (worklog Task 22, spec
+  v1.8.0 §14): o verso renderiza RESPOSTA (texto da alternativa correta;
+  letra nas 18 statement-selection) + EXPLICAÇÃO + fonte + ID — as 4
+  alternativas e a repetição do enunciado saem do verso. 100%
+  frontend/i18n, sem passo de banco; bump v1.8.1 + popup 1 item.
+  **Decisão registrada (28/out/2026): AZ-900 é a próxima certificação**
+  (ainda por último na fila, por ordem anterior do fundador — ver
+  Pendente).
 
 ## Fechado (entregue)
 
@@ -106,7 +119,9 @@
   pronta desde a v1.4.0 (`ranvier:cert`, seletor, progresso por cert por
   construção); entrar com blueprint + banco de questões próprio.
   **Ordem definida pelo fundador 27/out/2026: POR ÚLTIMO — "quando não
-  tiver mais nada pra mexer no app".**
+  tiver mais nada pra mexer no app".** **Escolha definida 28/out/2026:
+  a próxima é a AZ-900 (Azure Fundamentals)** — e o login Microsoft entra
+  junto com a 1ª certificação Microsoft (ver seção Autenticação).
 - ~~Atualizar o dossiê da equipe de design~~ — **parte in-repo fechada na
   Task 18** (`docs/sdd/fatias-dossie.md` §§1–2 corrigidos: DBDEA, IDs reais,
   registro marcado como desatualizado; nota no §6 sobre os exemplos az-900

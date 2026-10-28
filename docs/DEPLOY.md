@@ -202,6 +202,13 @@ bun run db:generate
 > (network-first) — visitantes que já tinham o SW antigo trocam para o novo
 > ao fechar as abas (ciclo de vida sem skipWaiting, por design; a ativação
 > limpa os caches antigos).
+>
+> **DEPLOY DA v1.8.1 (emenda do verso dos flashcards):** mudança 100%
+> frontend/i18n (o verso do cartão mostra só a resposta — ver spec v1.8.0
+> §14). **SEM passo de banco**: banco e schema idênticos aos da v1.8.0 —
+> basta sync GitHub → redeploy. Verificação pós-deploy: abrir os flashcards,
+> virar um cartão e conferir que o verso mostra RESPOSTA + EXPLICAÇÃO +
+> fonte, sem a lista de alternativas.
 
 ---
 

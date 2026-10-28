@@ -32,7 +32,7 @@
  * take control (the page reloads once via the controllerchange listener in
  * pwa-provider.tsx so the initial load gets cached).
  */
-const VERSION = "ranvier-v1.8.0";
+const VERSION = "ranvier-v1.8.1";
 const SHELL_CACHE = `ranvier-shell-${VERSION}`;
 const ASSET_CACHE = `ranvier-assets-${VERSION}`;
 const DATA_CACHE = `ranvier-data-${VERSION}`;
