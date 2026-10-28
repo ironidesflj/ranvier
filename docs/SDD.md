@@ -1,6 +1,6 @@
 # Ranvier (by Noos) — Software Design Document (SDD)
 
-**Versão:** 1.1.0 · **Data:** 2026-10-23 · **Status:** Documento vivo (complementar ao `worklog.md`)
+**Versão:** 1.8.1 · **Data:** 2026-10-28 · **Status:** Documento vivo (complementar ao `worklog.md`)
 **App:** Ranvier — estudos e simulados gratuitos para certificações · **Ecossistema:** Noos (assinatura "by Noos"; hub: noos.study, fallback https://noos-hub.vercel.app)
 **Autor do produto:** Ironides Junior — <https://github.com/ironidesflj> · <https://www.linkedin.com/in/ironjunior/>
 **Princípio norteador:** *nada se perda* — este documento existe para que futuros mantenedores tenham 100% do contexto de projeto, decisão e limitação sem precisar arqueologia no código.
@@ -75,7 +75,7 @@ Todos os fatos abaixo foram capturados na sessão de pesquisa oficial (Task 0, v
 | S5 | Implementing CI/CD | **10%** | 12 | 5 |
 | S6 | Troubleshooting, Monitoring, and Optimization | **10%** | 12 | 4 |
 | S7 | Governance and Security | **15%** | 17 | 7 |
-| — | **Total** | **100%** | **116** | **45** |
+| — | **Total** | **100%** | **300** | **45** |
 
 A coluna "Simulado" é a distribuição oficial espelhada (método do maior resto sobre os pesos: 3/9/10/7/5/4/7 = 45), codificada em `EXAM_DISTRIBUTION` (`src/data/certifications.ts`) e **recomputada em runtime** pelo `stratifiedCounts()` (`src/lib/attempt-service.ts`) — ou seja, a distribuição do simulado não depende de uma tabela fixa no banco, e sim dos pesos oficiais persistidos por domínio.
 
@@ -390,7 +390,7 @@ Definidos em `src/lib/types.ts` (tipos compartilhados cliente/servidor — "Neve
 
 ### 8.2 Distribuição e calibragem do banco
 
-- **Banco: 116 questões** — S1=8, S2=24, S3=25, S4=18, S5=12, S6=12, S7=17 (alvo ≥2× a necessidade do simulado por domínio; checado pelo validador).
+- **Banco: 300 questões** — S1=19, S2=59, S3=69, S4=43, S5=31, S6=33, S7=46 (alvo ≥2× a necessidade do simulado por domínio; checado pelo validador).
 - **Simulado: 45 questões por maior-resto** espelhando os pesos oficiais (3/9/10/7/5/4/7), recomputado em runtime a partir dos `weightPercent` (seção 2). Top-up defensivo caso algum domínio fique curto.
 - **Dificuldade alvo ~30/50/20** (EASY/MEDIUM/HARD). Real por arquivo: 27–33% EASY, 50–53% MEDIUM, 17–22% HARD — dentro da meta.
 - Padrões de qualidade por questão: stem de cenário (≥40 palavras), explicações EN e PT-BR **naturais e não literais** (60–120 palavras cada), blocos de código ```sql/```python/```yaml/```bash onde o tópico pede, respeitando a nota oficial "SQL quando possível, senão Python".
@@ -540,7 +540,7 @@ Higiene garantida (estado verificado): `.gitignore` cobre `.env*`, `db/` (SQLite
 bun install
 bun run db:generate:prod
 DATABASE_URL="<neon-pooled>" bun run db:push:prod
-DATABASE_URL="<neon-pooled>" bun scripts/seed.ts   # seed idempotente (116 questões + IDs públicas)
+DATABASE_URL="<neon-pooled>" bun scripts/seed.ts   # seed idempotente (300 questões + IDs públicas)
 bun run db:generate                                  # restaura o client SQLite para o dev local
 ```
 
@@ -623,13 +623,13 @@ Adaptação executada conforme o **Guia de Adaptação Noos-Ranvier, Fase 1** (e
 ### 16.2 ID pública estável (a costura permanente)
 
 - **Formato:** `RAN-{EXAM}-{SEQ}` — ex. `RAN-DBDEA-00042`. Prefixo do app (RAN-), código da prova (registry em `src/lib/axon/ids.ts`: DBDEA = Databricks Data Engineer Associate), sequencial de 5 dígitos.
-- **Registry imutável:** `src/data/questions/id-registry.ts` (116 entradas, RAN-DBDEA-00001…00116). **Publicada não se renomeia; sem reciclagem** (questão removida = epitáfio — validador avisa); correção de digitação mantém a ID (campo `version` no banco), reescrita gera ID nova.
+- **Registry imutável:** `src/data/questions/id-registry.ts` (300 entradas, RAN-DBDEA-00001…00300). **Publicada não se renomeia; sem reciclagem** (questão removida = epitáfio — validador avisa); correção de digitação mantém a ID (campo `version` no banco), reescrita gera ID nova.
 - **Alias GLI-:** nenhuma ID foi publicada sob o codinome — o registro nasceu em RAN-; `aliases: []` em 100% das linhas do manifesto.
 - **UI:** ID no rodapé de cada questão (mono, discreta, `select-all`); botão **Comunidade** (deep-link `{base}/{lang}/q/{id}`) visível após feedback/review — nunca no meio da prova ativa.
 
 ### 16.3 Axon — fatia F1 (`src/lib/axon/`)
 
-Pacote compartilhado do ecossistema (biblioteca semver linkada no build, nunca serviço). F1 adotada in-repo, extraível verbatim: `ids.ts` (gerador/validador `RAN-*`), `deep-links.ts` (helper de deep-link com fallback canônico), `schema.ts` (contrato do manifest.jsonl com zod). `AXON_VERSION = 0.1.0`.
+Pacote compartilhado do ecossistema (biblioteca semver linkada no build, nunca serviço). O app usa `@ironidesflj/axon@0.2.1` com pin exato: IDs, deep-links, checksum canônico e parser do manifesto.
 
 ### 16.4 Contrato de manifesto (como o hub vê o banco)
 

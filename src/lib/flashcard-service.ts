@@ -68,6 +68,11 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
+function stateId(owner: { userId?: string | null; anonId?: string | null }, questionId: string): string {
+  const ownerId = owner.userId ? `user_${owner.userId}` : `anon_${owner.anonId}`;
+  return `fc_${ownerId}_${questionId}`;
+}
+
 // ---------------------------------------------------------------------------
 // Summary (Home CTA + Progress block)
 // ---------------------------------------------------------------------------
@@ -249,8 +254,11 @@ export async function gradeFlashcard(questionId: string, remembered: boolean): P
       },
     });
   } else {
-    await db.flashcardState.create({
-      data: {
+    const id = stateId(owner, questionId);
+    try {
+      await db.flashcardState.create({
+        data: {
+          id,
         // dono — userId XOR anonId (mesmo padrão do Attempt)
         ...(owner.userId !== null ? { userId: owner.userId } : { anonId: owner.anonId }),
         questionId,
@@ -260,8 +268,23 @@ export async function gradeFlashcard(questionId: string, remembered: boolean): P
         lapses: next.lapses,
         dueAt: next.dueAt,
         lastReviewedAt: now,
-      },
-    });
+        },
+      });
+    } catch (err) {
+      // Concurrent reviews converge on the deterministic owner+question ID.
+      if (!(err instanceof Error) || !err.message.includes("Unique constraint")) throw err;
+      await db.flashcardState.update({
+        where: { id },
+        data: {
+          ease: next.ease,
+          intervalDays: next.intervalDays,
+          reps: next.reps,
+          lapses: next.lapses,
+          dueAt: next.dueAt,
+          lastReviewedAt: now,
+        },
+      });
+    }
   }
 
   return {

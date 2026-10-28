@@ -7,7 +7,12 @@ import { createHmac, randomBytes, scryptSync, timingSafeEqual } from "node:crypt
  * No external dependencies; httpOnly cookies are set in session.ts.
  */
 
-const SECRET = process.env.SESSION_SECRET || "ranvier-dev-secret-change-me";
+function sessionSecret(): string {
+  const configured = process.env.SESSION_SECRET;
+  if (configured) return configured;
+  if (process.env.NODE_ENV === "production") throw new Error("SESSION_SECRET is required in production");
+  return "ranvier-dev-secret-change-me";
+}
 const TOKEN_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 export function hashPassword(password: string): string {
@@ -26,7 +31,7 @@ export function verifyPassword(password: string, stored: string): boolean {
 }
 
 function sign(payload: string): string {
-  return createHmac("sha256", SECRET).update(payload).digest("hex");
+  return createHmac("sha256", sessionSecret()).update(payload).digest("hex");
 }
 
 export function createSessionToken(userId: string): { token: string; maxAgeSec: number } {

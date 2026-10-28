@@ -19,11 +19,9 @@
  *  - PUBLIC data (/api/catalog, /api/health, manifest files):
  *    stale-while-revalidate (instant offline reads, background refresh).
  *  - OWNER-SCOPED data GETs (attempts, progress, flashcards summary, trails,
- *    auth/me): NETWORK-FIRST with cache fallback (v1.8.0 fix). These payloads
- *    change with every answered question/graded card — serving a stale cache
- *    entry made counters lag one fetch behind (founder-visible in flashcards
- *    and trails). Network-first keeps them fresh when online; the cache
- *    fallback preserves offline readability (goal #2 below).
+ *    auth/me): NETWORK-ONLY. Cache API keys do not include cookies, so caching
+ *    these responses could expose one owner's data to another on a shared
+ *    device. Offline views use the existing error/fallback UI instead.
  *  - Everything else (POST/PUT/DELETE, cross-origin): untouched.
  *
  * Lifecycle: no skipWaiting on purpose — a study session / running exam in an
@@ -112,9 +110,6 @@ self.addEventListener("fetch", (event) => {
     if (isPublicDataUrl(url.pathname)) {
       // Public data: instant stale read + background refresh.
       event.respondWith(staleWhileRevalidate(event, DATA_CACHE, request));
-    } else {
-      // Owner-scoped data (v1.8.0 fix): fresh when online, cache when offline.
-      event.respondWith(networkFirst(DATA_CACHE, request));
     }
     return;
   }
@@ -198,22 +193,3 @@ async function staleWhileRevalidate(event, cacheName, request) {
   });
 }
 
-/** Owner-scoped data (v1.8.0): network-first — counters must reflect the
- *  last answer/grade immediately; cache is the offline fallback only. */
-async function networkFirst(cacheName, request) {
-  const cache = await caches.open(cacheName);
-  try {
-    const response = await fetch(request);
-    if (response && response.ok) {
-      cache.put(request, response.clone()).catch(() => {});
-    }
-    return response;
-  } catch {
-    const cached = await cache.match(request);
-    if (cached) return cached;
-    return new Response(JSON.stringify({ error: "offline" }), {
-      status: 503,
-      headers: { "Content-Type": "application/json; charset=utf-8" },
-    });
-  }
-}
