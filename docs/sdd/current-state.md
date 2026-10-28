@@ -1,6 +1,7 @@
 # current-state.md — estado verificado
 
-Última atualização: **2026-10-28 · v1.9.0 + v1.10.0 APROVADAS E
+Última atualização: **2026-10-28 · Novo Símbolo Topologia Orbital 'R' + Animação de Abertura (`spec-v1.10.1-symbol-orbital-splash.md`, Task 25)** — o fundador escolheu a Opção 03 ("Topologia Orbital 'R' — Câmara de Bolhas / Diagrama de Feynman") para substituir o monograma tipográfico anterior, alinhando a identidade do Ranvier à linguagem analítica de elipses e órbitas da marca-mãe Noos (`noos-mark.svg`). Implementada também a tela de abertura silenciosa (`RanvierSplash`, duração total `4,6s` = `3,6s` de coreografia + `+1,0s` de contemplação pós-desenho, fundo em branco/escuro puro, símbolo surgindo no centro e, por último, a barra fina inferior surgindo junto com a assinatura discreta `by Noos`). Removida a redundância do símbolo grande dentro do Hero da Home (`home-view.tsx`).
+Lote anterior (mesmo dia): **v1.9.0 + v1.10.0 APROVADAS E
 IMPLEMENTADAS (Task 24)** — o fundador aprovou ambas as specs ("specs
 aprovadas") e as duas embarcaram juntas no bump **v1.10.0**: glossário
 bilíngue de consulta (94 verbetes, dado estático, offline por construção)
@@ -94,12 +95,26 @@ aprovada: glossário (v1.9.0) e depois flashcards offline (v1.10.0) —
   domínio S1–S7, contagem factual, teclado `/` (desktop), estado vazio
   honesto; **novo gate `validate:glossary`** (slugs, glosses bilíngues,
   URL⊂allowlist, domainCodes — PASS com 0 findings).
+- Símbolo & Animação de Abertura (**Topologia Orbital 'R'**, `docs/sdd/spec-v1.10.1-symbol-orbital-splash.md`):
+  símbolo redesenhado a partir da linguagem de anéis analíticos da Noos
+  (cilindro meridiano $E_1$, dipolo de campo $E_2/E_3$ a $\pm 16^\circ$,
+  bojo contínuo $C^1$ até o nó pré-salto $(54,62)$, perna descendente sobre
+  o círculo de Larmor $R=88{,}25$ com **Fenda de Ranvier** real e 2 faíscas
+  tangentes de condução saltatória entre $(54,62)$ e $(65,69)$); 3 escalas
+  ópticas em `src/components/app/ranvier-mark.tsx` (`full` ≥64px, `ui` 22–48px
+  com crop `viewBox="14 12 92 96"` e traço `5.2`, `compact` ≤20px); todos os
+  SVGs (`public/brand/ranvier-*.svg`, `public/favicon.svg`, `identidade/*`),
+  ícones PWA (`public/icons/*`) e imagens OG (`public/og/*`) regenerados;
+  tela de abertura `RanvierSplash` em tela cheia (1× por sessão SPA na Home,
+  `3,6s` de coreografia + `+1,0s` de contemplação = `4,6s`, `fadeTimer=4050ms`,
+  `doneTimer=4600ms`, com barra horizontal inferior e assinatura `by Noos`
+  emergindo no encerramento).
 - PWA: manifest (tema papel #f7fbf9), sw.js (`ranvier-v1.10.0`) com
   **network-only para dados owner-scoped** (endurecimento da auditoria
   28/out — dado privado não fica legível offline de propósito: previne
   vazamento entre contas num dispositivo compartilhado) e SWR
   apenas para dados públicos (catalog/health/manifestos), offline.html,
-  ícones com monograma R.
+  ícones com o novo símbolo **Topologia Orbital 'R'**.
 - Social preview (v1.5.1→v1.6.0): og:image 1200×630 "bilhete de exame"
   (`public/og/`, gerada por `bun run og`), twitter summary_large_image,
   canonical + og:locale pt_BR/en_US no `layout.tsx`.

@@ -91,6 +91,7 @@ export const dict = {
         ctaStudy: "Modo estudo com feedback imediato",
         proofLine: "Questões comentadas com fonte. Progresso salvo no dispositivo.",
         continueSession: "Continuar",
+        replayEmblem: "Símbolo do Ranvier — clique para recalibrar a animação de condução saltatória",
       },
       ticket: {
         label: "Certificação",
@@ -639,6 +640,7 @@ export const dict = {
         ctaStudy: "Study mode with instant feedback",
         proofLine: "Questions explained with sources. Progress saved on your device.",
         continueSession: "Continue",
+        replayEmblem: "Ranvier symbol — click to replay saltatory conduction animation",
       },
       ticket: {
         label: "Certification",

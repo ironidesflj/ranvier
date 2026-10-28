@@ -1153,3 +1153,29 @@ Stage Summary:
 - Contratos intactos: banco/manifesto/IDs/Axon intocados; Estudar/Exame seguem com correção server-side; SW segue com as estratégias da auditoria (glossário é bundle estático — nem passa pelo fetch); srs.ts só ganhou import no cliente (zero duplicação).
 - Deploy do fundador: sync GitHub → redeploy (SEM passo de banco). Verificação: #/glossario busca "unity catalog" + flashcards virar/julgar offline/online.
 - Fila natural agora: reanálise da animação §14 (decisão dele) · AZ-900 como próxima certificação (última da fila, com login Microsoft junto — plan.md) · Fase 1/2 do hub (ele mexe no Noos).
+
+---
+Task ID: 25
+Agent: Antigravity
+Task: Novo símbolo do Ranvier ("Topologia Orbital 'R' — Câmara de Bolhas / Diagrama de Feynman") + tela de abertura silenciosa (`RanvierSplash` com barra e assinatura `by Noos` surgindo por último, tempo ajustado para `3,6s` + `1,0s` de contemplação pós-animação = `4,6s`) + remoção de símbolo redundante no Hero da Home + atualização completa do SDD (`docs/sdd/spec-v1.10.1-symbol-orbital-splash.md`, `plan.md`, `current-state.md`, `SDD.md`).
+
+Work Log:
+- CONCEITO E GEOMETRIA ANALÍTICA (com equipe de 3 especialistas — Direção de Geometria Óptica, Coreografia de Motion/Física e Arquitetura de UI): escolhida pelo fundador a Opção 03 ("Topologia Orbital 'R'"), desenhada como irmã direta de `public/brand/noos-mark.svg` (gramática de elipses analíticas, nós polares e arcos de precisão inspirados em câmaras de bolhas de partículas e diagramas de Feynman).
+  - Haste e Bainha Meridiana: eixo condutor $x=34, y \in [20, 100]$ envolto pela elipse meridiana $E_1(34, 60, r_x=9, r_y=40)$ com nós polares em $(34, 20)$ e $(34, 100)$.
+  - Dipolo Orbital do Bojo: par de elipses gêmeas $E_2, E_3(58, 42, r_x=33, r_y=16, \theta=\pm 16^\circ)$ cuja interseção leste ocorre em $(87{,}55, 42{,}00)$, guiando o arco primário contínuo $C^1$ (`M34 20A53.55 22 0 0 1 87.55 42A53.55 21.56 0 0 1 54 62`) até o Nó Receptor Pré-Salto $(54, 62)$.
+  - Círculo de Larmor e Fenda de Ranvier (Condução Saltatória): a raiz oculta tracejada $(34, 54{,}22) \to (54, 62)$, as duas faíscas tangentes na fenda aberta $K_1(57{,}64, 64{,}07)$ e $K_2(60{,}46, 65{,}83)$ e a perna balística $(65, 69) \to (90, 98)$ pertencem ao mesmo círculo de Larmor analítico $R = 88{,}25$ centrado em $(12{,}25, 139{,}75)$, garantindo continuidade tangencial $C^2$ antes e depois do salto no vácuo.
+- 3 ESCALAS ÓPTICAS (`src/components/app/ranvier-mark.tsx`):
+  - `full` ($\ge 64\text{px}$): geometria completa com cilindro meridiano, dipolo $\pm 16^\circ$, trajetória tracejada, 2 faíscas na fenda e 4 nós polares.
+  - `ui` ($22\text{–}48\text{px}$, default do header e rodapé): `viewBox="14 12 92 96"` cropado (+28% de presença óptica), `strokeWidth={5.2}`, 1 elipse guia limpa (`opacity={0.3}`), 1 faísca central na fenda e 3 nós.
+  - `compact` ($\le 20\text{px}$): traço `7.5`, fenda ampliada e apenas os 2 nós de ancoragem para nitidez em 16px.
+- ANIMAÇÃO DE ABERTURA SILENCIOSA (`RanvierSplash` em `src/components/app/ranvier-mark.tsx` + `src/components/app/ranvier-app.tsx` + `docs/preview/animated-mark.html`):
+  - Requisito do fundador: tela 100% limpa (fundo papel `#f7fbf9` no claro ou `#0a0f10` no escuro, zero card/borda ao redor do símbolo, zero textos explicativos), com o símbolo surgindo no centro e, **por último**, uma barra horizontal fina embaixo surgindo junto com a assinatura discreta **`by Noos`**.
+  - Tempo confirmado e calibrado: a coreografia do símbolo + barra + `by Noos` conclui sua entrada na faixa de `2,58s` dentro da janela de `3,6s` definida pelo fundador, acrescida de **`+1,0s` de contemplação pós-animação** (`fadeTimer = 4050ms` — ~1,5s de símbolo estático completo na tela — e `doneTimer = 4600ms` após o fade-out suave de `550ms`). Exibida 1× por sessão SPA na abertura da Home (`splashShownInSpaSession`), respeitando `prefers-reduced-motion`.
+- REMOÇÃO DE REDUNDÂNCIA NA HOME (`src/components/app/home-view.tsx`): removido o símbolo grande (`RanvierOrbitalHero`) que ficava acima do título principal na coluna esquerda do Hero, evitando duplicação visual com o lockup `[R] Ranvier` já presente no `LandingHeader`.
+- ASSETS REGENERADOS: atualizados `public/brand/ranvier-mark.svg`, `ranvier-mark-negative.svg`, `ranvier-mark-compact.svg`, `ranvier-icon.svg`, `public/favicon.svg`, `identidade/assets_ranvier-*.svg`, `public/offline.html`, `scripts/generate-icons.ts` e `scripts/generate-og.ts`; regenerados todos os PNGs em `public/icons/*` (192, 512, maskable, apple-touch-icon) e `public/og/*` (`og-image.png`, `og-image-dark.png`).
+- SDD ATUALIZADO: criada `docs/sdd/spec-v1.10.1-symbol-orbital-splash.md` com conceito, equações analíticas e tabela de tempos; atualizados `docs/sdd/plan.md` (§14 reanálise da animação concluída), `docs/sdd/current-state.md` e `docs/SDD.md` (§16.1).
+
+Stage Summary:
+- Novo símbolo **Topologia Orbital 'R'** implantado em 100% do ecossistema Ranvier (componentes React com 3 escalas ópticas, SVGs de marca, favicon, ícones PWA, imagens OG e `offline.html`).
+- Tela de abertura `RanvierSplash` enxuta e silenciosa na abertura da Home (`3,6s` base + `1,0s` de contemplação = `4,6s`), com a barra fina e `by Noos` emergindo por último, e Hero da Home limpo sem símbolo redundante.
+- Documentação SDD completa e sincronizada.

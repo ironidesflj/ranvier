@@ -58,28 +58,46 @@ const FACTS = "300 QUESTÕES · 6 SIMULADOS · PT/EN · SEM CADASTRO";
 const STRIP_LEFT = "NÃO OFICIAL · UNOFFICIAL — SEM AFILIAÇÃO · UNAFFILIATED";
 const STRIP_RIGHT = "GRÁTIS · FREE";
 
-/** Compact monogram (favicon tile geometry, patch §4) — the identity row. */
+/** Compact Topologia Orbital 'R' (favicon tile geometry) — the identity row. */
 const TILE = `
   <svg x="72" y="56" width="88" height="88" viewBox="0 0 120 120">
     <rect width="120" height="120" rx="26" fill="${BLUE}"/>
-    <g transform="translate(-3 0)" fill="none" stroke="${PAPER}" stroke-width="10" stroke-linecap="round">
-      <path d="M38 94V26"/>
-      <path d="M38 26h22a20 20 0 0 1 0 40H38"/>
-      <path d="M60 66l28 28"/>
+    <ellipse cx="58" cy="42" rx="33" ry="16" transform="rotate(-16 58 42)" fill="none" stroke="${PAPER}" stroke-width="3.2" opacity=".4"/>
+    <g fill="none" stroke="${PAPER}" stroke-width="7.5" stroke-linecap="round">
+      <path d="M34 20V100"/>
+      <path d="M34 20A53.55 22 0 0 1 87.55 42A53.55 21.56 0 0 1 52 62.31"/>
+      <path d="M68 71.34A88.25 88.25 0 0 1 90 98"/>
+    </g>
+    <g fill="${PAPER}">
+      <circle cx="34" cy="20" r="4.8"/>
+      <circle cx="34" cy="100" r="4.8"/>
+      <circle cx="87.55" cy="42" r="4.8"/>
+      <circle cx="52" cy="62.31" r="4.2"/>
+      <circle cx="68" cy="71.34" r="6.2"/>
+      <circle cx="90" cy="98" r="4.8"/>
     </g>
   </svg>`;
 
-/** Full monogram (interrupted leg + node) as the watermark. */
+/** Full Topologia Orbital 'R' as the watermark. */
 function watermark(ink: string): string {
   return `
-  <svg x="742" y="148" width="400" height="400" viewBox="0 0 120 120" opacity="0.05">
-    <g fill="none" stroke="${ink}" stroke-width="10" stroke-linecap="round">
-      <path d="M38 94V26"/>
-      <path d="M38 26h22a20 20 0 0 1 0 40H38"/>
-      <path d="M60 66l6.4 6.4"/>
-      <path d="M82 88l6 6"/>
+  <svg x="742" y="148" width="400" height="400" viewBox="0 0 120 120" opacity="0.06">
+    <g fill="none" stroke="${ink}" stroke-width="1.1" opacity=".6">
+      <ellipse cx="34" cy="60" rx="9" ry="40"/>
+      <ellipse cx="58" cy="42" rx="33" ry="16" transform="rotate(-16 58 42)"/>
+      <ellipse cx="58" cy="42" rx="33" ry="16" transform="rotate(16 58 42)"/>
+      <path d="M34 54.22A88.25 88.25 0 0 1 54 62" stroke-dasharray="2.2 2.8" stroke-linecap="round"/>
     </g>
-    <circle cx="73.8" cy="79.8" r="2.8" fill="${ink}"/>
+    <g fill="none" stroke="${ink}" stroke-width="2.4" stroke-linecap="round">
+      <path d="M34 20V100"/>
+      <path d="M34 20A53.55 22 0 0 1 87.55 42A53.55 21.56 0 0 1 54 62"/>
+      <path d="M65 69A88.25 88.25 0 0 1 90 98"/>
+    </g>
+    <g fill="${ink}">
+      <circle cx="34" cy="20" r="2.2"/><circle cx="34" cy="100" r="2.2"/>
+      <circle cx="87.55" cy="42" r="2.2"/><circle cx="54" cy="62" r="2.2"/>
+      <circle cx="65" cy="69" r="3.2"/><circle cx="90" cy="98" r="2.2"/>
+    </g>
   </svg>`;
 }
 

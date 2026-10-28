@@ -20,12 +20,21 @@ const OUT_DIR = "public/icons";
 const BRAND_BLUE = "#246cad";
 const PAPER = "#f7fbf9";
 
-/** Compact monograma (full leg, no node) — patch §4. */
+/** Compact Topologia Orbital 'R' — 16px/launcher scale. */
 const COMPACT_MONOGRAM = `
-  <g fill="none" stroke="${PAPER}" stroke-width="10" stroke-linecap="round">
-    <path d="M38 94V26"/>
-    <path d="M38 26h22a20 20 0 0 1 0 40H38"/>
-    <path d="M60 66l28 28"/>
+  <ellipse cx="58" cy="42" rx="33" ry="16" transform="rotate(-16 58 42)" fill="none" stroke="${PAPER}" stroke-width="3.2" opacity=".4"/>
+  <g fill="none" stroke="${PAPER}" stroke-width="7.5" stroke-linecap="round">
+    <path d="M34 20V100"/>
+    <path d="M34 20A53.55 22 0 0 1 87.55 42A53.55 21.56 0 0 1 52 62.31"/>
+    <path d="M68 71.34A88.25 88.25 0 0 1 90 98"/>
+  </g>
+  <g fill="${PAPER}">
+    <circle cx="34" cy="20" r="4.8"/>
+    <circle cx="34" cy="100" r="4.8"/>
+    <circle cx="87.55" cy="42" r="4.8"/>
+    <circle cx="52" cy="62.31" r="4.2"/>
+    <circle cx="68" cy="71.34" r="6.2"/>
+    <circle cx="90" cy="98" r="4.8"/>
   </g>`;
 
 /** Full-bleed maskable icon: tile + compact monograma centered (57% of the

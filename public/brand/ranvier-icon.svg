@@ -1,9 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" role="img" aria-labelledby="rani-title">
   <title id="rani-title">Ícone do app Ranvier</title>
   <rect width="120" height="120" rx="26" fill="#246cad"/>
-  <g transform="translate(-3 0)" fill="none" stroke="#f7fbf9" stroke-width="10" stroke-linecap="round">
-    <path d="M38 94V26"/>
-    <path d="M38 26h22a20 20 0 0 1 0 40H38"/>
-    <path d="M60 66l28 28"/>
+  <ellipse cx="58" cy="42" rx="33" ry="16" transform="rotate(-16 58 42)" fill="none" stroke="#f7fbf9" stroke-width="3.2" opacity=".4"/>
+  <g fill="none" stroke="#f7fbf9" stroke-width="7.5" stroke-linecap="round">
+    <path d="M34 20V100"/>
+    <path d="M34 20A53.55 22 0 0 1 87.55 42A53.55 21.56 0 0 1 52 62.31"/>
+    <path d="M68 71.34A88.25 88.25 0 0 1 90 98"/>
+  </g>
+  <g fill="#f7fbf9">
+    <circle cx="34" cy="20" r="4.8"/>
+    <circle cx="34" cy="100" r="4.8"/>
+    <circle cx="87.55" cy="42" r="4.8"/>
+    <circle cx="52" cy="62.31" r="4.2"/>
+    <circle cx="68" cy="71.34" r="6.2"/>
+    <circle cx="90" cy="98" r="4.8"/>
   </g>
 </svg>

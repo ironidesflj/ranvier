@@ -168,17 +168,19 @@
   do guia). O que resta é **externo ao repo**: o guia Noos e o patch v1.1
   pertencem à equipe de design — encaminhar a correção quando conveniente
   (não bloqueia nada; a adaptação já está documentada na spec v1.4.0).
-- ~~Avaliar traço do símbolo animado no carregamento~~ — **avaliado na
-  Task 18** (patch v1.1 §14): desenhar o traço do símbolo via
-  `stroke-dashoffset` (600–800ms) na primeira carga/skeletons é **viável,
-  pequeno (1 componente + keyframes, 2 temas) e sem conflito com a
-  anti-filosofia** (movimento de marca ≠ recompensa). Ponto honesto
-  pós-v1.6.0: a carga ficou rápida (borda ~35ms) e a animação duraria mais
-  que a espera — precisa cortar no ready (máx ~800ms, nunca atrasa
-  conteúdo, respeita `prefers-reduced-motion`). **Decisão do fundador
-  27/out/2026: EXCLUÍDA da v1.7.0 — "preciso reanalisar ela depois"**;
-  fica este item como lembrete vivo da reanálise pendente (embarcar em
-  lote futuro ou engavetar de vez).
+- ~~Avaliar traço do símbolo animado no carregamento~~ — **REANALISADO,
+  APROVADO E IMPLEMENTADO EM 28/out/2026 (`spec-v1.10.1-symbol-orbital-splash.md`)**:
+  o fundador redesenhou o próprio símbolo do Ranvier para a **Topologia Orbital
+  'R' (Câmara de Bolhas / Diagrama de Feynman)** — unindo haste meridional
+  ($E_1$), dipolo orbital no bojo ($E_2, E_3, \pm 16^\circ$) e salto balístico
+  azul sobre o círculo magnético de Larmor ($R=88.25$) com 3 escalas ópticas
+  (`full`, `ui`, `compact`) — e definiu a **Abertura Silenciosa em Tela Cheia
+  (`RanvierSplash`)**: tela 100% em papel claro (`#f7fbf9`) ou escuro
+  (`#0a0f10`), sem caixas nem textos extras, com o símbolo puro surgindo no
+  centro e, por último, o filete horizontal abrindo-se junto com a assinatura
+  discreta `by Noos` (`2,58s` de desenho + `~1,5s` de contemplação pós-animação
+  até `4,05s`, dissolvendo em `4,6s`; Hero da `HomeView` mantido 100%
+  tipográfico sem símbolo redundante).
 
 ## Propostas aguardando decisão do fundador
 

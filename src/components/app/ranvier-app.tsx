@@ -24,7 +24,7 @@ import { api } from "@/lib/api-client";
 import { APP_VERSION } from "@/lib/version";
 import { AdSenseScript } from "@/components/app/ad-slot";
 import { NoosBadge } from "@/components/app/noos-badge";
-import { RanvierMark } from "@/components/app/ranvier-mark";
+import { RanvierMark, RanvierSplash } from "@/components/app/ranvier-mark";
 import { TopBar, MoreSheet, LangSeg, ThemeToggle, AccountControl } from "@/components/app/top-bar";
 import { HomeView } from "@/components/app/home-view";
 import { CertView } from "@/components/app/cert-view";
@@ -414,6 +414,7 @@ export function RanvierApp() {
   if (view === "home") {
     return (
       <div className="flex min-h-screen flex-col bg-background">
+        <RanvierSplash />
         <AdSenseScript />
         <LandingHeader />
         <main className="flex flex-1 flex-col">{content}</main>
