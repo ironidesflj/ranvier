@@ -17,7 +17,7 @@ const drawSchema = z.object({
  * correct answer NEVER travels here; grading happens on review.
  */
 export async function POST(req: Request) {
-  const rl = rateLimit(req, "flashcards-draw", LIMITS.flashcardsDraw.limit, LIMITS.flashcardsDraw.windowMs);
+  const rl = await rateLimit(req, "flashcards-draw", LIMITS.flashcardsDraw.limit, LIMITS.flashcardsDraw.windowMs);
   if (!rl.ok) return tooMany(rl.retryAfterSec);
   try {
     const body = await req.json().catch(() => null);

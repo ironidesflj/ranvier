@@ -18,7 +18,7 @@ const gradeSchema = z.object({
  * answer from memory").
  */
 export async function POST(req: Request) {
-  const rl = rateLimit(req, "flashcards-grade", LIMITS.flashcardsGrade.limit, LIMITS.flashcardsGrade.windowMs);
+  const rl = await rateLimit(req, "flashcards-grade", LIMITS.flashcardsGrade.limit, LIMITS.flashcardsGrade.windowMs);
   if (!rl.ok) return tooMany(rl.retryAfterSec);
   try {
     const body = await req.json().catch(() => null);

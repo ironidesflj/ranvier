@@ -9,7 +9,7 @@ import { tooMany } from "@/lib/api-helpers";
  * Requires an authenticated session; also clears cookies.
  */
 export async function DELETE(req: Request) {
-  const rl = rateLimit(req, "account-delete", LIMITS.auth.limit, LIMITS.auth.windowMs);
+  const rl = await rateLimit(req, "account-delete", LIMITS.auth.limit, LIMITS.auth.windowMs);
   if (!rl.ok) return tooMany(rl.retryAfterSec);
   try {
     const user = await getCurrentUser();

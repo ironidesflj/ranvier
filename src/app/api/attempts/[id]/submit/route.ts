@@ -4,7 +4,7 @@ import { jsonError, tooMany } from "@/lib/api-helpers";
 import { rateLimit, LIMITS } from "@/lib/rate-limit";
 
 export async function POST(req: Request, ctx: { params: Promise<{ id: string }> }) {
-  const rl = rateLimit(req, "submit", LIMITS.submit.limit, LIMITS.submit.windowMs);
+  const rl = await rateLimit(req, "submit", LIMITS.submit.limit, LIMITS.submit.windowMs);
   if (!rl.ok) return tooMany(rl.retryAfterSec);
   try {
     const { id } = await ctx.params;

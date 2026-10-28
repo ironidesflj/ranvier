@@ -14,7 +14,7 @@ const startSchema = z.object({
 });
 
 export async function POST(req: Request) {
-  const rl = rateLimit(req, "attempts-post", LIMITS.startAttempt.limit, LIMITS.startAttempt.windowMs);
+  const rl = await rateLimit(req, "attempts-post", LIMITS.startAttempt.limit, LIMITS.startAttempt.windowMs);
   if (!rl.ok) return tooMany(rl.retryAfterSec);
   try {
     const body = await req.json().catch(() => null);
@@ -30,7 +30,7 @@ export async function POST(req: Request) {
 }
 
 export async function GET(req: Request) {
-  const rl = rateLimit(req, "attempts-get", LIMITS.read.limit, LIMITS.read.windowMs);
+  const rl = await rateLimit(req, "attempts-get", LIMITS.read.limit, LIMITS.read.windowMs);
   if (!rl.ok) return tooMany(rl.retryAfterSec);
   try {
     const attempts = await listAttempts();

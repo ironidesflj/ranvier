@@ -10,7 +10,7 @@ const answerSchema = z.object({
 });
 
 export async function POST(req: Request, ctx: { params: Promise<{ id: string }> }) {
-  const rl = rateLimit(req, "answer", LIMITS.answer.limit, LIMITS.answer.windowMs);
+  const rl = await rateLimit(req, "answer", LIMITS.answer.limit, LIMITS.answer.windowMs);
   if (!rl.ok) return tooMany(rl.retryAfterSec);
   try {
     const { id } = await ctx.params;

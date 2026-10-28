@@ -16,7 +16,7 @@ const querySchema = z.object({
  * flashcards summary).
  */
 export async function GET(req: Request) {
-  const rl = rateLimit(req, "trails", LIMITS.trails.limit, LIMITS.trails.windowMs);
+  const rl = await rateLimit(req, "trails", LIMITS.trails.limit, LIMITS.trails.windowMs);
   if (!rl.ok) return tooMany(rl.retryAfterSec);
   try {
     const url = new URL(req.url);

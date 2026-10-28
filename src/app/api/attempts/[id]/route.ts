@@ -4,7 +4,7 @@ import { jsonError, tooMany } from "@/lib/api-helpers";
 import { rateLimit, LIMITS } from "@/lib/rate-limit";
 
 export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }) {
-  const rl = rateLimit(req, "attempt-get", LIMITS.read.limit, LIMITS.read.windowMs);
+  const rl = await rateLimit(req, "attempt-get", LIMITS.read.limit, LIMITS.read.windowMs);
   if (!rl.ok) return tooMany(rl.retryAfterSec);
   try {
     const { id } = await ctx.params;

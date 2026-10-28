@@ -1,29 +1,12 @@
-/**
- * Best-effort in-memory rate limiter (per-instance; documented in SDD as a
- * single-instance mitigation — swap for Upstash/Redis when scaling out).
- */
+import { db } from "@/lib/db";
 
-interface Bucket {
-  count: number;
-  resetAt: number;
-}
-
-const buckets = new Map<string, Bucket>();
-
-/**
- * Best-effort client IP extraction.
- * Red Team F2 hardening: never trust the FIRST X-Forwarded-For entry (client-spoofable).
- * Behind a single trusted reverse proxy (Caddy/Vercel), the proxy appends the real
- * client IP as the LAST entry — so we scan from the right and take the first
- * public (non-private) address. Direct access (no XFF) falls back to "local".
- */
+/** Shared fixed-window limiter backed by Neon/Prisma across all Vercel instances. */
 function isPrivateIp(ip: string): boolean {
   if (/^(10|127)\./.test(ip)) return true;
   if (/^192\.168\./.test(ip)) return true;
   if (/^172\.(1[6-9]|2\d|3[01])\./.test(ip)) return true;
   if (/^(::1|fc|fd|fe80)/i.test(ip)) return true;
-  if (ip === "unknown") return true;
-  return false;
+  return ip === "unknown";
 }
 
 function clientIp(req: Request): string {
@@ -33,35 +16,30 @@ function clientIp(req: Request): string {
     for (let i = entries.length - 1; i >= 0; i--) {
       if (!isPrivateIp(entries[i])) return entries[i];
     }
-    // All private (internal call chain) — use the last entry as a stable key.
     if (entries.length > 0) return entries[entries.length - 1];
   }
   return "local";
 }
 
-export function rateLimit(req: Request, route: string, limit: number, windowMs: number): { ok: boolean; retryAfterSec: number } {
-  const key = `${route}:${clientIp(req)}`;
-  const now = Date.now();
-  const bucket = buckets.get(key);
-  if (!bucket || bucket.resetAt < now) {
-    buckets.set(key, { count: 1, resetAt: now + windowMs });
+export async function rateLimit(req: Request, route: string, limit: number, windowMs: number) {
+  const id = `${route}:${clientIp(req)}`;
+  const now = new Date();
+  const resetAt = new Date(now.getTime() + windowMs);
+  const existing = await db.rateLimitBucket.findUnique({ where: { id } });
+
+  if (!existing || existing.resetAt <= now) {
+    await db.rateLimitBucket.upsert({ where: { id }, create: { id, count: 1, resetAt }, update: { count: 1, resetAt } });
     return { ok: true, retryAfterSec: 0 };
   }
-  bucket.count += 1;
-  if (bucket.count > limit) {
-    return { ok: false, retryAfterSec: Math.ceil((bucket.resetAt - now) / 1000) };
+
+  const next = await db.rateLimitBucket.updateMany({
+    where: { id, resetAt: existing.resetAt, count: { lt: limit } },
+    data: { count: { increment: 1 } },
+  });
+  if (next.count === 0 || existing.count >= limit) {
+    return { ok: false, retryAfterSec: Math.max(1, Math.ceil((existing.resetAt.getTime() - now.getTime()) / 1000)) };
   }
   return { ok: true, retryAfterSec: 0 };
-}
-
-/** Occasionally prune expired buckets to bound memory. */
-if (typeof setInterval !== "undefined") {
-  const timer = setInterval(() => {
-    const now = Date.now();
-    for (const [k, b] of buckets) if (b.resetAt < now) buckets.delete(k);
-  }, 60_000);
-  // Don't hold the event loop open (serverless-friendly).
-  (timer as unknown as { unref?: () => void }).unref?.();
 }
 
 export const LIMITS = {
@@ -70,9 +48,6 @@ export const LIMITS = {
   answer: { limit: 300, windowMs: 5 * 60_000 },
   submit: { limit: 60, windowMs: 5 * 60_000 },
   read: { limit: 300, windowMs: 60_000 },
-  /* v1.7.0 → v1.8.0 — flashcards: draw é 1 por sessão (mas re-draws
-     acontecem); reveal+grade são 1 de cada por cartão (uma sessão de 50
-     com re-entradas bate ~100 de cada). Trails: leitura derivada leve. */
   flashcardsDraw: { limit: 60, windowMs: 5 * 60_000 },
   flashcardsReveal: { limit: 300, windowMs: 5 * 60_000 },
   flashcardsGrade: { limit: 300, windowMs: 5 * 60_000 },

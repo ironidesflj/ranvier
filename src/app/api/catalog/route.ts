@@ -5,7 +5,7 @@ import { rateLimit, LIMITS } from "@/lib/rate-limit";
 import type { Lang } from "@/lib/types";
 
 export async function GET(req: Request) {
-  const rl = rateLimit(req, "catalog", LIMITS.read.limit, LIMITS.read.windowMs);
+  const rl = await rateLimit(req, "catalog", LIMITS.read.limit, LIMITS.read.windowMs);
   if (!rl.ok) return tooMany(rl.retryAfterSec);
   try {
     const lang = (new URL(req.url).searchParams.get("lang") === "en" ? "en" : "pt") as Lang;

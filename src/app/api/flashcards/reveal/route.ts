@@ -17,7 +17,7 @@ const revealSchema = z.object({
  * records no review.
  */
 export async function POST(req: Request) {
-  const rl = rateLimit(req, "flashcards-reveal", LIMITS.flashcardsReveal.limit, LIMITS.flashcardsReveal.windowMs);
+  const rl = await rateLimit(req, "flashcards-reveal", LIMITS.flashcardsReveal.limit, LIMITS.flashcardsReveal.windowMs);
   if (!rl.ok) return tooMany(rl.retryAfterSec);
   try {
     const body = await req.json().catch(() => null);

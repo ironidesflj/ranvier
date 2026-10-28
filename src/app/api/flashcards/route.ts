@@ -11,7 +11,7 @@ import { rateLimit, LIMITS } from "@/lib/rate-limit";
  * unlike the public catalog.
  */
 export async function GET(req: Request) {
-  const rl = rateLimit(req, "flashcards-summary", LIMITS.read.limit, LIMITS.read.windowMs);
+  const rl = await rateLimit(req, "flashcards-summary", LIMITS.read.limit, LIMITS.read.windowMs);
   if (!rl.ok) return tooMany(rl.retryAfterSec);
   try {
     const certSlug = new URL(req.url).searchParams.get("certSlug") ?? "";

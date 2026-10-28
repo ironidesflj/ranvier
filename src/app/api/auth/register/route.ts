@@ -13,7 +13,7 @@ const schema = z.object({
 });
 
 export async function POST(req: Request) {
-  const rl = rateLimit(req, "auth-register", LIMITS.auth.limit, LIMITS.auth.windowMs);
+  const rl = await rateLimit(req, "auth-register", LIMITS.auth.limit, LIMITS.auth.windowMs);
   if (!rl.ok) return tooMany(rl.retryAfterSec);
   try {
     const body = await req.json().catch(() => null);
