@@ -1,6 +1,6 @@
 # Ranvier — audit fixes
 
-Date: 2026-10-28 · Version: 1.8.1
+Date: 2026-10-28 · Version: 1.8.1 · Updated after production deployment
 
 ## Findings and corrections
 
@@ -21,6 +21,13 @@ Date: 2026-10-28 · Version: 1.8.1
 - Strict quality gate: 0 findings
 - Red-team self-test: 17/17
 - Rate-limit schema/client generation and route type-check: passed
+
+## Publication
+
+- Neon production schema synchronized successfully with `prisma db push`.
+- GitHub published: commit `17d1588` on `main`.
+- Production health check after deployment: HTTP 200, database `ok`, 300 questions.
+- The previous per-instance rate-limit limitation is closed.
 
 ## Deliberate trade-off
 
