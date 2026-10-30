@@ -127,7 +127,7 @@ export function HomeView() {
 
       {/* Hero + bilhete */}
       <section className="border-b">
-        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:py-20 lg:grid-cols-[1fr_360px] lg:gap-14">
+        <div className="mx-auto grid max-w-6xl grid-cols-1 gap-10 px-4 py-14 sm:py-20 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-14">
           {/* Hero à esquerda */}
           <div className="flex flex-col justify-center">
             <p className="mb-4 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
@@ -178,7 +178,7 @@ export function HomeView() {
                 <dl className="mt-4 space-y-2.5 text-sm">
                   <div className="flex items-baseline justify-between gap-3">
                     <dt className="text-xs uppercase tracking-wide text-muted-foreground">{t.home.ticket.code}</dt>
-                    <dd className="font-mono text-sm font-medium">{cert.shortName}</dd>
+                    <dd className="min-w-0 text-right font-mono text-sm font-medium">{cert.shortName}</dd>
                   </div>
                   <div className="flex items-baseline justify-between gap-3">
                     <dt className="text-xs uppercase tracking-wide text-muted-foreground">{t.home.ticket.questions}</dt>

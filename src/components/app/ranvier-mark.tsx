@@ -288,7 +288,7 @@ export function RanvierSplash() {
         .ran-anim-noos { opacity: 0; animation: ran-noos-fade 640ms cubic-bezier(0.22, 1, 0.36, 1) 1940ms forwards; }
       `}</style>
 
-      <div className="flex flex-col items-center">
+      <div className="relative">
         {/* Símbolo puro no centro do vazio (viewBox 0 0 116 120 alinha o centro de massa x=58) */}
         <svg
           viewBox="0 0 116 120"
@@ -400,7 +400,7 @@ export function RanvierSplash() {
         </svg>
 
         {/* Por último: a barra fina embaixo surgindo junto com o by Noos */}
-        <div className="mt-4 flex flex-col items-center gap-2.5">
+        <div className="absolute left-1/2 top-full mt-4 flex -translate-x-1/2 flex-col items-center gap-2.5 whitespace-nowrap">
           <span aria-hidden="true" className="ran-anim-rule h-px w-8 bg-border-strong/45" />
           <span className="ran-anim-noos inline-flex items-center gap-1.5 font-mono text-[11.5px] leading-none tracking-[0.04em] text-muted-foreground">
             <img

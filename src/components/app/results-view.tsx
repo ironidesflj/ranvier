@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ArrowUp, BookOpenCheck, Home, Loader2, RotateCcw } from "lucide-react";
@@ -14,6 +14,7 @@ import { api } from "@/lib/api-client";
 import { APP_VERSION } from "@/lib/version";
 import { orderOptions } from "@/lib/option-order";
 import { QuestionCard } from "@/components/app/question-card";
+import { QueryError } from "@/components/app/query-error";
 import { AdSlot } from "@/components/app/ad-slot";
 import type { ReviewQuestion } from "@/lib/types";
 
@@ -39,15 +40,17 @@ export function ResultsView() {
   const { attemptId, navigate, certSlug } = useAppStore();
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState<"all" | "wrong">("all");
+  const autoSubmittedId = useRef<string | null>(null);
 
-  const { data: detail, isLoading, isError } = useQuery({
+  const { data: detail, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: ["attempt", attemptId],
     queryFn: () => api.getAttempt(attemptId!),
     enabled: Boolean(attemptId),
+    refetchOnMount: "always",
   });
 
   // Auto-submit study attempts opened straight in results (defensive)
-  const submit = useMutation({
+  const { mutate: submit, isError: submitError } = useMutation({
     mutationFn: (id: string) => api.submit(id),
     onSuccess: (_res, id) => {
       void queryClient.invalidateQueries({ queryKey: ["attempt", id] });
@@ -56,10 +59,17 @@ export function ResultsView() {
   });
 
   useEffect(() => {
-    if (detail?.status === "IN_PROGRESS" && !submit.isPending) {
-      submit.mutate(detail.attemptId);
+    // Cached IN_PROGRESS data can outlive a successful submit. Wait for the
+    // fresh detail, then submit a resumed study session only once.
+    if (isFetching || isError || detail?.status !== "IN_PROGRESS") return;
+    if (detail.mode === "EXAM") {
+      navigate("exam", { attemptId: detail.attemptId });
+      return;
     }
-  }, [detail?.status, detail?.attemptId, submit]);
+    if (autoSubmittedId.current === detail.attemptId) return;
+    autoSubmittedId.current = detail.attemptId;
+    submit(detail.attemptId);
+  }, [isFetching, isError, detail?.status, detail?.mode, detail?.attemptId, navigate, submit]);
 
   const questions = (detail?.questions ?? []) as ReviewQuestion[];
   const result = detail?.result ?? null;
@@ -81,22 +91,18 @@ export function ResultsView() {
     return null;
   }
 
+  if (isError || submitError) {
+    return <QueryError onRetry={() => {
+      if (submitError && detail) submit(detail.attemptId);
+      else void refetch();
+    }} />;
+  }
+
   if (isLoading || !detail || !result) {
     return (
       <div className="mx-auto w-full max-w-3xl px-4 py-10">
         <Skeleton className="mb-6 h-32 w-full" />
         <Skeleton className="h-64 w-full" />
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div className="mx-auto max-w-xl px-4 py-12 text-center">
-        <p className="text-muted-foreground">{t.results.notFound}</p>
-        <Button className="mt-4" variant="outline" onClick={() => navigate("home")}>
-          {t.common.back}
-        </Button>
       </div>
     );
   }

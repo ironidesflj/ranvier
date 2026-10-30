@@ -42,8 +42,10 @@ export function AuthModal({ open, onClose }: { open: boolean; onClose: () => voi
       setPassword("");
       setName("");
     } catch (err) {
-      if (err instanceof ApiError && (err.status === 400 || err.status === 401 || err.status === 409)) {
-        setError(err.message);
+      if (err instanceof ApiError && mode === "login" && (err.status === 400 || err.status === 401)) {
+        setError(t.auth.invalidCredentials);
+      } else if (err instanceof ApiError && mode === "register" && (err.status === 400 || err.status === 409)) {
+        setError(err.status === 409 ? t.auth.registrationFailed : t.auth.invalidRegistration);
       } else {
         setError(t.auth.authErrorGeneric);
       }
