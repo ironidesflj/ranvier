@@ -11,12 +11,16 @@
 - Correções QA commit `1d28e85`: erros de autenticação genéricos/localizados; overflow do cartão de certificação na Home; assinatura `by Noos` posicionada no splash; resultados refazem fetch, evitam auto-submit duplicado, retomam EXAM e mostram retry; strings PT/EN.
 - Testes após esse commit: não há resultado confirmado nesta sessão. Histórico anterior reporta gates verdes antes dessas correções.
 
+### Adendo — retenção de rate limit (2026-11-06)
+
+`src/lib/rate-limit.ts` agora exporta `cleanupExpiredRateLimits(graceMs = 60_000)` (deleteMany por `resetAt < now - graceMs`, retorna `count`) e a função pura `isExpired(resetAt, now, graceMs)`. `rateLimit()` dispara a limpeza de forma oportunista e fire-and-forget em 1/50 das chamadas, com `.catch(() => {})`: não adiciona latência e não derruba a requisição se o delete falhar. Não há cron nem secret; a tabela cresce de forma limitada. Cobertura em `src/lib/rate-limit.test.ts` (`bun:test`, sem mock de Prisma) e step `bun test` no job `quality` do CI.
+
 ### Dívidas abertas
 
 1. Confirmar deploy Vercel de `1d28e85` e testar health + fluxos alterados.
 2. Confirmar que o deployment inclui a env `NEXT_PUBLIC_NOOS_HUB_URL` atualizada para `noos.study` (ela precisa ser `Config` por ser `NEXT_PUBLIC_`).
 3. Decidir/avaliar upgrade do Axon `0.2.1` para `0.2.2`; verificar changelog/assinaturas e regenerar lockfile + CI se aprovado.
-4. Definir política de retenção e limpeza de `RateLimitBucket` expirados; hoje expiram/reutilizam por chave, sem limpeza global periódica.
+4. Retenção de `RateLimitBucket`: **implementada** (2026-11-06) — `cleanupExpiredRateLimits()` apaga buckets com `resetAt` mais antigo que a carência de 60s; disparo oportunista fire-and-forget em `rateLimit()` com probabilidade 1/50. Sem cron/secret; falha de limpeza não afeta a requisição. Falta apenas observar o crescimento da tabela no Neon.
 5. Atualizar worklog com a sequência pós-Task 25 e esta rodada de handoff.
 
 ## Histórico detalhado

@@ -8,6 +8,7 @@
     "build:vercel": "prisma generate --schema prisma/schema.prod.prisma && next build",
     "start": "NODE_ENV=production bun .next/standalone/server.js 2>&1 | tee server.log",
     "lint": "eslint .",
+    "test": "bun test",
     "postinstall": "prisma generate",
     "db:push": "prisma db push --accept-data-loss",
     "db:push:prod": "prisma db push --schema prisma/schema.prod.prisma",
