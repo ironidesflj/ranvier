@@ -1179,3 +1179,16 @@ Stage Summary:
 - Novo símbolo **Topologia Orbital 'R'** implantado em 100% do ecossistema Ranvier (componentes React com 3 escalas ópticas, SVGs de marca, favicon, ícones PWA, imagens OG e `offline.html`).
 - Tela de abertura `RanvierSplash` enxuta e silenciosa na abertura da Home (`3,6s` base + `1,0s` de contemplação = `4,6s`), com a barra fina e `by Noos` emergindo por último, e Hero da Home limpo sem símbolo redundante.
 - Documentação SDD completa e sincronizada.
+
+---
+Task ID: 26
+Agent: Codex
+Task: Atualizar o handoff e corrigir divergências de estado nos documentos do Ranvier.
+
+Work Log:
+- Confirmado no checkout: branch `main`, commit local/remoto conhecido `1d28e85`; app version `1.10.0`; Axon pinado em `0.2.1`.
+- Verificação Vercel em 2026-11-06 não concluiu: falha de resolução DNS. O deployment de `1d28e85` permanece explicitamente NÃO CONFIRMADO; health histórico anterior não foi tratado como estado atual.
+- Atualizados `docs/SDD.md`, `docs/sdd/current-state.md` e `docs/sdd/plan.md`: removidas afirmações obsoletas de rate limit em memória e hub completamente pendente; marcadas as verificações que dependem da Vercel.
+- Criado `memory.md` com handoff para manutenção, capacidades, segurança, dados, estado Noos/Axon e dívidas.
+- Axon 0.2.2 registrado como atualização a avaliar, sem mudar o pin 0.2.1.
+- Dívidas registradas: confirmar deploy e env pública do hub; avaliar upgrade Axon; definir retenção dos buckets de rate limit; confirmar gates/QA após commit `1d28e85`.

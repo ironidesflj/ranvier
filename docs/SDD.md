@@ -1,12 +1,14 @@
 # Ranvier (by Noos) — Software Design Document (SDD)
 
-**Versão:** 1.8.1 · **Data:** 2026-10-28 · **Status:** Documento vivo (complementar ao `worklog.md`)
+**Versão:** 1.10.0 · **Data:** 2026-11-06 · **Status:** Documento vivo (complementar ao `worklog.md`)
 **App:** Ranvier — estudos e simulados gratuitos para certificações · **Ecossistema:** Noos (assinatura "by Noos"; hub: noos.study, fallback https://noos-hub.vercel.app)
 **Autor do produto:** Ironides Junior — <https://github.com/ironidesflj> · <https://www.linkedin.com/in/ironjunior/>
 **Princípio norteador:** *nada se perda* — este documento existe para que futuros mantenedores tenham 100% do contexto de projeto, decisão e limitação sem precisar arqueologia no código.
 
 > **Convenção:** texto em PT-BR; identificadores, código, comandos e termos técnicos em English onde natural.
 > **Segredos:** este documento referencia apenas **nomes** de variáveis de ambiente (`DATABASE_URL`, `SESSION_SECRET`). Valores secretos jamais são impressos.
+
+> **Estado atual (2026-11-06):** código em `main` no commit `1d28e85`; app versionada `1.10.0`; deploy desse commit na Vercel ainda não foi confirmado nesta sessão. Para estado operacional recente e dívidas, ver `docs/sdd/current-state.md` e `memory.md`.
 
 ---
 
@@ -133,7 +135,7 @@ flowchart LR
         UI["CertTrack shell<br/>hash routing #/... (Zustand)<br/>TanStack Query"]
     end
     subgraph Server["Next.js 16 — server side"]
-        RL["rate-limit.ts<br/>(in-memory, por IP)"]
+        RL["rate-limit.ts<br/>(Neon compartilhado, por IP)"]
         ZV["Zod<br/>(validação de corpo)"]
         SES["session.ts / auth.ts<br/>ct_anon · ct_session (HMAC)"]
         SVC["attempt-service.ts<br/>correção 100% server-side<br/>gabarito NUNCA vai ao cliente"]
@@ -369,7 +371,7 @@ Definidos em `src/lib/types.ts` (tipos compartilhados cliente/servidor — "Neve
 **Aceitamos (riscos residuais, documentados com honestidade):**
 
 - **Crawling determinado do gabarito** criando tentativas STUDY e respondendo cada opção para inferir `correctIndex` — risco **aceito** para um app gratuito de estudo (o gabarito de STUDY é pedagógico e precisa ser devolvido). Mitigado por: rate limit (300 respostas/5min por IP), shuffle da ordem das questões e amostragem aleatória (aumenta o custo do crawler). Não há CAPTCHA — decisão consciente de não degradar a UX gratuita.
-- Rate limit **in-memory** = por instância; atrás de múltiplas réplicas, o limite efetivo multiplica. Documentado como limitação single-instance; trocar por Upstash/Redis ao escalar (ver seção 12).
+- Rate limit compartilhado em `RateLimitBucket` no Neon; operações condicionais limitam incrementos entre instâncias Vercel. Dívida restante: revisar retenção/limpeza dos buckets expirados e custo sob tráfego real; Redis/Upstash só se medições justificarem.
 - **(Red Team F3 — residual)** Enumeração de conta no registro via status (409 vs 201) — o fluxo de criação revela inerentemente a existência do e-mail; timing equalizado com scrypt dummy e mensagem genérica. Risco baixo para app gratuito; login não é enumerável.
 - `SESSION_SECRET` com fallback dev (`certtrack-dev-secret-change-me`) se não definido — aceitável apenas no sandbox; **em produção a variável é obrigatória** (passo de deploy).
 - E-mail não verificado (sem fluxo de confirmação) — aceito para escopo de app gratuito; não há funcionalidade sensível atrelada ao e-mail.
@@ -526,7 +528,7 @@ Higiene garantida (estado verificado): `.gitignore` cobre `.env*`, `db/` (SQLite
 
 1. Importar o repo (framework Next.js detectado; bun detectado via `bun.lock`).
 2. **Build Command (override):** `bun run build:vercel` (= `prisma generate --schema prisma/schema.prod.prisma && next build`) — gera o client Prisma com o **schema Postgres** antes do build.
-3. **Environment Variables:** `DATABASE_URL` (Neon), `SESSION_SECRET` (`openssl rand -hex 32`), `NEXT_PUBLIC_NOOS_HUB_URL` (default `https://noos-hub.vercel.app`; trocar para `https://noos.study` quando o domínio existir), e os 4 opcionais de AdSense (seção 11).
+3. **Environment Variables:** `DATABASE_URL` (Neon pooled), `SESSION_SECRET` (`openssl rand -hex 32`, obrigatório em produção), `NEXT_PUBLIC_NOOS_HUB_URL` (configurado para `https://noos.study`, segundo confirmação do fundador em 2026-10-30), e os 4 opcionais de AdSense (seção 11).
 
 ### d. Schemas Prisma duplicados (design v1.1.0)
 
@@ -554,7 +556,7 @@ Railway, Fly.io ou VPS com Docker — o build standalone **já está configurado
 
 ### Avisos e limitações conhecidas
 
-- **Rate limit é in-memory** → por instância. Single instance (Vercel Hobby/uma réplica) ok para começar; ao escalar horizontalmente, trocar por Upstash Redis (a interface `rateLimit(req, route, limit, windowMs)` isola a troca).
+- **Rate limit** → tabela compartilhada `RateLimitBucket` no Neon, chaveada por rota e IP. Os buckets vencidos são redefinidos na próxima requisição da mesma chave; limpeza global/retention ainda não está automatizada.
 - **Backups:** Neon free tier tem PITR limitado — para dados de progresso de usuários (não críticos, mas reais), considerar dumps periódicos (`pg_dump`) antes de mudanças de schema.
 - **Limites do free tier:** monitorar horas de compute do Neon e largura de banda da Vercel; o app é leve (uma rota, SSR mínimo, queries indexadas), mas progresso cresce linearmente com respostas.
 - `typescript.ignoreBuildErrors` = **false** desde a v1.1.0 (codebase typecheck limpo: `bunx tsc --noEmit`; pastas de scaffold `examples/`/`skills/` excluídas do `tsconfig.json`)
@@ -573,7 +575,7 @@ Railway, Fly.io ou VPS com Docker — o build standalone **já está configurado
 | 4 | **Sessão anônima server-side vs localStorage** | Progresso anônimo precisava sobreviver a reload/limpeza e sincronizar no login (decisão de kickoff nº 6) | Cookie `ct_anon` httpOnly 365 dias + tentativas no DB por `anonId`; **retomada cross-dispositivo** funciona (a URL `#/simulado/:id` + cookie) e o **merge** no login é um único `updateMany`. Custa: linhas no banco para anônimos (mitigado: sem PII; fila de revisão limitada a 50) |
 | 5 | **Hash routing vs rotas físicas** | Restrição de produto: app single-page sob a rota `/` | Navegação `#/...` via Zustand + `hashchange`; URLs compartilháveis de simulado/resultado funcionam sem server routing. Custa: SEO single-page (aceitável — é um app, não um site de conteúdo); histórico do browser via hash |
 | 6 | **Ads config-gated** | Monetização não pode degradar o estudo nem violar a confiança (gratuito/independente) | `AdSlot`/`AdSenseScript` renderizam `null` sem `NEXT_PUBLIC_ADSENSE_*`; política "nunca durante exame/estudo" garantida por composição (views focadas não importam o componente). Ativação futura = variáveis de ambiente + redeploy |
-| 7 | **Rate limit in-memory** | Mitigação de abuso necessária desde o dia 1, sem infra externa | Simples, zero dependência, serverless-friendly (timer `unref`, poda de buckets). Limitação documentada: por instância — trocar por Upstash/Redis ao escalar |
+| 7 | **Rate limit compartilhado no Neon** | Mitigação coerente entre instâncias serverless | Reutiliza Postgres existente; sem novo serviço. Monitorar custo/retention dos buckets antes de considerar Redis/Upstash |
 | 8 | **Sessão stateless (token HMAC) vs tabela de sessões** | Sem necessidade de revogação granular no escopo gratuito | Sem query extra por request; expiração embutida no token (30 dias). Custa: logout = limpeza de cookie (token válido "órfão" até expirar) — aceito |
 
 ---
@@ -619,7 +621,7 @@ Adaptação executada conforme o **Guia de Adaptação Noos-Ranvier, Fase 1** (e
 - **Assinatura "by Noos":** badge no rodapé (e encerramento silencioso da tela de abertura `RanvierSplash`) — marca compacta (positiva no claro, negativa no escuro) + texto em **Newsreader itálico**, em tinta suave; nunca título, nunca botão primário. A palavra é sempre "Noos" (sem acento/caixa-alta/tradução).
 - **Cor de domínio:** `--noos-ranvier` **#246cad** (tokens do manual em `src/styles/noos-tokens.css`, com prefixo `--noos-` para não colidir com as variáveis shadcn) — aplicada em preenchimento/filete (`--primary`, `--ring`, `--chart-1`, sidebar, favicon, theme-color). Variante noturna `#64a1d8` (mesma família de matiz) para estudo noturno. O accent da mãe (#066755) **nunca** vira cor genérica de UI.
 - **Tipografia:** Instrument Sans (corpo), IBM Plex Mono (IDs/código), Newsreader **reservada** ao wordmark da mãe (via `next/font/google`).
-- **Rodapé:** nome do app (hierarquia máxima) + badge "by Noos" + **Contato** ao lado (página Sobre — GitHub/LinkedIn/e-mail configurável em `src/lib/site.ts`, sem formulário) + URL de fallback do hub embutida no badge (`https://noos-hub.vercel.app`, env `NEXT_PUBLIC_NOOS_HUB_URL`).
+- **Rodapé:** nome do app (hierarquia máxima) + badge "by Noos" + **Contato** ao lado (página Sobre — GitHub/LinkedIn/e-mail configurável em `src/lib/site.ts`, sem formulário) + hub canônico configurado por `NEXT_PUBLIC_NOOS_HUB_URL`; fallback `https://noos-hub.vercel.app` permanece no código.
 
 ### 16.2 ID pública estável (a costura permanente)
 
@@ -630,7 +632,7 @@ Adaptação executada conforme o **Guia de Adaptação Noos-Ranvier, Fase 1** (e
 
 ### 16.3 Axon — fatia F1 (`src/lib/axon/`)
 
-Pacote compartilhado do ecossistema (biblioteca semver linkada no build, nunca serviço). O app usa `@ironidesflj/axon@0.2.1` com pin exato: IDs, deep-links, checksum canônico e parser do manifesto.
+Pacote compartilhado do ecossistema (biblioteca semver linkada no build, nunca serviço). O app usa `@ironidesflj/axon@0.2.1` com pin exato: IDs, deep-links, checksum canônico e parser do manifesto. O dossiê de 2026-10-30 cita Axon 0.2.2 como versão publicada atual; atualização do consumidor não foi feita e deve ser tratada como decisão/dependência a revisar, não presumida.
 
 ### 16.4 Contrato de manifesto (como o hub vê o banco)
 

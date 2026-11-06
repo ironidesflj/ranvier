@@ -1,5 +1,26 @@
 # current-state.md — estado verificado
 
+## Snapshot operacional — 2026-11-06
+
+- Código: branch `main`, commit `1d28e85` (`fix: apply daily QA corrections`); checkout local sincronizado com `origin/main` na última verificação.
+- App: `1.10.0`; stack Next.js 16, React 19, TypeScript, Bun, Prisma 6.
+- Produção Vercel: deploy de `1d28e85` **não confirmado nesta sessão** (consulta falhou por DNS); endpoint `/api/health` deve ser verificado antes de declarar deploy concluído.
+- Banco de produção: Neon PostgreSQL; estado previamente confirmado `db: ok`, 1 certificação e 300 questões; schema contém `RateLimitBucket` para limiter compartilhado.
+- Axon: dependência exata `@ironidesflj/axon@0.2.1`; dossiê externo de 30/out cita `0.2.2` como latest, atualização do app pendente de revisão.
+- Noos: em 30/out foram verificados manifesto no hub e deep-link HTTP 200; fundador confirmou que `NEXT_PUBLIC_NOOS_HUB_URL=https://noos.study` foi configurada na Vercel. O último redeploy após essa configuração não foi verificado nesta sessão.
+- Correções QA commit `1d28e85`: erros de autenticação genéricos/localizados; overflow do cartão de certificação na Home; assinatura `by Noos` posicionada no splash; resultados refazem fetch, evitam auto-submit duplicado, retomam EXAM e mostram retry; strings PT/EN.
+- Testes após esse commit: não há resultado confirmado nesta sessão. Histórico anterior reporta gates verdes antes dessas correções.
+
+### Dívidas abertas
+
+1. Confirmar deploy Vercel de `1d28e85` e testar health + fluxos alterados.
+2. Confirmar que o deployment inclui a env `NEXT_PUBLIC_NOOS_HUB_URL` atualizada para `noos.study` (ela precisa ser `Config` por ser `NEXT_PUBLIC_`).
+3. Decidir/avaliar upgrade do Axon `0.2.1` para `0.2.2`; verificar changelog/assinaturas e regenerar lockfile + CI se aprovado.
+4. Definir política de retenção e limpeza de `RateLimitBucket` expirados; hoje expiram/reutilizam por chave, sem limpeza global periódica.
+5. Atualizar worklog com a sequência pós-Task 25 e esta rodada de handoff.
+
+## Histórico detalhado
+
 Última atualização: **2026-10-28 · Novo Símbolo Topologia Orbital 'R' + Animação de Abertura (`spec-v1.10.1-symbol-orbital-splash.md`, Task 25)** — o fundador escolheu a Opção 03 ("Topologia Orbital 'R' — Câmara de Bolhas / Diagrama de Feynman") para substituir o monograma tipográfico anterior, alinhando a identidade do Ranvier à linguagem analítica de elipses e órbitas da marca-mãe Noos (`noos-mark.svg`). Implementada também a tela de abertura silenciosa (`RanvierSplash`, duração total `4,6s` = `3,6s` de coreografia + `+1,0s` de contemplação pós-desenho, fundo em branco/escuro puro, símbolo surgindo no centro e, por último, a barra fina inferior surgindo junto com a assinatura discreta `by Noos`). Removida a redundância do símbolo grande dentro do Hero da Home (`home-view.tsx`).
 Lote anterior (mesmo dia): **v1.9.0 + v1.10.0 APROVADAS E
 IMPLEMENTADAS (Task 24)** — o fundador aprovou ambas as specs ("specs
@@ -153,8 +174,9 @@ aprovada: glossário (v1.9.0) e depois flashcards offline (v1.10.0) —
   seed) e 4 (manifesto validado pelo parser do hub `parseManifest` +
   `verifyChecksum`, tolerância zero, no `ci.yml` e no `manifest.yml`).
   Fatia 5: formato de deep-link adotado (ID no rodapé + botão Comunidade +
-  badge); flip para o domínio canônico pendente de env
-  (`NEXT_PUBLIC_NOOS_HUB_URL=https://noos.study`) na Vercel.
+  badge); manifesto e deep-link canônico foram verificados no hub em
+  2026-10-30, e o fundador confirmou que a env do hub foi configurada na
+  Vercel. Confirmar que o deployment ativo incorporou a variável.
 - Estado vivo do ecossistema: `docs/sdd/fatias-dossie.md` (instantâneo
   trazido pelo fundador, atualizado nesta adoção).
 

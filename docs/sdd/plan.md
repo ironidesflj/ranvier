@@ -1,5 +1,7 @@
 # plan.md — autorizado, pendente, adiado e fora de escopo
 
+> Estado revisado em 2026-11-06: versão do app 1.10.0; `main` em `1d28e85`. O deploy deste commit na Vercel e o efeito da variável do hub após redeploy ainda precisam de verificação operacional. Ver `current-state.md`.
+
 ## Autorizado (em curso)
 
 - ~~Deploy da v1.6.0~~ — **concluído pelo fundador e verificado ao vivo**
@@ -23,15 +25,14 @@
   leitura offline no SW. Sandbox ressincronizado a partir do GitHub
   (byte-idêntico, worklog Task 23) — o GitHub passa a ser também fonte de
   sincronização de volta.
-- **Fase 1 — acender o hub** (passo do mantenedor, fora do repo do app):
-  committar o conteúdo de `public/manifest.jsonl` como `manifestos/RAN.jsonl`
-  no repo do hub; o deploy seguinte acende 300 páginas PT/EN em
-  `noos.study/{lang}/q/{ID}` + redirects de alias + sitemap. **Timing definido
-  pelo fundador em 27/out/2026: "2 e 3 eu farei depois, quando eu for mexer
-  no noos" — sem urgência.**
-- **Fase 2 — fatia 5 completa**: setar `NEXT_PUBLIC_NOOS_HUB_URL=https://noos.study`
-  nas envs da Vercel junto/com o hub aceso (badge e Comunidade apontam ao
-  canônico vivo). Idem timing acima.
+- ~~Fase 1 — publicar o manifesto no hub~~ — concluída segundo verificação
+  pública de 2026-10-30: `/pt/q/RAN-DBDEA-00001/` respondeu HTTP 200 e exibiu
+  ID, Ranvier e DBDEA.
+- ~~Fase 2 — URL canônica da fatia 5~~ — fundador confirmou em 2026-10-30
+  `NEXT_PUBLIC_NOOS_HUB_URL=https://noos.study` na Vercel. Confirmar que o
+  deployment ativo foi reconstruído com a variável; antes disso, considerar
+  o fechamento funcional confirmado no hub, mas o bundle da produção do app
+  sujeito a verificação.
 - **v1.7.0 — Flashcards com repetição espaçada**: spec **APROVADA pelo
   fundador em 27/out/2026** ("aprovado, exceto a animação") e **implementada
   no mesmo dia** (worklog Task 19 — código completo e verificado no sandbox;
@@ -115,6 +116,16 @@
   do fundador (v1.4.1 + banco 300 + CI gate + Axon pin).
 
 ## Pendente (próximos passos naturais)
+
+- Confirmar na Vercel o deploy do commit `1d28e85`; após ficar Ready, validar
+  `/api/health`, splash e os fluxos corrigidos pelo QA diário.
+- Avaliar atualização do Axon pinado em `0.2.1` para `0.2.2` (versão indicada
+  pelo dossiê externo de 30/out); ler changelog/constitution e validar o
+  contrato antes de mudar dependência.
+- Planejar retenção/limpeza global dos buckets expirados de `RateLimitBucket`;
+  não introduzir serviço novo sem evidência de necessidade.
+- Registrar no worklog tarefas 26+ e manter README/About em inglês em toda
+  atualização publicada do Ranvier.
 
 - ~~**v1.9.0 — Glossário bilíngue**~~ — **APROVADA E IMPLEMENTADA (Task 24,
   28/out/2026)**: specs aprovadas pelo fundador; `spec-v1.9.0-glossario.md`
