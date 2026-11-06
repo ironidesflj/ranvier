@@ -25,7 +25,7 @@ Last checked: 2026-11-06 (America/Sao_Paulo)
 - **Neon restore drill (2026-11-06):** temporary branch `testar restore` (`br-odd-butterfly-b63tjz70`), created from parent `production` on 2026-11-06 at 15:58 (São Paulo), was queried in the Neon SQL Editor. Result: `RateLimitBucket = 46`, `Question = 300` (query completed in 78 ms). This confirms the point-in-time test branch had application data. The branch was deleted after the check; the Neon branch list showed only `production` (34.06 MB). Production was not modified.
 - Production requires `SESSION_SECRET`; missing secret fails closed. Never print secrets from `.env` or Vercel.
 - Service worker does not cache owner-scoped API responses; only public catalog/health/manifest data is cacheable.
-- Rate limiting is shared across Vercel instances via Neon `RateLimitBucket`, keyed by route and client IP. Expired keys are reused on next access; no global cleanup/retention job is currently documented.
+- Rate limiting is shared across Vercel instances via Neon `RateLimitBucket`, keyed by route and client IP. Expired keys are reused on next access. Retention is now opportunistic: `cleanupExpiredRateLimits()` deletes buckets whose `resetAt` is older than a 60s grace period, triggered fire-and-forget from `rateLimit()` with probability 1/50 (no cron, no shared secret; growth stays bounded and a failed sweep never affects the request).
 - Flashcard state uses deterministic owner+question IDs for conflict convergence.
 - Study/exam answer grading remains server-side. Flashcard draw includes the answer for offline self-assessment by design; see `docs/sdd/spec-v1.10.0-flashcards-offline.md`.
 - Public `manifest.jsonl` contains answer snapshots by Noos/Axon contract; this is intentional.
@@ -39,7 +39,7 @@ Commit `1d28e85` contains five local QA fixes: generic localized auth errors; Ho
 1. Verify Vercel deployment for `1d28e85`; check build status/logs and `/api/health` (expect DB OK, 1 certification, 300 questions).
 2. Verify active build picked up `NEXT_PUBLIC_NOOS_HUB_URL=https://noos.study`; then check the community link points at `noos.study`.
 3. Review Axon 0.2.2 release notes and decide whether to upgrade from 0.2.1; keep exact pin and regenerate lockfile/CI if changed.
-4. Decide whether to add retention/cleanup for expired rate-limit buckets, guided by Neon usage.
+4. Retention for expired rate-limit buckets is implemented opportunistically (1/50, 60s grace); monitor table growth in Neon and revisit if it keeps rising.
 5. Maintain English GitHub README and About metadata for every published Ranvier update.
 6. Keep `docs/SDD.md`, `docs/sdd/current-state.md`, `docs/sdd/plan.md`, this file, and `worklog.md` aligned.
 

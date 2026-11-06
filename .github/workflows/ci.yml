@@ -35,6 +35,9 @@ jobs:
       - name: Typecheck
         run: bunx tsc --noEmit
 
+      - name: Unit tests
+        run: bun test
+
       - name: Validate question bank
         run: bun run validate:questions
 
