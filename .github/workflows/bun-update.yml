@@ -1,0 +1,38 @@
+name: Dependency update (bun)
+
+# Atualiza dependências dentro do semver e abre PR se lint/gate/manifest/build
+# continuarem verdes. O lockfile é bun.lock; Dependabot não o cobre.
+on:
+  schedule:
+    - cron: "0 6 1 * *" # mensal, dia 1 às 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - run: bun update
+      - name: Validate
+        run: |
+          bun run lint
+          bun run ci:gate
+          bun run validate:manifest
+          bun run build
+      - uses: peter-evans/create-pull-request@v6
+        with:
+          branch: deps/bun-update
+          title: "chore(deps): bun update"
+          body: |
+            Atualização automática de dependências dentro do semver.
+            Validação: lint, ci:gate, validate:manifest e build.
+            Revisão e merge manuais obrigatórios.
+          commit-message: "chore(deps): bun update"
