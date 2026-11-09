@@ -21,18 +21,30 @@ jobs:
           bun-version: latest
       - run: bun install --frozen-lockfile
       - run: bun update
-      - name: Validate
+      # Não bloqueia a abertura do PR: se a validação falhar, o PR sai como
+      # draft com o log anexado — quem revisa decide corrigir ou descartar.
+      - name: Validate (não bloqueante)
+        id: validate
+        continue-on-error: true
         run: |
-          bun run lint
-          bun run ci:gate
-          bun run validate:manifest
-          bun run build
+          set -o pipefail
+          { bun run lint; bun run ci:gate; bun run validate:manifest; bun run build; } 2>&1 | tee /tmp/validate.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: validate-log
+          path: /tmp/validate.log
+          if-no-files-found: ignore
+          retention-days: 7
       - uses: peter-evans/create-pull-request@v6
+        if: always()
         with:
           branch: deps/bun-update
           title: "chore(deps): bun update"
+          draft: ${{ steps.validate.outcome != 'success' }}
           body: |
-            Atualização automática de dependências dentro do semver.
-            Validação: lint, ci:gate, validate:manifest e build.
-            Revisão e merge manuais obrigatórios.
+            Atualização de dependências (semver) gerada pelo workflow.
+
+            Validação: `${{ steps.validate.outcome }}` — log no artefato `validate-log` do run.
+            Revisão e merge manuais obrigatórios; se lint/build falharem, corrija no PR ou feche.
           commit-message: "chore(deps): bun update"
