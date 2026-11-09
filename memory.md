@@ -7,10 +7,10 @@ Last checked: 2026-11-06 (America/Sao_Paulo)
 - Repository: `ironidesflj/ranvier`, branch `main`, last known commit `1d28e85` (`fix: apply daily QA corrections`). Local checkout matched `origin/main` at the last git check.
 - App version: `1.10.0` (`src/lib/version.ts`, `package.json`).
 - Production URL: <https://ranvier-seven.vercel.app>.
-- Important verification gap: on 2026-11-06, DNS lookup failed while checking Vercel, so deployment of `1d28e85` and current production health are unconfirmed. Do not describe it as deployed until checked.
+- Deploy/health **verificados em 2026-11-09**: `https://ranvier-seven.vercel.app/` 200 e `/api/health` 200. `main` avançou além de `1d28e85` (docs, retenção de rate limit, workflows de bump/dispatch); a produção serve o build atual.
 - Stack: Next.js 16, React 19, TypeScript, Bun, Prisma 6; Neon PostgreSQL in production, SQLite in local development.
 - Current exam: Databricks Certified Data Engineer Associate (DBDEA); 300 enabled questions across 7 domains; public IDs `RAN-DBDEA-00001` through `RAN-DBDEA-00300`.
-- Axon is pinned exactly to `@ironidesflj/axon@0.2.1` in package.json and bun.lock. External Noos dossier dated 2026-10-30 identifies 0.2.2 as published latest; review its changelog/contract before upgrading.
+- Axon pin: `0.2.1` → **0.3.0** em andamento (PR #6, lockfile regenerado no CI; 0.3.0 = campo `retired`/`isRetired`, MINOR com aviso).
 
 ## Product capabilities
 
@@ -36,9 +36,9 @@ Commit `1d28e85` contains five local QA fixes: generic localized auth errors; Ho
 
 ## Open work
 
-1. Verify Vercel deployment for `1d28e85`; check build status/logs and `/api/health` (expect DB OK, 1 certification, 300 questions).
+1. ~~Verify Vercel deployment for `1d28e85`; check `/api/health`~~ — **feito em 09/nov**: app 200, health 200. (Mantém-se checar após deploys relevantes.)
 2. Verify active build picked up `NEXT_PUBLIC_NOOS_HUB_URL=https://noos.study`; then check the community link points at `noos.study`.
-3. Review Axon 0.2.2 release notes and decide whether to upgrade from 0.2.1; keep exact pin and regenerate lockfile/CI if changed.
+3. ~~Review Axon 0.2.2 and decide upgrade~~ — decidido: **0.3.0** (PR #6 com lock regenerado no CI).
 4. Retention for expired rate-limit buckets is implemented opportunistically (1/50, 60s grace); monitor table growth in Neon and revisit if it keeps rising.
 5. Maintain English GitHub README and About metadata for every published Ranvier update.
 6. Keep `docs/SDD.md`, `docs/sdd/current-state.md`, `docs/sdd/plan.md`, this file, and `worklog.md` aligned.

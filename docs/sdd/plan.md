@@ -1,6 +1,6 @@
 # plan.md — autorizado, pendente, adiado e fora de escopo
 
-> Estado revisado em 2026-11-06: versão do app 1.10.0; `main` em `1d28e85`. O deploy deste commit na Vercel e o efeito da variável do hub após redeploy ainda precisam de verificação operacional. Ver `current-state.md`.
+> Estado revisado em 2026-11-09: versão do app 1.10.0; deploy e `/api/health` verificados (200). `main` avançou além de `1d28e85`; Axon 0.3.0 entra via PR #6 (lock regenerado no CI). Ver `current-state.md`.
 
 ## Autorizado (em curso)
 
