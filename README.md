@@ -54,3 +54,10 @@ Content is based on official public Databricks documentation. Questions are orig
 ## License
 
 Code under MIT. Question bank and content under CC BY-SA 4.0.
+
+## Privacy
+
+- Study progress is stored on your device; the optional account stores only what is needed to sync progress (email + study state) in Neon.
+- No third-party analytics or advertising cookies. Session cookies are httpOnly and same-site.
+- You can export/delete your data from the app; for deletion requests, use the contact in the app's About page.
+- This project is independent and not affiliated with Databricks, Microsoft or Pearson VUE.
