@@ -1,0 +1,44 @@
+name: Bump @ironidesflj/axon
+
+# Atualiza o pin exato do Axon e regenera o bun.lock no runner (registry
+# acessível no CI), valida e abre PR. Usado quando o lock precisa mudar e o
+# ambiente local do mantenedor não tem rede para o registry.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Versão do Axon (ex.: 0.3.0)"
+        required: true
+        default: "0.3.0"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - name: Bump Axon
+        env:
+          VERSION: ${{ inputs.version }}
+        run: bun add "@ironidesflj/axon@${VERSION}"
+      - name: Validate
+        run: |
+          bun run lint
+          bun run ci:gate
+          bun run validate:manifest
+      - uses: peter-evans/create-pull-request@v6
+        with:
+          branch: "deps/axon-${{ inputs.version }}"
+          title: "chore(deps): Axon ${{ inputs.version }}"
+          body: |
+            Pin do `@ironidesflj/axon` atualizado para ${{ inputs.version }} e `bun.lock` regenerado no CI.
+            Validação: lint, ci:gate e validate:manifest.
+            Revisão e merge manuais.
+          commit-message: "chore(deps): Axon ${{ inputs.version }}"
