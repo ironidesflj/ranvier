@@ -64,6 +64,7 @@ export function StudyView() {
   useEffect(() => {
     if (!cert) return;
     if (studyDomainCode) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sync pre-selected domain when arriving from cert view or once cert loads
       setSelectedDomains([studyDomainCode]);
     } else {
       setSelectedDomains((prev) => (prev.length === 0 ? cert.domains.map((d) => d.code) : prev));

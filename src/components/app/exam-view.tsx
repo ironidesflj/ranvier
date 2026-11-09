@@ -149,7 +149,6 @@ export function ExamView() {
     if (remainingSec <= 0) return;
     if (remainingSec <= 600 && !announcedRef.current.ten) {
       announcedRef.current.ten = true;
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- deliberate one-shot milestone announcement for screen readers (aria-live polite)
       setTimeAnnouncement(t.exam.timeWarning);
     } else if (remainingSec <= 60 && !announcedRef.current.one) {
       announcedRef.current.one = true;
