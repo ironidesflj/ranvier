@@ -9,7 +9,7 @@
         "@dnd-kit/sortable": "^10.0.0",
         "@dnd-kit/utilities": "^3.2.2",
         "@hookform/resolvers": "^5.1.1",
-        "@ironidesflj/axon": "0.2.1",
+        "@ironidesflj/axon": "0.3.0",
         "@mdxeditor/editor": "^3.39.1",
         "@prisma/client": "^6.11.1",
         "@radix-ui/react-accordion": "^1.2.11",
@@ -305,7 +305,7 @@
 
     "@img/sharp-win32-x64": ["@img/sharp-win32-x64@0.34.5", "https://registry.npmjs.com/@img/sharp-win32-x64/-/sharp-win32-x64-0.34.5.tgz", { "os": "win32", "cpu": "x64" }, "sha512-+29YMsqY2/9eFEiW93eqWnuLcWcufowXewwSNIT6UwZdUUCrM3oFjMWH/Z6/TMmb4hlFenmfAVbpWeup2jryCw=="],
 
-    "@ironidesflj/axon": ["@ironidesflj/axon@0.2.1", "", {}, "sha512-gkKDwQLAmhmKqV+ZcTQtBDBIC7knj0FlKSICLTI5cQ4fEmhsFG8Ok3Pi0FaFMnKFS1Ht2Qup03sdlEkKxfukZw=="],
+    "@ironidesflj/axon": ["@ironidesflj/axon@0.3.0", "", {}, "sha512-+0IhoRuIlenIKU+3AcKd/672i0OcJZnc5w5cajuOE2lJGR2s7qMJcPmGsDPVTXGvMnbSqqrXLmMfHWBVFs2Hxw=="],
 
     "@jridgewell/gen-mapping": ["@jridgewell/gen-mapping@0.3.13", "https://registry.npmjs.com/@jridgewell/gen-mapping/-/gen-mapping-0.3.13.tgz", { "dependencies": { "@jridgewell/sourcemap-codec": "^1.5.0", "@jridgewell/trace-mapping": "^0.3.24" } }, "sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA=="],
 
