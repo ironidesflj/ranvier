@@ -108,8 +108,10 @@ export function FlashcardsView() {
   const [results, setResults] = useState<Record<string, boolean>>({});
   const [requeued, setRequeued] = useState<Set<string>>(new Set());
   /* v1.10.0 — estado de rede honesto + fila local de julgamentos (spec §5). */
-  const [offlineQueue, setOfflineQueue] = useState(0);
-  const [netOffline, setNetOffline] = useState(false);
+  const [offlineQueue, setOfflineQueue] = useState(() => readQueue().length);
+  const [netOffline, setNetOffline] = useState(
+    () => typeof navigator !== "undefined" && navigator.onLine === false,
+  );
   const [drawOffline, setDrawOffline] = useState(false);
   const syncingRef = useRef(false);
   const trySyncRef = useRef<() => void>(() => {});
@@ -217,7 +219,9 @@ export function FlashcardsView() {
       syncingRef.current = false;
     }
   }
-  trySyncRef.current = trySync;
+  useEffect(() => {
+    trySyncRef.current = trySync;
+  });
 
   /* v1.10.0 — julgamento binário → escrita online OU fila local → auto-avançar.
      "Errei" re-entra na fila 1× (o estado dele já vence AGORA). */
@@ -306,12 +310,9 @@ export function FlashcardsView() {
     };
   }, []);
 
-  /* Mount: fila de ontem? Conta honesta já no primeiro render + tentativa
-     de sync se há rede (subir o app conta como foco). */
+  /* Mount: fila de ontem? Tentativa de sync se há rede (subir o app conta como foco). */
   useEffect(() => {
     const queued = readQueue();
-    setOfflineQueue(queued.length);
-    setNetOffline(typeof navigator !== "undefined" && navigator.onLine === false);
     if (queued.length > 0 && typeof navigator !== "undefined" && navigator.onLine) {
       trySyncRef.current();
     }
@@ -350,14 +351,13 @@ export function FlashcardsView() {
   }
 
   /* Instrução de evocação: só na primeira sessão (localStorage 1×). */
-  const [hintSeen, setHintSeen] = useState(true);
-  useEffect(() => {
+  const [hintSeen, setHintSeen] = useState(() => {
     try {
-      setHintSeen(Boolean(window.localStorage.getItem(HINT_SEEN_KEY)));
+      return typeof window !== "undefined" ? Boolean(window.localStorage.getItem(HINT_SEEN_KEY)) : true;
     } catch {
-      setHintSeen(true);
+      return true;
     }
-  }, []);
+  });
   function markHintSeen() {
     if (hintSeen) return;
     setHintSeen(true);
