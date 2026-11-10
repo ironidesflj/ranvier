@@ -464,7 +464,7 @@ export async function getProgress(certSlug: string): Promise<ProgressResponse> {
 
   const answers = await db.attemptAnswer.findMany({
     where: { attempt: { ...where, certificationId: cert.id } },
-    include: { question: { include: { domain: { where: { certificationId: cert.id }, select: { code: true, name: true, namePt: true, weightPercent: true } } } } },
+    include: { question: { include: { domain: { select: { code: true, name: true, namePt: true, weightPercent: true } } } } },
     take: 5000,
   });
 
