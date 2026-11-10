@@ -173,17 +173,33 @@ export function RanvierMark({
 /* ------------------------------------------------------------------ */
 
 let splashShownInSpaSession = false;
+const SPLASH_SESSION_KEY = "ranvier:splash:shown";
 
 export function RanvierSplash() {
-  const [phase, setPhase] = useState<"playing" | "fading" | "done">(() =>
-    splashShownInSpaSession ? "done" : "playing"
-  );
+  const [phase, setPhase] = useState<"playing" | "fading" | "done">(() => {
+    if (splashShownInSpaSession) return "done";
+    // Reload da mesma aba não repete a abertura — a splash é um gesto de
+    // marca da primeira visita, não um atraso em cada carregamento.
+    try {
+      if (typeof window !== "undefined" && window.sessionStorage.getItem(SPLASH_SESSION_KEY)) {
+        return "done";
+      }
+    } catch {
+      /* sessionStorage bloqueado: segue com a abertura curta abaixo */
+    }
+    return "playing";
+  });
 
   useEffect(() => {
-    if (splashShownInSpaSession) {
+    if (phase === "done" || splashShownInSpaSession) {
       return;
     }
     splashShownInSpaSession = true;
+    try {
+      window.sessionStorage.setItem(SPLASH_SESSION_KEY, "1");
+    } catch {
+      /* sem storage: a splash ainda aparece uma vez por sessão SPA */
+    }
 
     if (
       typeof window !== "undefined" &&
@@ -193,12 +209,15 @@ export function RanvierSplash() {
       return () => window.clearTimeout(quickTimer);
     }
 
-    const fadeTimer = window.setTimeout(() => setPhase("fading"), 4050);
-    const doneTimer = window.setTimeout(() => setPhase("done"), 4600);
+    // Abertura curta (perf 2026-11-10): 4,6 s de splash dominavam o loading
+    // percebido. 1,0 s de animação + 0,35 s de fade mantém o gesto de marca.
+    const fadeTimer = window.setTimeout(() => setPhase("fading"), 1000);
+    const doneTimer = window.setTimeout(() => setPhase("done"), 1350);
     return () => {
       window.clearTimeout(fadeTimer);
       window.clearTimeout(doneTimer);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- roda uma vez por montagem; phase inicial já cobre o skip
   }, []);
 
   if (phase === "done") return null;
