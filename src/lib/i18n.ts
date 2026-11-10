@@ -106,7 +106,7 @@ export const dict = {
         sessionScore: "{percent}% · {mode}",
       },
       factsTitle: "O exame em números",
-      factsSubtitle: "Dados oficiais — versão do exame de maio/2026",
+      factsSubtitle: "Dados oficiais por certificação",
       facts: {
         questions: "Questões pontuadas",
         duration: "Duração",
@@ -660,7 +660,7 @@ export const dict = {
         sessionScore: "{percent}% · {mode}",
       },
       factsTitle: "The exam in numbers",
-      factsSubtitle: "Official data — exam version May 2026",
+      factsSubtitle: "Official data per certification",
       facts: {
         questions: "Scored questions",
         duration: "Duration",
