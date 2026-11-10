@@ -36,6 +36,8 @@ Commit `1d28e85` contains five local QA fixes: generic localized auth errors; Ho
 
 - **2026-11-10:** AZ-900 integrado como 2ª certificação (300 questões, IDs RAN-AZ900-00001..00300, manifesto 600 linhas). Scripts/manifest/seed/gate agora são por certificação (`src/data/questions/bank.ts`); gate mede viés de comprimento em palavras. Versão 1.11.0. **Falta rodar `bun scripts/seed.ts` em produção** (Neon) e mergear o PR de ingestão do hub.
 
+- **2026-11-10 (2):** correções pós-AZ-900 na 1.11.1: tentativas/continuar filtrados por cert, copy/links/footers/metadados neutros, glossário com fallback oficial, barras de peso com clamp, home via `/api/overview` (1 request) e índices de perf (rodar `db:push:prod`).
+
 ## Open work
 
 1. ~~Verify Vercel deployment for `1d28e85`; check `/api/health`~~ — **feito em 09/nov**: app 200, health 200. (Mantém-se checar após deploys relevantes.)

@@ -120,7 +120,15 @@ export interface AttemptListItem {
   percent: number | null;
   passed: boolean | null;
   durationSec: number | null;
+  certSlug: string;
   certShortName: string;
+}
+
+/** One-shot homepage payload (single request, one rate-limit bucket). */
+export interface HomeOverview {
+  attempts: AttemptListItem[];
+  flashcards: FlashcardsSummary;
+  trails: TrailsSummary;
 }
 
 export interface AttemptDetail {

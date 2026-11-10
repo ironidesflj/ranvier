@@ -29,6 +29,13 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { cn } from "@/lib/utils";
 import { useLang } from "@/components/app/language-provider";
 import { useAppStore, type View } from "@/store/app-store";
+import { CERTIFICATIONS } from "@/data/certifications";
+
+function officialUrlFor(certSlug: string): string {
+  const cert = CERTIFICATIONS.find((c) => c.slug === certSlug) ?? CERTIFICATIONS[0];
+  return cert.officialUrl;
+}
+
 import { api } from "@/lib/api-client";
 import { AuthModal } from "@/components/app/auth-modal";
 import { AdSenseScript } from "@/components/app/ad-slot";
@@ -263,7 +270,7 @@ function Header() {
 
 function Footer() {
   const { t } = useLang();
-  const { navigate } = useAppStore();
+  const { navigate, certSlug } = useAppStore();
   return (
     <footer className="mt-auto border-t bg-card/40">
       <div className="mx-auto max-w-6xl px-4 py-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
@@ -296,7 +303,7 @@ function Footer() {
               GitHub
             </a>
             <a
-              href="https://www.databricks.com/learn/certification/data-engineer-associate"
+              href={officialUrlFor(certSlug)}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground"

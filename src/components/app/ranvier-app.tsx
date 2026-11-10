@@ -20,6 +20,13 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useLang } from "@/components/app/language-provider";
 import { useAppStore, type View } from "@/store/app-store";
+import { CERTIFICATIONS } from "@/data/certifications";
+
+function officialUrlFor(certSlug: string): string {
+  const cert = CERTIFICATIONS.find((c) => c.slug === certSlug) ?? CERTIFICATIONS[0];
+  return cert.officialUrl;
+}
+
 import { api } from "@/lib/api-client";
 import { APP_VERSION } from "@/lib/version";
 import { AdSenseScript } from "@/components/app/ad-slot";
@@ -260,7 +267,7 @@ function MobileBottomNav({ onMore }: { onMore: () => void }) {
 
 function ContentFooter() {
   const { t, f } = useLang();
-  const { navigate } = useAppStore();
+  const { navigate, certSlug } = useAppStore();
   return (
     <footer className="mt-auto border-t">
       <div className="mx-auto max-w-6xl px-4 py-6">
@@ -288,7 +295,7 @@ function ContentFooter() {
               GitHub
             </a>
             <a
-              href="https://www.databricks.com/learn/certification/data-engineer-associate"
+              href={officialUrlFor(certSlug)}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground"

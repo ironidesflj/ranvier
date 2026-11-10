@@ -384,3 +384,10 @@ aprovada: glossário (v1.9.0) e depois flashcards offline (v1.10.0) —
 - Scripts passaram a ser **por certificação** (`src/data/questions/bank.ts`): `validate:questions`, `generate-manifest`, `seed`, `ci:gate`, `prep` e `option-length-report` não assumem mais DBDEA. Gate usa comprimento em **palavras** no viés de comprimento (documentado em GATE_SPEC).
 - UI: certificação já era multi-cert; `cert-view` usa a distribuição do próprio cert, `guide`/`about` derivam links e domínios da certificação ativa. Versão **1.11.0**.
 - Pendente operacional: rodar `bun scripts/seed.ts` contra o banco de produção (Neon) para o AZ-900 aparecer no app — o seed é idempotente e não reescreve IDs publicados.
+
+## Adendo 2026-11-10 (2) — correções pós-lançamento AZ-900 (1.11.1)
+
+- **Vazamento de conteúdo DBDEA na AZ-900 corrigido:** o card "Continuar" filtrava tentativas pela certificação ativa (antes um attempt DBDEA em andamento abria questões Databricks); `AttemptListItem` ganhou `certSlug`.
+- **Copy/links neutros por certificação:** hero (eyebrow/lead), ticket, fontes do Sobre/Guia, rodapés (app/certificar/ajustes), metadados de layout/manifest e glossário deixam de citar Databricks quando a certificação é Azure. Glossário (94 verbetes DBDEA) agora mostra estado vazio com link ao glossário oficial para outras certificações.
+- **Layout:** barra azul de pesos não estoura mais o container (clamp em 100%) e o cartão de exame mostra a distribuição correta.
+- **Performance:** a home passou a usar `GET /api/overview` (um request, três consultas em paralelo, um rate-limit) no lugar de 3 GETs; cache cliente de 30s. Índices novos em `Attempt(anonId|userId, startedAt)` e `FlashcardState(anonId|userId, dueAt)` (aplicar com `db:push:prod`).

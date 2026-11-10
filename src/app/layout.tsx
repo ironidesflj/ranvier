@@ -32,10 +32,12 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://ranvier-seven.vercel.app"),
   title: "Ranvier — Simulados e estudos gratuitos para certificações",
   description:
-    "Preparação gratuita para a certificação Databricks Certified Data Engineer Associate: simulados no formato real do exame, modo estudo com explicações e fontes oficiais, e progresso por domínio. Projeto independente, sem afiliação.",
+    "Preparação gratuita para certificações de dados e cloud (Databricks e Microsoft Azure): simulados no formato real do exame, modo estudo com explicações e fontes oficiais, e progresso por domínio. Projeto independente, sem afiliação.",
   keywords: [
     "Databricks",
-    "Data Engineer Associate",
+    "Azure",
+    "AZ-900",
+    "cloud",
     "certificação",
     "simulado",
     "prova",
@@ -70,7 +72,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Ranvier — Simulados gratuitos para certificações",
     description:
-      "Simulados fiéis ao exame real Databricks Data Engineer Associate: 300 questões autorais com referência oficial e 6 simulados completos. Gratuito, independente e sem cadastro.",
+      "Simulados fiéis ao exame real, questões autorais com referência oficial e simulados completos para certificações de dados e cloud (Databricks, Azure). Gratuito, independente e sem cadastro.",
     siteName: "Ranvier",
     type: "website",
     url: "/",
@@ -81,7 +83,7 @@ export const metadata: Metadata = {
         url: "/og/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Cartão do Ranvier: monograma R azul sobre papel da marca e linha de axônio com o nó destacado — Databricks Certified Data Engineer Associate, 300 questões, 6 simulados, PT/EN, gratuito e sem cadastro.",
+        alt: "Cartão do Ranvier: monograma R azul sobre papel da marca e linha de axônio com o nó destacado — certificações de dados e cloud (Databricks, Azure), questões autorais, PT/EN, gratuito e sem cadastro.",
       },
     ],
   },

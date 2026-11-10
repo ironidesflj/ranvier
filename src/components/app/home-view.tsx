@@ -47,40 +47,28 @@ export function HomeView() {
     staleTime: 24 * 60 * 60 * 1000,
   });
   const cert = data?.certifications.find((c) => c.slug === certSlug) ?? data?.certifications[0] ?? null;
-  /* Lista de tentativas: sempre fresca ao montar a landing — o botão
-     "Continuar" do bilhete depende dela e o cache stale escondia sessões
-     em andamento (QA 3-a FAIL-1). */
-  const { data: attemptsData } = useQuery({
-    queryKey: ["attempts"],
-    queryFn: api.listAttempts,
-    staleTime: 0,
-    refetchOnMount: "always",
+  /* Um único request para a landing (perf 2026-11-10): tentativas +
+     flashcards + trilhas em paralelo no servidor, um rate-limit só. Antes
+     eram 3 GETs separados em série — cada um pagava rate-limit + acordar o
+     Neon, o que dominava o "loading entre telas". */
+  const { data: overview } = useQuery({
+    queryKey: ["overview", cert?.slug, lang],
+    queryFn: () => api.overview(cert!.slug, lang),
+    enabled: Boolean(cert?.slug) && langReady,
+    staleTime: 30_000,
   });
-  const lastAttempt = attemptsData?.attempts.find((a) => a.status === "COMPLETED") ?? null;
-  const inProgress = attemptsData?.attempts.find((a) => a.status === "IN_PROGRESS") ?? null;
+  /* Tentativas SEMPRE filtradas pela certificação ativa: antes um attempt
+     DBDEA em andamento aparecia no "Continuar" da AZ-900 e abria questões
+     Databricks (bug reportado em 10/nov). */
+  const certAttempts = (overview?.attempts ?? []).filter((a) => a.certSlug === cert?.slug);
+  const lastAttempt = certAttempts.find((a) => a.status === "COMPLETED") ?? null;
+  const inProgress = certAttempts.find((a) => a.status === "IN_PROGRESS") ?? null;
 
-  /* Flashcards (v1.7.0): número factual do dono para o CTA do bilhete —
-     “N para hoje” quando há vencidas; “N cartões” quando só há novas. */
-  const { data: fcSummary } = useQuery({
-    queryKey: ["flashcards-summary", cert?.slug],
-    queryFn: () => api.flashcardsSummary(cert!.slug),
-    enabled: Boolean(cert?.slug),
-    staleTime: 0,
-    refetchOnMount: "always",
-  });
+  const fcSummary = overview?.flashcards ?? null;
   const fcDue = fcSummary?.dueCount ?? 0;
   const fcAvailable = fcDue + (fcSummary?.newCount ?? 0);
 
-  /* Trilhas (v1.8.0): CTA factual do bilhete — “Comece pela rota · N
-     questões” (nada iniciado), “Continuar: {trilha} · {done}/{total}” ou o
-     percentual ponderado da rota. Progresso derivado por dono. */
-  const { data: trailsSummary } = useQuery({
-    queryKey: ["trails", cert?.slug, lang],
-    queryFn: () => api.trails(cert!.slug, lang),
-    enabled: Boolean(cert?.slug) && langReady,
-    staleTime: 0,
-    refetchOnMount: "always",
-  });
+  const trailsSummary = overview?.trails ?? null;
   const trailList = trailsSummary?.trails ?? [];
   const trailStarted = trailList.some((tr) => tr.state !== "not_started");
   const trailRouteComplete = trailList.length > 0 && trailList.every((tr) => tr.state === "complete");
@@ -131,12 +119,14 @@ export function HomeView() {
           {/* Hero à esquerda */}
           <div className="flex flex-col justify-center">
             <p className="mb-4 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
-              {t.home.landing.eyebrow}
+              {cert ? `${cert.vendor} · ${cert.shortName}` : t.home.landing.eyebrow}
             </p>
             <h1 className="max-w-[16ch] font-display text-4xl font-light leading-[1.05] tracking-[-0.03em] sm:text-5xl">
               {t.home.landing.h1}
             </h1>
-            <p className="mt-5 max-w-[62ch] text-base leading-relaxed text-muted-foreground">{t.home.landing.lead}</p>
+            <p className="mt-5 max-w-[62ch] text-base leading-relaxed text-muted-foreground">
+              {cert ? f(t.home.landing.leadCert, { name: cert.name }) : t.home.landing.lead}
+            </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Button size="lg" onClick={() => startExam.mutate()} disabled={startExam.isPending}>
                 {startExam.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
@@ -304,7 +294,7 @@ export function HomeView() {
                 </div>
                 {/* barra de 3 px — patch §9 */}
                 <div className="h-[3px] w-full bg-surface-2" role="img" aria-label={`${d.weightPercent}%`}>
-                  <div className="h-full bg-app-ink" style={{ width: `${Math.max(d.weightPercent * 3.5, 6)}%` }} />
+                  <div className="h-full bg-app-ink" style={{ width: `${Math.min(100, Math.max(d.weightPercent * 3.5, 6))}%` }} />
                 </div>
               </div>
             ))}
