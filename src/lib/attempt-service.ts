@@ -440,8 +440,16 @@ export async function listAttempts(): Promise<AttemptListItem[]> {
   }));
 }
 
-export async function getProgress(): Promise<ProgressResponse> {
-  const where = await ownerWhere();
+/**
+ * Progresso SEMPRE por certificação (bug 10/nov: a tela da AZ-900 mostrava
+ * números/domínios do DBDEA porque esta consulta era global). O certSlug é
+ * obrigatório; attempts e respostas são filtrados pelo certificationId.
+ */
+export async function getProgress(certSlug: string): Promise<ProgressResponse> {
+  const cert = await db.certification.findUnique({ where: { slug: certSlug }, select: { id: true } });
+  if (!cert) throw new ServiceError(404, "Certification not found");
+  const owner = await ownerWhere();
+  const where = { ...owner, certificationId: cert.id };
   const attempts = await db.attempt.findMany({
     where,
     select: { id: true, mode: true, status: true, percent: true, startedAt: true },
@@ -455,8 +463,8 @@ export async function getProgress(): Promise<ProgressResponse> {
   const studies = completed.filter((a) => a.mode === "STUDY" || a.mode === "TRAIL");
 
   const answers = await db.attemptAnswer.findMany({
-    where: { attempt: where },
-    include: { question: { include: { domain: { select: { code: true, name: true, namePt: true, weightPercent: true } } } } },
+    where: { attempt: { ...where, certificationId: cert.id } },
+    include: { question: { include: { domain: { where: { certificationId: cert.id }, select: { code: true, name: true, namePt: true, weightPercent: true } } } } },
     take: 5000,
   });
 

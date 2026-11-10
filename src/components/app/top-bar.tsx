@@ -200,7 +200,7 @@ export function TopBar() {
 
 export function MoreSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   const { t } = useLang();
-  const { navigate } = useAppStore();
+  const { navigate, certSlug } = useAppStore();
   const queryClient = useQueryClient();
 
   /* v1.9.0 (spec §4): a Revisão passa a viver aqui (junto de Ajustes) — o
@@ -209,7 +209,10 @@ export function MoreSheet({ open, onOpenChange }: { open: boolean; onOpenChange:
      honesta quando vazia. */
   async function startReview() {
     try {
-      const progress = await queryClient.fetchQuery({ queryKey: ["progress"], queryFn: api.progress });
+      const progress = await queryClient.fetchQuery({
+        queryKey: ["progress", certSlug],
+        queryFn: () => api.progress(certSlug),
+      });
       const ids = progress?.reviewQuestionIds ?? [];
       onOpenChange(false);
       if (ids.length > 0) {

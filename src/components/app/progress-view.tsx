@@ -36,8 +36,8 @@ export function ProgressView() {
   const [authOpen, setAuthOpen] = useState(false);
 
   const { data: progress, isLoading: progressLoading, isError: progressError, isFetching: progressFetching, refetch: refetchProgress, error: progressErr } = useQuery({
-    queryKey: ["progress"],
-    queryFn: api.progress,
+    queryKey: ["progress", certSlug],
+    queryFn: () => api.progress(certSlug),
     retry: 1,
     staleTime: 0,
     refetchOnMount: "always",
@@ -49,6 +49,7 @@ export function ProgressView() {
     staleTime: 0,
     refetchOnMount: "always",
   });
+  const certAttempts = (attemptsData?.attempts ?? []).filter((a) => a.certSlug === certSlug);
   /* Flashcards (v1.7.0): números factuais do SRS do dono. */
   const { data: fcSummary } = useQuery({
     queryKey: ["flashcards-summary", certSlug],
@@ -97,7 +98,7 @@ export function ProgressView() {
 
   const totals = progress?.totals;
   const byDomain = progress?.byDomain ?? [];
-  const attempts = attemptsData?.attempts ?? [];
+  const attempts = certAttempts;
   const hasData = (totals?.totalAnswered ?? 0) > 0;
   const examsCompleted = totals?.examsCompleted ?? 0;
 
