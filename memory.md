@@ -34,6 +34,8 @@ Last checked: 2026-11-06 (America/Sao_Paulo)
 
 Commit `1d28e85` contains five local QA fixes: generic localized auth errors; Home card overflow fix; splash signature positioning; result view fresh fetch, duplicate-submit guard, EXAM resume handling and retry UI; PT/EN messages. TypeScript/ESLint did not produce a confirmed result during that push attempt. Verify CI/deployment checks before claiming these fixes are production-ready.
 
+- **2026-11-10:** AZ-900 integrado como 2ª certificação (300 questões, IDs RAN-AZ900-00001..00300, manifesto 600 linhas). Scripts/manifest/seed/gate agora são por certificação (`src/data/questions/bank.ts`); gate mede viés de comprimento em palavras. Versão 1.11.0. **Falta rodar `bun scripts/seed.ts` em produção** (Neon) e mergear o PR de ingestão do hub.
+
 ## Open work
 
 1. ~~Verify Vercel deployment for `1d28e85`; check `/api/health`~~ — **feito em 09/nov**: app 200, health 200. (Mantém-se checar após deploys relevantes.)

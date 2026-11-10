@@ -376,3 +376,11 @@ aprovada: glossário (v1.9.0) e depois flashcards offline (v1.10.0) —
   fundador (27/out/2026), atualizado nas adoções de fatia e corrigido
   factualmente na Task 18 (DBDEA/IDs reais; exemplos az-900 anotados como
   didáticos do guia).
+
+## Adendo 2026-11-10 — AZ-900 integrado (segunda certificação)
+
+- Banco AZ-900 (300 questões revisadas: 85/115/100 nos 3 domínios oficiais; `AZ1-001`..`AZ3-100`) integrado em `src/data/questions/az*.ts`; certificação registrada com `examCode` **AZ900**, 50 questões / 45 min no simulado, distribuição `{1:14, 2:19, 3:17}`.
+- IDs públicos novos: **`RAN-AZ900-00001` .. `RAN-AZ900-00300`** (registry append-only, sem renumerar DBDEA). Manifesto público agora tem **600 linhas** (300 DBDEA + 300 AZ900), validado pelo parser do Axon (0 rejeições/0 divergências).
+- Scripts passaram a ser **por certificação** (`src/data/questions/bank.ts`): `validate:questions`, `generate-manifest`, `seed`, `ci:gate`, `prep` e `option-length-report` não assumem mais DBDEA. Gate usa comprimento em **palavras** no viés de comprimento (documentado em GATE_SPEC).
+- UI: certificação já era multi-cert; `cert-view` usa a distribuição do próprio cert, `guide`/`about` derivam links e domínios da certificação ativa. Versão **1.11.0**.
+- Pendente operacional: rodar `bun scripts/seed.ts` contra o banco de produção (Neon) para o AZ-900 aparecer no app — o seed é idempotente e não reescreve IDs publicados.

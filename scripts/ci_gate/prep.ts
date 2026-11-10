@@ -21,16 +21,10 @@ import path from "node:path";
 // → dois níveis acima) — independente do cwd de quem executa.
 const ROOT = path.resolve(import.meta.dir, "../..");
 
-const { s1Questions } = await import(`${ROOT}/src/data/questions/s1-platform`);
-const { s2Questions } = await import(`${ROOT}/src/data/questions/s2-ingestion`);
-const { s3Questions } = await import(`${ROOT}/src/data/questions/s3-transformation`);
-const { s4Questions } = await import(`${ROOT}/src/data/questions/s4-jobs`);
-const { s5Questions } = await import(`${ROOT}/src/data/questions/s5-cicd`);
-const { s6Questions } = await import(`${ROOT}/src/data/questions/s6-troubleshooting`);
-const { s7Questions } = await import(`${ROOT}/src/data/questions/s7-governance`);
+const { CERT_BANKS } = await import(`${ROOT}/src/data/questions/bank`);
 const { GUIDE_SECTIONS } = await import(`${ROOT}/src/data/guide`);
 
-const ALL = [s1Questions, s2Questions, s3Questions, s4Questions, s5Questions, s6Questions, s7Questions].flat();
+const ALL = CERT_BANKS.flatMap((bank: any) => bank.files.flatMap((file: any) => file.questions));
 
 // ---------- 1) ALLOWLIST ----------
 // Fontes (em ordem de precedência): banco atual (verificado on-line na auditoria v1/v2),
@@ -63,7 +57,7 @@ try {
   }
 } catch { /* primeira execução: arquivo ainda não existe */ }
 
-let allow = "# ALLOWLIST DE URLS VERIFICADAS — Quality Gate do Comitê DBDEA\n";
+let allow = "# ALLOWLIST DE URLS VERIFICADAS — Quality Gate do banco de questões (todas as certificações)\n";
 allow += "# Política (Security Engineer): só adicione URL após verificação on-line (HTTP 200 + leitura de conteúdo)\n";
 allow += "# e registro no log de verificação. URLs do banco de questões DEVEM vir daqui (types.ts: 'verified list').\n";
 allow += "# URL\tTítulo exemplo\tFonte\n";

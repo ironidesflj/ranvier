@@ -10,24 +10,12 @@
  *   LONG  = correct is the longest option AND ratio >= 1.2
  *   SHORT = ratio < 0.80
  */
-import { s1Questions } from "../src/data/questions/s1-platform";
-import { s2Questions } from "../src/data/questions/s2-ingestion";
-import { s3Questions } from "../src/data/questions/s3-transformation";
-import { s4Questions } from "../src/data/questions/s4-jobs";
-import { s5Questions } from "../src/data/questions/s5-cicd";
-import { s6Questions } from "../src/data/questions/s6-troubleshooting";
-import { s7Questions } from "../src/data/questions/s7-governance";
+import { CERT_BANKS } from "../src/data/questions/bank";
 import type { SeedQuestion } from "../src/data/questions/types";
 
-const files: [string, SeedQuestion[]][] = [
-  ["s1-platform.ts", s1Questions],
-  ["s2-ingestion.ts", s2Questions],
-  ["s3-transformation.ts", s3Questions],
-  ["s4-jobs.ts", s4Questions],
-  ["s5-cicd.ts", s5Questions],
-  ["s6-troubleshooting.ts", s6Questions],
-  ["s7-governance.ts", s7Questions],
-];
+const files: [string, SeedQuestion[]][] = CERT_BANKS.flatMap((bank) =>
+  bank.files.map((file) => [file.file, file.questions] as [string, SeedQuestion[]])
+);
 
 let totalLong = 0;
 let totalShort = 0;

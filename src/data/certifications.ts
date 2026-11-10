@@ -40,6 +40,8 @@ export interface SeedCertification {
   codeNoteEn: string;
   codeNotePt: string;
   domains: SeedDomain[];
+  /** Stratified per-domain counts for a full exam simulation (sums to questionCount). */
+  examDistribution: Record<number, number>;
 }
 
 export const CERTIFICATIONS: SeedCertification[] = [
@@ -69,6 +71,7 @@ export const CERTIFICATIONS: SeedCertification[] = [
       "Data manipulation code in the exam is provided in SQL when possible; in all other cases, code is in Python.",
     codeNotePt:
       "No exame, código de manipulação de dados é em SQL quando possível; nos demais casos, em Python.",
+    examDistribution: { 1: 3, 2: 9, 3: 10, 4: 7, 5: 5, 6: 4, 7: 7 },
     domains: [
       {
         code: 1,
@@ -208,15 +211,89 @@ export const CERTIFICATIONS: SeedCertification[] = [
       },
     ],
   },
+  {
+    slug: "microsoft-azure-fundamentals-az-900",
+    examCode: "AZ900",
+    vendor: "Microsoft",
+    name: "Microsoft Certified: Azure Fundamentals (AZ-900)",
+    shortName: "Azure Fundamentals",
+    versionLabel: "Skills measured as of July 20, 2026",
+    durationMin: 45,
+    questionCount: 50,
+    passingScorePercent: 70,
+    passingScoreIsOfficial: false,
+    fee: "USD 99 (regional pricing)",
+    languages: "English, Português (Brasil), and other languages",
+    delivery: "Online proctored or test center",
+    officialUrl: "https://learn.microsoft.com/en-us/credentials/certifications/azure-fundamentals/",
+    guideUrl: "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-900",
+    trainingUrl: "https://learn.microsoft.com/en-us/training/paths/microsoft-azure-fundamentals-describe-cloud-concepts/",
+    descriptionEn:
+      "Assesses foundational knowledge of cloud concepts and Azure: the cloud model and its benefits, core Azure architecture and services (compute, networking, storage, identity and security), and management and governance (costs, compliance, monitoring and tools).",
+    descriptionPt:
+      "Avalia conhecimento fundamental de conceitos de nuvem e do Azure: o modelo de nuvem e seus benefícios, arquitetura e serviços centrais do Azure (computação, rede, armazenamento, identidade e segurança) e gestão e governança (custos, conformidade, monitoramento e ferramentas).",
+    codeNoteEn: "No code: AZ-900 is a fundamentals exam.",
+    codeNotePt: "Sem código: AZ-900 é uma prova de fundamentos.",
+    examDistribution: { 1: 14, 2: 19, 3: 17 },
+    domains: [
+      {
+        code: 1,
+        name: "Cloud concepts",
+        namePt: "Conceitos de nuvem",
+        weightPercent: 28,
+        outlineEn: [
+          "Describe cloud computing and the shared responsibility and consumption models.",
+          "Describe the benefits of using cloud services: high availability, scalability, reliability, predictability and security.",
+          "Describe cloud service types: IaaS, PaaS, SaaS and the appropriate use case for each.",
+        ],
+        outlinePt: [
+          "Descrever a computação em nuvem e os modelos de responsabilidade compartilhada e de consumo.",
+          "Descrever os benefícios da nuvem: alta disponibilidade, escalabilidade, confiabilidade, previsibilidade e segurança.",
+          "Descrever os tipos de serviço de nuvem: IaaS, PaaS e SaaS, e o caso de uso adequado para cada um.",
+        ],
+      },
+      {
+        code: 2,
+        name: "Azure architecture and services",
+        namePt: "Arquitetura e serviços do Azure",
+        weightPercent: 38,
+        outlineEn: [
+          "Describe core Azure architectural components: regions, availability zones, resource groups, subscriptions and management groups.",
+          "Describe Azure compute and networking services, including VMs, containers, functions, App Service, VNets, VPN Gateway and ExpressRoute.",
+          "Describe Azure storage services and Azure identity, access and security services (Entra ID, MFA, Conditional Access, Defender for Cloud).",
+        ],
+        outlinePt: [
+          "Descrever os componentes centrais da arquitetura do Azure: regiões, zonas de disponibilidade, grupos de recursos, assinaturas e grupos de gerenciamento.",
+          "Descrever serviços de computação e rede do Azure, incluindo VMs, contêineres, funções, App Service, VNets, VPN Gateway e ExpressRoute.",
+          "Descrever os serviços de armazenamento do Azure e de identidade, acesso e segurança (Entra ID, MFA, Acesso Condicional, Defender for Cloud).",
+        ],
+      },
+      {
+        code: 3,
+        name: "Azure management and governance",
+        namePt: "Gestão e governança do Azure",
+        weightPercent: 34,
+        outlineEn: [
+          "Describe cost management: factors affecting costs, pricing and TCO calculators, and cost management tools.",
+          "Describe governance and compliance: Azure Policy, resource locks, Microsoft Purview and trust principles.",
+          "Describe monitoring and management tools: Azure Monitor, Log Analytics, alerts, Advisor, Service Health and Azure Arc.",
+        ],
+        outlinePt: [
+          "Descrever gestão de custos: fatores que afetam custos, calculadoras de preço e de TCO e ferramentas de gestão de custos.",
+          "Descrever governança e conformidade: Azure Policy, bloqueios de recursos, Microsoft Purview e princípios de confiança.",
+          "Descrever ferramentas de monitoramento e gestão: Azure Monitor, Log Analytics, alertas, Advisor, Service Health e Azure Arc.",
+        ],
+      },
+    ],
+  },
 ];
 
-/** Stratified per-domain question counts for a full exam simulation (45 questions). */
-export const EXAM_DISTRIBUTION: Record<number, number> = {
-  1: 3,
-  2: 9,
-  3: 10,
-  4: 7,
-  5: 5,
-  6: 4,
-  7: 7,
-};
+
+/** Stratified per-domain question counts for each exam simulation. */
+export const EXAM_DISTRIBUTIONS: Record<string, Record<number, number>> = Object.fromEntries(
+  CERTIFICATIONS.map((cert) => [cert.slug, cert.examDistribution]),
+);
+
+/** Stratified per-domain question counts for the Databricks exam (45 questions). */
+export const EXAM_DISTRIBUTION: Record<number, number> = EXAM_DISTRIBUTIONS["databricks-data-engineer-associate"];
+
