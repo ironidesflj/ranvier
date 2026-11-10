@@ -80,7 +80,8 @@ export const api = {
 
   submit: (attemptId: string) => fetchJson<AttemptResult>(`/api/attempts/${attemptId}/submit`, { method: "POST" }),
 
-  progress: () => fetchJson<ProgressResponse>("/api/progress"),
+  progress: (certSlug: string) =>
+    fetchJson<ProgressResponse>(`/api/progress?certSlug=${encodeURIComponent(certSlug)}`),
 
   flashcardsSummary: (certSlug: string) =>
     fetchJson<FlashcardsSummary>(`/api/flashcards?certSlug=${encodeURIComponent(certSlug)}`),

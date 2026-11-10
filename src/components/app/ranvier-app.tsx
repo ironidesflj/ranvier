@@ -102,7 +102,7 @@ function BrandLockup({ size = "md" }: { size?: "md" | "sm" }) {
 
 function Rail() {
   const { t, f } = useLang();
-  const { view, navigate } = useAppStore();
+  const { view, navigate, certSlug } = useAppStore();
   const queryClient = useQueryClient();
 
   const items: { view: View; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
@@ -122,7 +122,10 @@ function Rail() {
      orienta e leva ao progresso (o guia manda o vazio oferecer o próximo passo). */
   async function startReview() {
     try {
-      const progress = await queryClient.fetchQuery({ queryKey: ["progress"], queryFn: api.progress });
+      const progress = await queryClient.fetchQuery({
+        queryKey: ["progress", certSlug],
+        queryFn: () => api.progress(certSlug),
+      });
       const ids = progress?.reviewQuestionIds ?? [];
       if (ids.length > 0) {
         navigate("study", { questionIds: ids });
