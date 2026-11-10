@@ -169,7 +169,7 @@ export function CertView() {
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <div className="h-[3px] w-16 bg-surface-2">
-                        <div className="h-full bg-app-ink" style={{ width: `${Math.max(d.weightPercent * 3.5, 6)}%` }} />
+                        <div className="h-full bg-app-ink" style={{ width: `${Math.min(100, Math.max(d.weightPercent * 3.5, 6))}%` }} />
                       </div>
                       <span className="font-mono text-sm font-medium tabular-nums">{d.weightPercent}%</span>
                     </div>

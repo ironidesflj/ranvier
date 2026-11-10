@@ -22,6 +22,13 @@ import { cn } from "@/lib/utils";
 import { useLang } from "@/components/app/language-provider";
 import { usePwa } from "@/components/app/pwa-provider";
 import { useAppStore } from "@/store/app-store";
+import { CERTIFICATIONS } from "@/data/certifications";
+
+function officialUrlFor(certSlug: string): string {
+  const cert = CERTIFICATIONS.find((c) => c.slug === certSlug) ?? CERTIFICATIONS[0];
+  return cert.officialUrl;
+}
+
 import { api } from "@/lib/api-client";
 import { AuthModal } from "@/components/app/auth-modal";
 
@@ -34,7 +41,7 @@ import { AuthModal } from "@/components/app/auth-modal";
 export function SettingsView() {
   const { t, lang, setLang } = useLang();
   const { theme, setTheme } = useTheme();
-  const { navigate } = useAppStore();
+  const { navigate, certSlug } = useAppStore();
   const { showInstallEntry, install } = usePwa();
   const queryClient = useQueryClient();
   const [authOpen, setAuthOpen] = useState(false);
@@ -203,7 +210,7 @@ export function SettingsView() {
               {t.settings.aboutCta}
             </Button>
             <a
-              href="https://www.databricks.com/learn/certification/data-engineer-associate"
+              href={officialUrlFor(certSlug)}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex h-11 items-center gap-2 border px-5 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"

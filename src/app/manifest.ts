@@ -25,7 +25,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Ranvier — Simulados e estudos gratuitos",
     short_name: "Ranvier",
     description:
-      "Preparação gratuita para a certificação Databricks Certified Data Engineer Associate: simulados no formato real do exame, modo estudo com explicações e progresso por domínio.",
+      "Preparação gratuita para certificações de dados e cloud (Databricks e Microsoft Azure): simulados no formato real do exame, modo estudo com explicações e progresso por domínio.",
     start_url: "/",
     scope: "/",
     display: "standalone",

@@ -422,7 +422,7 @@ export async function listAttempts(): Promise<AttemptListItem[]> {
     where,
     orderBy: { startedAt: "desc" },
     take: 20,
-    include: { certification: { select: { shortName: true } } },
+    include: { certification: { select: { slug: true, shortName: true } } },
   });
   return attempts.map((a) => ({
     id: a.id,
@@ -435,6 +435,7 @@ export async function listAttempts(): Promise<AttemptListItem[]> {
     percent: a.percent,
     passed: a.passed,
     durationSec: a.durationSec,
+    certSlug: a.certification.slug,
     certShortName: a.certification.shortName,
   }));
 }

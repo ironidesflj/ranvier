@@ -1,4 +1,5 @@
 import type {
+  HomeOverview,
   AttemptDetail,
   AttemptListItem,
   AttemptResult,
@@ -66,6 +67,8 @@ export const api = {
   }) => fetchJson<StartAttemptResponse>("/api/attempts", { method: "POST", body: JSON.stringify(body) }),
 
   listAttempts: () => fetchJson<{ attempts: AttemptListItem[] }>("/api/attempts"),
+  overview: (certSlug: string, lang: Lang) =>
+    fetchJson<HomeOverview>(`/api/overview?certSlug=${encodeURIComponent(certSlug)}&lang=${lang}`),
 
   getAttempt: (id: string) => fetchJson<AttemptDetail>(`/api/attempts/${id}`),
 

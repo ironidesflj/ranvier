@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useLang } from "@/components/app/language-provider";
 import { GLOSSARY, type GlossaryEntry } from "@/data/glossary";
+import { CERTIFICATIONS } from "@/data/certifications";
+import { useAppStore } from "@/store/app-store";
 
 /**
  * Glossário bilíngue de consulta (v1.9.0 — spec docs/sdd/
@@ -33,7 +35,17 @@ function haystackOf(e: GlossaryEntry): string {
 
 export function GlossaryView() {
   const { t, f, lang } = useLang();
+  const { certSlug } = useAppStore();
   const inputRef = useRef<HTMLInputElement>(null);
+
+  /* Glossário curado é do DBDEA (94 verbetes). Para outras certificações
+     ainda não há verbetes autorais — estado vazio honesto com o glossário
+     oficial da plataforma, em vez de vazar termos Databricks. */
+  const cert = CERTIFICATIONS.find((c) => c.slug === certSlug) ?? CERTIFICATIONS[0];
+  const glossaryAvailable = cert.examCode === "DBDEA";
+  const officialGlossaryUrl = cert.vendor.toLowerCase().includes("microsoft")
+    ? "https://learn.microsoft.com/en-us/azure/azure-glossary-cloud-terminology"
+    : "https://docs.databricks.com/aws/en/getting-started/concepts";
 
   const [query, setQuery] = useState("");
   const [domain, setDomain] = useState<number | null>(null);
@@ -75,6 +87,28 @@ export function GlossaryView() {
 
   const isFiltered = q !== "" || domain !== null;
   const hasQuery = query.trim() !== "";
+
+  if (!glossaryAvailable) {
+    return (
+      <div className="mx-auto w-full max-w-3xl flex-1 px-4 py-10">
+        <h1 className="font-display text-3xl font-light tracking-[-0.03em] sm:text-4xl">{t.glossary.title}</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          {lang === "pt"
+            ? `O glossário curado do Ranvier tem 94 verbetes do DBDEA e ainda não cobre ${cert.shortName}. Enquanto os verbetes desta certificação são autorais e revisados, consulte o glossário oficial:`
+            : `Ranvier's curated glossary has 94 DBDEA entries and does not yet cover ${cert.shortName}. While entries for this certification are authored and reviewed, use the official glossary:`}
+        </p>
+        <a
+          href={officialGlossaryUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-4 inline-flex h-11 items-center gap-2 border px-4 text-sm font-medium"
+        >
+          <ExternalLink className="h-4 w-4" />
+          {lang === "pt" ? "Abrir glossário oficial" : "Open official glossary"}
+        </a>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto w-full max-w-3xl flex-1 px-4 py-8 sm:py-12">
