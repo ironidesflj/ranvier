@@ -9,23 +9,26 @@ import { useLang } from "@/components/app/language-provider";
 import { useAppStore } from "@/store/app-store";
 import { SITE } from "@/lib/site";
 import { hubHomeUrl } from "@/lib/axon/deep-links";
+import { CERTIFICATIONS } from "@/data/certifications";
 
 export function AboutView() {
   const { t, lang } = useLang();
-  const { navigate } = useAppStore();
+  const { navigate, certSlug } = useAppStore();
+
+  const cert = CERTIFICATIONS.find((c) => c.slug === certSlug) ?? CERTIFICATIONS[0];
+  const docsUrl = cert.vendor.toLowerCase().includes("microsoft")
+    ? "https://learn.microsoft.com/en-us/azure/"
+    : "https://docs.databricks.com/";
 
   /* Ícones dos pontos de privacidade (um por promessa — pedido do fundador
      2026-10-27: transparência de segurança no app; só fatos auditados). */
   const privacyIcons = [KeyRound, Mail, EyeOff, Ghost, Trash2];
 
   const sources = [
-    { label: t.about.sources.examPage, href: "https://www.databricks.com/learn/certification/data-engineer-associate" },
-    {
-      label: t.about.sources.examGuide,
-      href: "https://www.databricks.com/sites/default/files/2026-05/databricks-certified-data-engineer-associate-exam-guide-may-2026-000.pdf",
-    },
-    { label: t.about.sources.docs, href: "https://docs.databricks.com/" },
-    { label: t.about.sources.training, href: "https://www.databricks.com/learn/training/home" },
+    { label: t.about.sources.examPage, href: cert.officialUrl },
+    { label: t.about.sources.examGuide, href: cert.guideUrl },
+    { label: t.about.sources.docs, href: docsUrl },
+    { label: t.about.sources.training, href: cert.trainingUrl },
   ];
 
   return (

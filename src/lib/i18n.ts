@@ -482,6 +482,7 @@ export const dict = {
       title: "O que há de novo",
       subtitle: "Avisamos uma única vez por atualização — depois, é só estudar.",
       items: [
+        "AZ-900 (Azure Fundamentals): novo banco com 300 questões revisadas em 3 domínios — seletor de certificação disponível.",
         "Glossário de consulta: 94 verbetes do vocabulário da prova, com definições bilíngues e fonte oficial — funciona offline.",
         "Flashcards offline: sessões iniciadas online continuam sem rede; os julgamentos sincronizam sozinhos quando a conexão volta.",
       ],
@@ -1034,6 +1035,7 @@ export const dict = {
       title: "What's new",
       subtitle: "We show this once per update — then it's back to studying.",
       items: [
+        "AZ-900 (Azure Fundamentals): new 300-question bank across 3 domains — certification selector available.",
         "Reference glossary: 94 exam-vocabulary entries with bilingual definitions and official sources — works offline.",
         "Offline flashcards: sessions started online keep going without network; grades sync by themselves when connectivity returns.",
       ],

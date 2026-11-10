@@ -278,3 +278,10 @@ resolvem com CSS"). Diagnóstico pós-auditoria e estado:
 - Anúncios durante estudo/simulado ativos; anúncios só config-gated.
 - Vender dados ou progresso; ranking/streak/avatar/confete (anti-filosofia
   do patch §1).
+
+
+## Concluído em 2026-11-10 — AZ-900 (segunda certificação)
+
+- Integração dos 300 itens do banco AZ-900 (85/115/100) com IDs `RAN-AZ900-00001..00300`; manifesto 600 linhas validado pelo Axon.
+- Refatoração certificação-aware: `bank.ts`, validadores, gerador de manifesto, seed, gate e prep.
+- Pendente operacional: `bun scripts/seed.ts` em produção (Neon) e merge do PR de ingestão do hub gerado pelo dispatch.

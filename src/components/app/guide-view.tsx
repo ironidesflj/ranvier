@@ -6,21 +6,39 @@ import { Button } from "@/components/ui/button";
 import { useLang } from "@/components/app/language-provider";
 import { useAppStore } from "@/store/app-store";
 import { GUIDE_SECTIONS } from "@/data/guide";
+import { CERTIFICATIONS } from "@/data/certifications";
 import { AdSlot } from "@/components/app/ad-slot";
 
 export function GuideView() {
   const { t, lang } = useLang();
-  const { navigate } = useAppStore();
+  const { navigate, certSlug } = useAppStore();
+
+  const cert = CERTIFICATIONS.find((c) => c.slug === certSlug) ?? CERTIFICATIONS[0];
+  const isDbdea = cert.examCode === "DBDEA";
+  const docsUrl = cert.vendor.toLowerCase().includes("microsoft")
+    ? "https://learn.microsoft.com/en-us/azure/"
+    : "https://docs.databricks.com/";
+
+  // Guia estático só existe para DBDEA; para as demais certificações o guia é
+  // gerado dos domínios oficiais da própria certificação (mesmo layout).
+  const sections = isDbdea
+    ? GUIDE_SECTIONS
+    : cert.domains.map((d) => ({
+        code: d.code,
+        titleEn: d.name,
+        titlePt: d.namePt,
+        summaryEn: `${cert.versionLabel} — official outline`,
+        summaryPt: `${cert.versionLabel} — edital oficial`,
+        pointsEn: d.outlineEn,
+        pointsPt: d.outlinePt,
+        links: [] as Array<{ url: string; title: string; titlePt?: string }>,
+      }));
 
   const officialResources = [
-    {
-      icon: FileText,
-      label: t.about.sources.examGuide,
-      href: "https://www.databricks.com/sites/default/files/2026-05/databricks-certified-data-engineer-associate-exam-guide-may-2026-000.pdf",
-    },
-    { icon: ExternalLink, label: t.about.sources.examPage, href: "https://www.databricks.com/learn/certification/data-engineer-associate" },
-    { icon: GraduationCap, label: t.about.sources.training, href: "https://www.databricks.com/learn/training/home" },
-    { icon: ExternalLink, label: t.about.sources.docs, href: "https://docs.databricks.com/" },
+    { icon: FileText, label: t.about.sources.examGuide, href: cert.guideUrl },
+    { icon: ExternalLink, label: t.about.sources.examPage, href: cert.officialUrl },
+    { icon: GraduationCap, label: t.about.sources.training, href: cert.trainingUrl },
+    { icon: ExternalLink, label: t.about.sources.docs, href: docsUrl },
   ];
 
   return (
@@ -60,7 +78,7 @@ export function GuideView() {
 
       {/* Sections */}
       <div className="space-y-4">
-        {GUIDE_SECTIONS.map((section) => (
+        {sections.map((section) => (
           <Card key={section.code}>
             <CardHeader>
               <CardTitle className="flex items-baseline gap-2 text-base">

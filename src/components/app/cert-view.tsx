@@ -26,7 +26,7 @@ import { useLang } from "@/components/app/language-provider";
 import { useAppStore } from "@/store/app-store";
 import { api, ApiError } from "@/lib/api-client";
 import { QueryError } from "@/components/app/query-error";
-import { EXAM_DISTRIBUTION } from "@/data/certifications";
+import { EXAM_DISTRIBUTIONS } from "@/data/certifications";
 
 export function CertView() {
   const { t, lang, langReady } = useLang();
@@ -174,7 +174,7 @@ export function CertView() {
                       <span className="font-mono text-sm font-medium tabular-nums">{d.weightPercent}%</span>
                     </div>
                   </TableCell>
-                  <TableCell className="font-mono text-sm tabular-nums">{EXAM_DISTRIBUTION[d.code] ?? "—"}</TableCell>
+                  <TableCell className="font-mono text-sm tabular-nums">{(EXAM_DISTRIBUTIONS[cert.slug] ?? {})[d.code] ?? "—"}</TableCell>
                   <TableCell className="font-mono text-sm tabular-nums text-muted-foreground">{d.questionCount}</TableCell>
                 </TableRow>
               ))}

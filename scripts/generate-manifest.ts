@@ -8,65 +8,26 @@
  * bank, keeps the public-ID registry consistent, writes public/manifest.jsonl
  * (one line per question, the 9 contract fields + referenceTitle) and —
  * BEFORE writing — re-parses the whole serialized file with parseManifest
- * (from @ironidesflj/axon) and verifies every checksum line by line with
- * verifyChecksum. Zero tolerance for the publisher: any rejection or
- * divergence fails the run (tolerating dirty lines is the hub's right,
- * never ours).
- *
- * Checksum: computeChecksum over the canonical [statement, options, answer,
- * reference] — the algorithm is LOCKED (axon constitution §2); changing it
- * is a MAJOR with 90-day notice. Only the snapshot enters the sum;
- * version and metadata do not.
+ * (from @ironidesflj/axon) and verifies every checksum line by line.
  *
  * Public ID rules (registry at src/data/questions/id-registry.ts):
- *  - Assigned ONCE via generateId (RAN- prefix, package-issued format),
- *    never renamed, never recycled. Removal = epitaph (warning below),
- *    never a reused number.
- *  - New questions are appended with the next free sequence — never
- *    renumbered. `--assign` does exactly that and nothing else.
+ *  - Assigned ONCE via generateId, never renamed, never recycled; removal is
+ *    an epitaph (warning below), never a reused number.
+ *  - New questions are APPENDED with the next free sequence per exam —
+ *    `--assign` does exactly that and nothing else.
  *
- * Usage:
- *   bun scripts/generate-manifest.ts             # validate + write manifest (fails if any question lacks a registered ID)
- *   bun scripts/generate-manifest.ts --assign    # also appends registry entries for NEW questions (safe: append-only)
+ * Works per certification: CERT_BANKS defines files, domain topics and exam
+ * codes; adding an exam never renumbers an existing one.
  */
 import { existsSync, writeFileSync } from "node:fs";
-import { CERTIFICATIONS } from "../src/data/certifications";
-import { s1Questions } from "../src/data/questions/s1-platform";
-import { s2Questions } from "../src/data/questions/s2-ingestion";
-import { s3Questions } from "../src/data/questions/s3-transformation";
-import { s4Questions } from "../src/data/questions/s4-jobs";
-import { s5Questions } from "../src/data/questions/s5-cicd";
-import { s6Questions } from "../src/data/questions/s6-troubleshooting";
-import { s7Questions } from "../src/data/questions/s7-governance";
+import { CERT_BANKS } from "../src/data/questions/bank";
 import type { SeedQuestion } from "../src/data/questions/types";
 import { generateId, validateId, parseManifest, verifyChecksum, computeChecksum } from "@ironidesflj/axon";
 import { APP_ID_PREFIX } from "../src/lib/axon/ids";
 
-const ALL_QUESTIONS: SeedQuestion[] = [
-  ...s1Questions,
-  ...s2Questions,
-  ...s3Questions,
-  ...s4Questions,
-  ...s5Questions,
-  ...s6Questions,
-  ...s7Questions,
-];
-
-/** Topic slugs per exam domain (feeds hub search/filters/stats). */
-const DOMAIN_TOPICS: Record<number, string> = {
-  1: "platform",
-  2: "ingestion",
-  3: "transformation",
-  4: "jobs",
-  5: "cicd",
-  6: "troubleshooting",
-  7: "governance",
-};
-
-const LETTERS = ["A", "B", "C", "D"] as const;
-
 const REGISTRY_PATH = "src/data/questions/id-registry.ts";
 const MANIFEST_PATH = "public/manifest.jsonl";
+const LETTERS = ["A", "B", "C", "D"] as const;
 
 interface RegistryEntry {
   key: string;
@@ -74,8 +35,6 @@ interface RegistryEntry {
 }
 
 const assign = process.argv.includes("--assign");
-const cert = CERTIFICATIONS[0]; // single certification at launch; loop when more arrive
-const examCode = cert.examCode.toUpperCase();
 
 function renderRegistry(entries: RegistryEntry[]): string {
   const lines = entries
@@ -116,14 +75,21 @@ async function loadRegistry(): Promise<RegistryEntry[]> {
   return (mod.ID_REGISTRY as RegistryEntry[]).map((e) => ({ key: e.key, publicId: e.publicId }));
 }
 
+function bankOfEntry(entry: RegistryEntry) {
+  const v = validateId(entry.publicId);
+  if (!v.ok) return null;
+  return CERT_BANKS.find((b) => b.cert.examCode.toUpperCase() === v.parsed.exam.toUpperCase()) ?? null;
+}
+
 async function main() {
   const errors: string[] = [];
   const warnings: string[] = [];
   const registry = await loadRegistry();
   const byKey = new Map(registry.map((e) => [e.key, e.publicId]));
 
-  // Registry sanity: unique keys, unique/valid public IDs — through the
-  // package's validateId, with the rejection reason in the log (fatia 2).
+  const examCodes = new Set(CERT_BANKS.map((b) => b.cert.examCode.toUpperCase()));
+
+  // Registry sanity: unique keys, unique/valid public IDs (through validateId).
   const seenIds = new Set<string>();
   for (const e of registry) {
     const v = validateId(e.publicId);
@@ -131,69 +97,93 @@ async function main() {
       errors.push(`registry: invalid publicId ${e.publicId} (${e.key}) — ${v.reason}`);
       continue;
     }
-    if (v.parsed.exam !== examCode) {
-      errors.push(`registry: publicId ${e.publicId} (${e.key}) exam segment != ${examCode}`);
+    if (!examCodes.has(v.parsed.exam.toUpperCase())) {
+      errors.push(`registry: publicId ${e.publicId} exam segment not registered (${v.parsed.exam})`);
     }
     if (seenIds.has(e.publicId)) errors.push(`registry: duplicate publicId ${e.publicId}`);
     seenIds.add(e.publicId);
   }
 
-  // Questions missing a registry entry.
-  const missing = ALL_QUESTIONS.filter((q) => !byKey.has(q.key));
-  if (missing.length > 0 && !assign) {
-    for (const q of missing) errors.push(`no public ID registered for ${q.key} (run with --assign to append)`);
+  // Missing IDs: assign per exam, append-only, no renumbering.
+  const lastIssued = new Map<string, number>();
+  for (const bank of CERT_BANKS) {
+    const examCode = bank.cert.examCode.toUpperCase();
+    lastIssued.set(
+      examCode,
+      registry.reduce((max, e) => {
+        const v = validateId(e.publicId);
+        return v.ok && v.parsed.exam.toUpperCase() === examCode ? Math.max(max, v.parsed.seq) : max;
+      }, 0)
+    );
   }
-  if (missing.length > 0 && assign) {
-    let lastIssued = registry.reduce((max, e) => {
-      const v = validateId(e.publicId);
-      return v.ok && v.parsed.exam === examCode ? Math.max(max, v.parsed.seq) : max;
-    }, 0);
-    for (const q of missing) {
-      const publicId = generateId(APP_ID_PREFIX, examCode, lastIssued);
-      lastIssued += 1;
-      registry.push({ key: q.key, publicId });
-      byKey.set(q.key, publicId);
-      console.log(`  + registry: ${q.key} → ${publicId}`);
+
+  const missing: Array<{ bank: (typeof CERT_BANKS)[number]; question: SeedQuestion }> = [];
+  for (const bank of CERT_BANKS) {
+    for (const q of bank.files.flatMap((f) => f.questions)) {
+      if (byKey.has(q.key)) continue;
+      missing.push({ bank, question: q });
+    }
+  }
+  if (missing.length > 0 && !assign) {
+    for (const m of missing) errors.push(`no public ID registered for ${m.question.key} (run with --assign to append)`);
+  } else if (missing.length > 0) {
+    for (const m of missing) {
+      const examCode = m.bank.cert.examCode.toUpperCase();
+      const last = lastIssued.get(examCode)!;
+      const publicId = generateId(APP_ID_PREFIX, examCode, last);
+      lastIssued.set(examCode, last + 1);
+      registry.push({ key: m.question.key, publicId });
+      byKey.set(m.question.key, publicId);
+      console.log(`  + registry: ${m.question.key} → ${publicId}`);
     }
     writeFileSync(REGISTRY_PATH, renderRegistry(registry), "utf8");
     console.log(`registry: ${missing.length} entries appended (${REGISTRY_PATH})`);
   }
 
   // Epitaphs: registry entries whose question no longer exists (never recycled).
-  const questionKeys = new Set(ALL_QUESTIONS.map((q) => q.key));
+  const allQuestions: SeedQuestion[] = CERT_BANKS.flatMap((b) => b.files.flatMap((f) => f.questions));
+  const questionKeys = new Set(allQuestions.map((q) => q.key));
   for (const e of registry) {
-    if (!questionKeys.has(e.key)) warnings.push(`epitaph: ${e.key} (${e.publicId}) has no question — number never reused`);
+    if (!questionKeys.has(e.key))
+      warnings.push(`epitaph: ${e.key} (${e.publicId}) has no question — number never reused`);
   }
 
-  // Build manifest lines in registry order (stable, published order).
+  // Build manifest lines in registry order (stable, published order). The
+  // certification comes from the public ID's exam segment, so the registry is
+  // the single ordering authority across exams.
   const lines: string[] = [];
+  let questionById = new Map<string, { bank: (typeof CERT_BANKS)[number]; question: SeedQuestion }>();
+  for (const bank of CERT_BANKS) {
+    for (const file of bank.files) {
+      for (const q of file.questions) questionById.set(byKey.get(q.key) ?? "", { bank, question: q });
+    }
+  }
   for (const e of registry) {
-    const q = ALL_QUESTIONS.find((x) => x.key === e.key);
-    if (!q) continue; // epitaph — warned above
+    const owned = questionById.get(e.publicId);
+    if (!owned) continue; // epitaph
+    const { bank, question: q } = owned;
     const snapshot = {
       statement: q.stem,
       options: [...q.options],
       answer: LETTERS[q.correctIndex],
       reference: q.referenceUrl,
-      referenceTitle: q.referenceTitle, // extra field — tolerated by the hub parser, used by its page spec
+      referenceTitle: q.referenceTitle,
     };
     const line = {
       id: e.publicId,
-      exam: examCode,
-      topics: [DOMAIN_TOPICS[q.domainCode] ?? `s${q.domainCode}`],
+      exam: bank.cert.examCode.toUpperCase(),
+      topics: [bank.domainTopics[q.domainCode] ?? `${bank.cert.examCode.toLowerCase()}-${q.domainCode}`],
       difficulty: q.difficulty.toLowerCase(),
-      lang: "en", // questions are always in the exam's English source (product decision)
-      version: q.contentVersion ?? 1, // content version — typo fixes bump it; the ID never changes
-      checksum: computeChecksum(snapshot), // canonical, LOCKED algorithm (fatia 3)
-      aliases: [] as string[], // no GLI- IDs were ever published — registry born at RAN-
+      lang: "en",
+      version: q.contentVersion ?? 1,
+      checksum: computeChecksum(snapshot),
+      aliases: [] as string[],
       snapshot,
     };
     lines.push(JSON.stringify(line));
   }
 
-  // Fatia 4 — validate with the SAME parser the hub uses on ingestion,
-  // over the actual serialized bytes: any rejection or checksum divergence
-  // fails the run. Zero tolerance for the publisher.
+  // Fatia 4 — validate with the SAME parser the hub uses on ingestion.
   const content = lines.length > 0 ? lines.join("\n") + "\n" : "";
   const parsed = parseManifest(content);
   for (const r of parsed.rejected) {
@@ -213,12 +203,18 @@ async function main() {
 
   writeFileSync(MANIFEST_PATH, content, "utf8");
 
+  const counts: Record<string, number> = {};
+  for (const line of lines) {
+    const rec = JSON.parse(line) as { exam: string };
+    counts[rec.exam] = (counts[rec.exam] ?? 0) + 1;
+  }
   console.log(`\n✓ manifest.jsonl — ${lines.length} questions (${MANIFEST_PATH})`);
-  console.log(`  exam: ${examCode} (${cert.name})`);
+  console.log(`  by exam: ${JSON.stringify(counts)}`);
   console.log(`  first: ${registry[0]?.publicId} · last: ${registry[registry.length - 1]?.publicId}`);
-  console.log(`  registry: ${registry.length} entries (aliases: none — no GLI- ever published)`);
-  console.log(`  hub parser: ${parsed.ok.length} ok · ${parsed.rejected.length} rejected · ${diverged.length} checksum divergences`);
-  console.log(`  checksum (line 1): ${parsed.ok[0]?.checksum}`);
+  console.log(`  registry: ${registry.length} entries`);
+  console.log(
+    `  hub parser: ${parsed.ok.length} ok · ${parsed.rejected.length} rejected · ${diverged.length} checksum divergences`
+  );
   if (warnings.length > 0) {
     console.log(`warnings: ${warnings.length}`);
     for (const w of warnings) console.log("  ⚠ " + w);

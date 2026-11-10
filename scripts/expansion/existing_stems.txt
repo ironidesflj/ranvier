@@ -300,3 +300,303 @@ S7-043	HARD	2	A company runs one Unity Catalog metastore shared by several busin
 S7-044	EASY	3	During an architecture review, a new data engineer must explain how three Unity Catalog objects work together for cloud storage: the object that holds the IAM c
 S7-045	MEDIUM	0	A Lakeflow Job writes manifest files directly to the cloud storage path s3://acme-dropzone/manifests/, which is registered in Unity Catalog as the external loca
 S7-046	EASY	2	During a security review, an auditor asks what the Databricks audit trail actually captures, expecting it to log only SQL queries. The platform lead must answer
+AZ1-001	EASY	1	An IT director at a logistics company is preparing the team's first Azure project. During the kickoff meeting, a project manager asks for a plain-language defin
+AZ1-002	EASY	0	A training nonprofit is onboarding a new cloud analyst. As a first exercise, the analyst lists what counts as a cloud computing service. Which list is accurate?
+AZ1-003	MEDIUM	1	A streaming service is producing an interactive live event that will multiply its normal traffic for a few days; after the event, demand returns to its usual le
+AZ1-004	MEDIUM	3	A flower delivery company sees orders multiply around Valentine's Day and Mother's Day. In past years, preparing for those peaks meant long procurement cycles f
+AZ1-005	EASY	1	A hospital network is moving its workloads to the cloud. A compliance officer asks which responsibilities always remain with the cloud provider, regardless of t
+AZ1-006	MEDIUM	3	A retailer has adopted a public cloud. A newly hired security engineer is reviewing what the company must keep doing itself, no matter which cloud service type 
+AZ1-007	MEDIUM	0	An external auditor is comparing the company's former on-premises datacenter with its current public cloud setup, and asks how responsibilities shifted when the
+AZ1-008	MEDIUM	2	A manufacturing company's cloud architect is briefing the infrastructure team on how the shared responsibility model behaves across service types, ahead of the 
+AZ1-009	HARD	1	A fintech runs two database workloads in the cloud. One is a SQL database that the team installed on its own virtual machines and patches itself. The other is a
+AZ1-010	EASY	3	A university is evaluating its first cloud deployment, and a lecturer on the evaluation committee asks what a public cloud is. Which statement is accurate?
+AZ1-011	EASY	0	A pharmaceutical company wants cloud technology, but its resources must be dedicated to the organization alone. A team member asks what a private cloud is. Whic
+AZ1-012	MEDIUM	3	An insurance company keeps a private cloud in its own datacenter and connects it to a public cloud so it can absorb temporary demand spikes without changing its
+AZ1-013	MEDIUM	1	A gaming studio uses one public provider for its development platform and is moving part of its workloads to a second public provider to use features the first 
+AZ1-014	MEDIUM	2	A solutions architect is preparing a briefing that compares cloud models for a client's board. One slide pairs characteristics with the models, and the architec
+AZ1-015	HARD	0	During a proposal review, a client asks the architect to confirm which statement about cloud models is accurate before it goes into the final deck. Which statem
+AZ1-016	MEDIUM	2	A defense contractor must run all of its workloads on dedicated infrastructure that the organization controls. Its data cannot be collocated with other tenants'
+AZ1-017	EASY	0	Two founders are building a mobile app with no capital to buy servers. Usage is expected to grow unpredictably if the app takes off. They want to pay only for w
+AZ1-018	MEDIUM	3	A tax-preparation firm runs a private cloud that carries a steady load for most of the year. During filing season, demand rises sharply for a few weeks. The fir
+AZ1-019	HARD	1	An energy utility uses one public provider for its customer portal and a second public provider for analytics, because each offers features the other lacks; the
+AZ1-020	HARD	2	A national research lab must keep its most sensitive workloads on infrastructure it controls, but it also wants public cloud capacity for temporary surges and f
+AZ1-021	EASY	0	The CFO of a mid-sized company asks the cloud team to explain the consumption-based model in one sentence, so that she can repeat it to the board without notes.
+AZ1-022	EASY	2	An accountant is classifying the company's IT spending after its move to the cloud, using the CapEx/OpEx distinction from cloud budgeting. How is spending on cl
+AZ1-023	MEDIUM	2	The head of IT planning at a manufacturer is explaining to the board why traditional datacenter capacity planning is hard. Which pair of outcomes describes the 
+AZ1-024	MEDIUM	3	A nonprofit runs donation drives whose traffic is hard to predict, and its budget is tight. The cloud team lists the benefits of the consumption-based model for
+AZ1-025	HARD	0	A company is closing its aging datacenter and moving entirely to the cloud. Its finance lead must classify each cost as CapEx or OpEx, using the definitions fro
+AZ1-026	EASY	2	A small design agency wants cloud services with no upfront commitment. Its workload is unpredictable, so the team wants to pay only for what it uses, to be able
+AZ1-027	MEDIUM	1	A logistics company runs a shipment-tracking system that uses roughly the same amount of compute around the clock, every day, for the foreseeable future. The cl
+AZ1-028	MEDIUM	3	A film studio runs nightly rendering jobs that can be restarted if they are interrupted, and it keeps a few dev and test environments that tolerate downtime. It
+AZ1-029	HARD	0	A cloud architect is briefing a client that has heard of three ways to pay for compute: committing for a discount, buying unused capacity, and paying for what i
+AZ1-030	MEDIUM	1	An online magazine's traffic spikes unpredictably when stories go viral. The publishing system cannot tolerate interruptions, and the team wants to avoid long-t
+AZ1-031	EASY	2	A junior developer on the team asks what "serverless" actually means in Azure, after hearing the term in a design review. Which statement is accurate?
+AZ1-032	EASY	0	A photo-sharing app wants to generate thumbnails automatically whenever a user uploads a picture to blob storage — with no polling loop and no always-on server.
+AZ1-033	EASY	3	A small product team wants to add a nightly data-cleanup job to its service, but it has no one available to deploy, patch, or maintain servers for it. Which sta
+AZ1-034	HARD	1	A team is choosing between a classic always-on hosting plan and a serverless approach for a web API that mostly sits idle and wakes up for short bursts. Which s
+AZ1-035	MEDIUM	2	An IoT startup needs to capture and transform data from device event streams on the way to storage, reacting to each event as it arrives, without managing any s
+AZ1-036	EASY	1	A regional hospital network is moving its patient scheduling application to Azure. The CIO's top requirement is that the application stays accessible to clinici
+AZ1-037	EASY	3	An engineering consultancy runs its 3D rendering workload on a single Azure virtual machine. Render jobs are taking too long, so the team decides to add more CP
+AZ1-038	MEDIUM	0	A manufacturer's production planning application was not designed to run as multiple parallel instances; its architecture assumes one instance with shared in-pr
+AZ1-039	EASY	2	An online retailer is preparing a 48-hour flash sale. To absorb the surge, the web operations team plans to add several virtual machine instances to the website
+AZ1-040	MEDIUM	0	An education technology platform serves steady traffic most of the year, with extreme spikes during course registration weeks. On-premises, the company had to b
+AZ1-041	HARD	3	A ticketing platform sees demand explode within minutes when popular events go on sale, and collapse just as quickly afterward. Operations wants capacity to fol
+AZ1-042	MEDIUM	1	A logistics company is selecting Azure services for its shipment tracking platform. Before signing off, the legal team wants to review Microsoft's formal commit
+AZ1-043	EASY	2	An insurance company is designing its claims processing platform on Azure. The lead architect summarizes one design goal this way: "If any component fails, the 
+AZ1-044	MEDIUM	0	A multinational utility company runs a grid monitoring API that must keep serving requests even if a catastrophic event, such as a natural disaster, takes an en
+AZ1-045	EASY	1	A video streaming startup is planning its growth and wants playback quality and response times to stay consistent as viewer numbers fluctuate through the day. T
+AZ1-046	MEDIUM	3	A fintech's finance team must submit a quarterly cloud budget. They want to track resource usage in real time, apply data analytics to find spending patterns, a
+AZ1-047	MEDIUM	0	An online learning platform enrolls a wave of new students at the start of each semester. The operations team configures rules so that additional resources depl
+AZ1-048	HARD	2	During a cloud adoption workshop, the IT steering committee of a media company asks a solution architect to confirm several claims they have read about cloud re
+AZ1-049	EASY	1	A nonprofit with a two-person IT team is moving its donor management application to the cloud. The team wants the cloud provider to handle operating system patc
+AZ1-050	MEDIUM	1	A pharmaceutical company's security policy requires its internal team to keep full control of the operating systems, installed software, and patch timing on eve
+AZ1-051	MEDIUM	3	A public sector agency learns that a new regulation requires a revised data retention configuration on every cloud resource it has deployed. The agency needs to
+AZ1-052	MEDIUM	2	An online news publisher is a frequent target of distributed denial-of-service (DDoS) attacks that can overwhelm its on-premises web servers, especially on elec
+AZ1-053	EASY	1	A retail chain's compliance officer wants to know whether any of the company's deployed cloud resources have drifted away from its corporate security baseline, 
+AZ1-054	HARD	0	The IT steering committee of a manufacturing group is reviewing statements about security and governance in the cloud before approving a migration to Azure. Whi
+AZ1-055	EASY	3	A newly hired cloud administrator at a university asks which interfaces are available for day-to-day management of the institution's cloud resources. Teammates 
+AZ1-056	MEDIUM	2	A logistics company's small operations team wants the cloud to watch the health of its resources continuously and, when a resource starts failing, to replace it
+AZ1-057	EASY	0	A food delivery platform's operations lead wants to hear about performance problems as they happen — for example, an automatic notification whenever a configure
+AZ1-058	EASY	0	A nongovernmental organization runs its fundraising platform with a two-person IT team. They provision new environments from preconfigured templates, keep an ey
+AZ1-059	HARD	2	An airline's cloud engineering team is reviewing the two aspects of manageability described in Azure fundamentals training. The team lead asks each engineer to 
+AZ1-060	MEDIUM	3	A health technology company's quality assurance team builds and tears down test environments every day. Engineers currently create each environment by clicking 
+AZ1-061	EASY	2	A home-improvement retailer moves its inventory workloads to Azure on virtual machines. Its own IT staff installs and patches the guest operating systems, defin
+AZ1-062	EASY	0	A junior cloud analyst is writing study notes about the three cloud service models for her team's onboarding guide. She wants one sentence that correctly captur
+AZ1-063	MEDIUM	1	A regional hospital runs its patient-scheduling workloads on Azure virtual machines under the IaaS model. During a compliance review, the auditors want to confi
+AZ1-064	MEDIUM	3	A freight company rehosted its route-planning application from its own datacenter onto Azure virtual machines. The operations director is drafting a memo about 
+AZ1-065	HARD	2	An architecture firm has always bought and housed its own rendering servers, which sit idle between project deadlines. The partners want to stop owning physical
+AZ1-066	EASY	1	An agritech startup is choosing how to host its new field-analytics web application. The option it prefers bundles the operating system, middleware, and develop
+AZ1-067	EASY	3	A smart-home device maker runs its product-portal application in a PaaS environment. A newly hired engineer asks who takes care of operating system and database
+AZ1-068	MEDIUM	0	A streaming-media company builds its internal analytics dashboard on a PaaS platform. The engineering manager is writing role descriptions and wants to state wh
+AZ1-069	MEDIUM	2	A software house is under pressure to shorten delivery time for a new customer portal. Its lead developer notes that on the PaaS platform under evaluation, scal
+AZ1-070	HARD	1	An online marketplace currently hosts its storefront on Azure virtual machines, and its own staff patches the operating systems and maintains the runtime. The C
+AZ1-071	EASY	0	A dental clinic with no technical staff needs appointment-scheduling and patient-communication software. A vendor offers a complete application delivered over t
+AZ1-072	EASY	2	A small law office must deploy a client-document management tool quickly. It has no IT staff, and the partners have agreed to work with the vendor's standard fe
+AZ1-073	MEDIUM	1	A university has adopted a SaaS collaboration platform for its administrative departments. The IT director is updating the operating handbook and wants to list 
+AZ1-074	MEDIUM	3	A hotel group is evaluating a SaaS property-management application. During the demo, the operations manager notices that the product supports only limited confi
+AZ1-075	HARD	0	A municipal government is rolling out a SaaS records-management application across its departments. The records director asks how the application will be kept c
+AZ1-076	EASY	3	A furniture manufacturer wants to move its legacy production-planning application to Azure. The application must run unchanged, on the same operating-system con
+AZ1-077	MEDIUM	3	A fintech startup is building a new public web application. Its four-person engineering team wants a complete development environment in the cloud: they deploy 
+AZ1-078	EASY	2	A 40-person insurance brokerage wants corporate email, calendars, and file sharing for everyone. It has no developers and no infrastructure team; the office man
+AZ1-079	MEDIUM	0	A game studio needs short-lived test environments that exactly replicate an established production configuration: a specific operating-system image, custom driv
+AZ1-080	MEDIUM	3	A utility company's data team wants to analyze and mine its operational data, find patterns, and predict demand to improve planning. Rather than building and ma
+AZ1-081	MEDIUM	1	A bank must host a proprietary risk engine whose vendor certifies it for exactly one legacy operating-system version, tuned with particular kernel settings. The
+AZ1-082	MEDIUM	2	A news media company is launching a mobile app whose back end is a set of REST APIs. The engineering team wants to spend its time on the API code while the prov
+AZ1-083	MEDIUM	0	A construction firm's finance department wants expense tracking and invoice approval for its site managers. Its processes follow standard accounting practices, 
+AZ1-084	HARD	1	A real-estate network has run its customer-relationship management (CRM) suite in its own datacenter for years; its small IT team spends much of each month patc
+AZ1-085	HARD	1	A grocery chain's cloud architect presents a migration plan: rehost the legacy warehouse system unchanged, with the team keeping control of its operating system
+AZ2-001	EASY	2	A health-tech startup is preparing its first production deployment on Azure. During planning, the team lead asks what Azure means when documentation says that r
+AZ2-002	EASY	0	An online retailer runs its storefront in a single Azure region. The solutions architect is designing disaster recovery and wants to base it on the second regio
+AZ2-003	MEDIUM	1	A fintech's transaction platform runs in an Azure region that is paired. During an onboarding session, a new compliance officer asks what Microsoft's region-pai
+AZ2-004	MEDIUM	3	A defense contractor delivers systems that process US federal government data. The contract requires an Azure environment that is physically and logically isola
+AZ2-005	MEDIUM	0	A European media company is expanding its streaming service into mainland China. Its legal team reports that Azure services in China are delivered through a clo
+AZ2-006	HARD	2	A logistics SaaS provider is designing a new deployment and selects a smaller Azure region close to its customers. While validating the design, the team finds t
+AZ2-007	EASY	1	During onboarding at a university's IT department, a new cloud engineer joins the team's weekly Azure study group. In the first session, she is asked to define 
+AZ2-008	MEDIUM	0	An e-commerce company's checkout API runs in one Azure region. Engineering must keep checkout available if a single datacenter in that region fails, and all com
+AZ2-009	MEDIUM	3	A solutions architect at an energy utility is finalizing a design for a region that supports availability zones and wants to confirm what Azure provides in such
+AZ2-010	HARD	1	After a storm briefly disrupted one Azure region, an insurance company's review board asks its cloud team to explain the difference between availability zones a
+AZ2-011	EASY	0	An intern at a logistics company has just started learning about cloud infrastructure. At the end of her first week, she asks her mentor what an Azure datacente
+AZ2-012	MEDIUM	2	A junior administrator at a marketing agency is about to deploy the company's first virtual machine and asks how to choose which specific Azure datacenter will 
+AZ2-013	MEDIUM	1	A video-streaming startup is launching in South America, with nearly all viewers in Brazil. The team wants to minimize the network distance between its viewers 
+AZ2-014	EASY	3	During onboarding at a manufacturing company, new engineers take a short Azure terminology quiz as part of their induction. One of the quiz questions asks what 
+AZ2-015	MEDIUM	0	A junior administrator at a hospital trust is documenting how resource groups work. Her draft says that a virtual machine can belong to two resource groups at o
+AZ2-016	MEDIUM	2	A software company reorganizes its teams, and the resources of a transferred project — virtual machines, storage accounts, and a database — must now live in a d
+AZ2-017	HARD	1	A payments team at a fintech wants to keep a virtual machine in West Europe and a storage account in North Europe inside one resource group named rg-payments, s
+AZ2-018	EASY	0	The CFO of a mid-sized energy company is new to Azure and asks what the company actually receives when it signs up for an Azure subscription. Which explanation 
+AZ2-019	MEDIUM	2	A SaaS company wants its production platform and its experimental sandbox to be billed as completely separate units, each with its own invoice and its own acces
+AZ2-020	MEDIUM	3	An administrator at a manufacturing company moves a virtual machine from the resource group rg-prototype to the resource group rg-factory; both groups are in th
+AZ2-021	EASY	1	An energy conglomerate has grown to dozens of Azure subscriptions across its business units. The cloud director asks what Azure management groups would give the
+AZ2-022	MEDIUM	3	A bank's security team must enforce an Azure Policy that restricts which regions can be used for new resources. All of the bank's subscriptions are organized un
+AZ2-023	HARD	2	An enterprise architect at a multinational retailer is reviewing a colleague's notes about management groups before the company's governance design is finalized
+AZ2-024	MEDIUM	3	On the first day at a telecom company, a new cloud engineer sketches Azure's management hierarchy on a whiteboard but is unsure about the order of the levels. W
+AZ2-025	HARD	0	An auditor at a pharmaceutical company is reviewing a storage account. The company assigned the compliance team's Reader role at the management group level and 
+AZ2-026	EASY	2	A logistics company is choosing a compute option for a new shipment-tracking service. The service is packaged as a self-contained unit that bundles the applicat
+AZ2-027	MEDIUM	1	An insurance company receives claim documents at unpredictable times throughout the day. Each new document must be validated and converted a few seconds after i
+AZ2-028	HARD	0	A manufacturer is moving a simulation application to Azure. The application is certified for a specific Linux distribution, and its installation procedure requi
+AZ2-029	MEDIUM	3	A gaming studio is reviewing which of its workloads would fit Azure Functions, the serverless compute option. Three of the following workloads are good candidat
+AZ2-030	HARD	1	A cloud architecture intern is writing a one-page summary of the differences between virtual machines, containers, and Azure Functions for the team wiki. Which 
+AZ2-031	EASY	2	A retailer wants to move an existing Windows server application to Azure with minimal changes. The application is installed directly on the server's Windows ope
+AZ2-032	EASY	0	A training provider is comparing Azure compute services for a student enrollment portal. The portal needs a service that creates and manages a group of load bal
+AZ2-033	MEDIUM	2	A media streaming startup runs its website front end on Azure virtual machines. Traffic is low overnight, spikes sharply during evening hours and live events, a
+AZ2-034	MEDIUM	1	A regional bank runs a multi-tier application on several virtual machines in a region that does not support availability zones. Operations wants to ensure that 
+AZ2-035	HARD	3	An administrator is documenting how availability sets protect the company's virtual machines within a datacenter. When describing fault domains in the document,
+AZ2-036	EASY	2	A nonprofit's staff work from offices, home, and field sites on many different devices. The organization wants to give each user a full Windows desktop with the
+AZ2-037	HARD	0	A junior architect is writing runbook notes about availability sets for the operations team. Which statement belongs in the runbook?
+AZ2-038	MEDIUM	2	A hospital's clinical staff use shared workstations and need only two line-of-business applications during their shifts; they do not need a full remote desktop.
+AZ2-039	EASY	3	A team creating its first Azure virtual machine is deciding how to handle the machine's storage. They want disk volumes where the team only specifies the disk t
+AZ2-040	MEDIUM	1	An analytics company is sizing a virtual machine for an in-memory database that keeps large working sets in RAM and runs memory-intensive analytics queries. Acc
+AZ2-041	MEDIUM	0	A software company wants every new virtual machine in its test lab to start from the same baseline: a specific Windows Server version plus the company's monitor
+AZ2-042	HARD	3	A network engineer is reviewing the supporting resources that Azure creates alongside a new virtual machine so that the machine can communicate on a virtual net
+AZ2-043	EASY	1	A startup is building a customer-facing web application with a RESTful API backend. The developers want to write code in the programming language of their choic
+AZ2-044	MEDIUM	0	An enterprise hosts a third-party Windows application on premises. The vendor's support contract requires full remote access to the server, including permission
+AZ2-045	MEDIUM	3	A data engineering team has packaged a one-off data transformation job as a single container image. They need to run it in Azure for a few hours tonight, withou
+AZ2-046	HARD	1	A software company runs a microservices platform made of dozens of containerized services. Deployments require coordinated rollouts, automatic restarts of unhea
+AZ2-047	HARD	2	A retailer's platform team is decomposing a monolith into containerized microservices. The team does not want to manage virtual machines, does not want to learn
+AZ2-048	MEDIUM	0	A fintech is launching a public web portal with a REST API backend. The code is written in Java, the team stores its source in GitHub, and they want automated d
+AZ2-049	EASY	1	A company is planning its first Azure deployment, which will include several virtual machines and a managed database. The cloud architect tells the team they mu
+AZ2-050	MEDIUM	3	A retailer has created an Azure Virtual Network with a defined IP address space for its online store. The team wants the web servers and the database servers in
+AZ2-051	MEDIUM	0	An organization's Azure environment has two virtual networks: one for production workloads and one for shared services, deployed in different regions. Resources
+AZ2-052	HARD	2	A multinational company has virtual networks in two Azure regions. Applications in each region must exchange data, and the security team requires that this traf
+AZ2-053	MEDIUM	2	A company registers a new public domain name for a product launch. The team wants to host the domain's DNS zone on Azure's global network of name servers and ma
+AZ2-054	HARD	0	A company wants its virtual machines to be reachable by custom names like payments.contoso.internal that resolve only inside its Azure virtual network and canno
+AZ2-055	MEDIUM	3	A manufacturer must connect its on-premises datacenter network to the company's Azure virtual network. The link must be established quickly and cost-effectively
+AZ2-056	MEDIUM	1	A consulting firm's analysts work from coworking spaces, client sites, and home, each using a company laptop. Each analyst needs secure access to resources insi
+AZ2-057	HARD	0	A bank's trading platform in Azure must exchange market data with the bank's on-premises systems. The compliance team mandates that the connection never travers
+AZ2-058	MEDIUM	2	A retailer's application runs in an Azure virtual network and stores product images in an Azure storage account. The security team requires the application to r
+AZ2-059	MEDIUM	3	A SaaS provider is onboarding new engineers and needs to explain how Azure virtual networking classifies endpoints. Which statement describes a public endpoint?
+AZ2-060	MEDIUM	1	A software company publishes a partner-facing REST API on an Azure service. External partners consume the API from their own systems over the internet, and none
+AZ2-061	EASY	0	A streaming service stores promotional artwork and episode video files that are delivered directly to viewers' browsers over HTTPS. The files are unstructured, 
+AZ2-062	MEDIUM	2	A law firm is moving its document-management application to Azure. The application expects a shared folder that several Windows virtual machines can mount simul
+AZ2-063	MEDIUM	1	An online retailer is decoupling its checkout flow. The web front end must record each incoming order so that a background worker can process it later; if the w
+AZ2-064	HARD	3	A startup is designing a consumer app that must be available worldwide. Beyond schemaless data, the team requires a fully managed NoSQL database with turnkey gl
+AZ2-065	EASY	2	A manufacturing company runs its inventory database on an Azure virtual machine. The database needs persistent, block-level storage volumes for its operating sy
+AZ2-066	MEDIUM	1	A web team already operates a standard general-purpose v2 storage account. For a new feature, they need to persist flexible, schemaless user-preference records 
+AZ2-067	EASY	0	A news website stores the images displayed in its articles. Readers load these images continuously throughout the day, and every page view triggers reads. Which
+AZ2-068	MEDIUM	3	A utility company must retain meter-reading exports for 90 days. During that period the exports are read only rarely, mainly to investigate billing disputes, bu
+AZ2-069	MEDIUM	1	A hospital must retain seven years of audit records for compliance purposes. The records are almost never opened; when an audit occurs, the compliance team can 
+AZ2-070	MEDIUM	0	An analyst sees that the cool tier has a lower storage price than hot and proposes moving the company's product catalog images — which website visitors view con
+AZ2-071	HARD	2	An insurance company stores policy documents in blob storage. Customers download their documents heavily during the first month after issue; after that, documen
+AZ2-072	EASY	0	A small design studio is creating its first storage account and wants the lowest-cost redundancy option. The founders accept that a disaster affecting an entire
+AZ2-073	MEDIUM	1	A financial services firm runs its storage in an Azure region that supports availability zones. Regulators require that data remains available for both reads an
+AZ2-074	MEDIUM	2	A logistics company stores shipment records in a storage account configured with geo-redundant storage (GRS). During an audit, the compliance officer asks exact
+AZ2-075	HARD	3	A healthcare platform runs in an availability-zone-enabled region. The platform must tolerate the failure of an individual availability zone and also survive a 
+AZ2-076	HARD	1	A travel company's storage account uses geo-redundant storage (GRS). The architecture team wants to serve part of the application's read traffic from the copy i
+AZ2-077	EASY	0	During onboarding, a new cloud engineer asks the storage team to explain, in one sentence, what an Azure storage account fundamentally provides within the platf
+AZ2-078	MEDIUM	2	A software company needs a single storage account for a mixed workload: blobs for user uploads, file shares for a legacy tool, queues for inter-component messag
+AZ2-079	MEDIUM	3	An IoT platform writes millions of small sensor readings every hour into block blobs. The ingestion pipeline requires consistently low storage latency, and the 
+AZ2-080	MEDIUM	0	A media company's rendering application reads source footage from an Azure file share and needs SSD-backed performance to keep render jobs fast. The team also w
+AZ2-081	HARD	1	A furniture retailer has run a legacy Blob storage account for years. A new project now needs to add an Azure file share and a queue in the same account, reusin
+AZ2-082	EASY	2	An operations team wants to automate a nightly upload of backup files from an on-premises Linux server to Azure Blob Storage. The job must run unattended as the
+AZ2-083	EASY	0	A marketing analyst regularly uploads campaign artwork, downloads performance reports, and reorganizes folders across several of the company's storage accounts.
+AZ2-084	MEDIUM	3	A manufacturer has branch offices on several continents. The IT team wants to centralize the company's file shares in Azure while keeping fast local access at e
+AZ2-085	MEDIUM	1	A logistics company acquires a smaller firm that keeps its product catalog — thousands of images and PDFs — in Amazon S3. As part of the consolidation, the clou
+AZ2-086	HARD	0	During a design review for a hybrid file solution, the team makes four statements about the tools that move files and data in Azure. Which statement is accurate
+AZ2-087	EASY	2	A public sector agency plans to move its on-premises datacenter — servers, databases, and web applications — to Azure. Leadership wants a central place to asses
+AZ2-088	MEDIUM	3	A film studio must move tens of terabytes of raw footage into Azure before an archive deadline. The studio's internet connection is too slow to transfer the dat
+AZ2-089	MEDIUM	3	An IT administrator at a research institute has just taken delivery of an Azure Data Box device at the loading dock. Which sequence describes how the import pro
+AZ2-090	MEDIUM	2	During a datacenter exit, a grocery chain must accomplish two things: evaluate which on-premises servers are ready for Azure and migrate them with minimal downt
+AZ2-091	EASY	2	A regional hospital network is moving its email, collaboration tools, and several custom web apps to the cloud. The IT director wants a single cloud service tha
+AZ2-092	MEDIUM	1	An industrial-equipment manufacturer runs a legacy inventory application that authenticates users with NTLM and needs its servers to be domain-joined. The compa
+AZ2-093	MEDIUM	3	A grocery chain uses a Microsoft Entra Domain Services managed domain so that a legacy warehouse application can keep using Kerberos and domain join. A newly hi
+AZ2-094	HARD	0	During onboarding at a public-sector agency, a junior cloud architect is asked to summarize, in one sentence, how Microsoft Entra ID and Microsoft Entra Domain 
+AZ2-095	EASY	2	At a logistics company, warehouse staff must sign in separately to the route-planning app, the inventory app, and Microsoft 365, and the help desk handles a con
+AZ2-096	MEDIUM	0	A payments company suffered a phishing incident in which attackers captured employees' passwords. The security team now requires each sign-in to demand more tha
+AZ2-097	MEDIUM	3	A hotel chain's IT team spends too much effort on password resets, and auditors flag password reuse across properties. The team decides to remove passwords from
+AZ2-098	HARD	1	A junior security analyst at a media company is writing study notes about the authentication methods available in Microsoft Entra ID. The notes must state preci
+AZ2-099	MEDIUM	2	A utility company requires multifactor authentication for remote access to its control-room dashboard. A dispatcher signs in with her password and then approves
+AZ2-100	MEDIUM	1	A university runs a joint research program with an engineering firm. About 40 of the firm's engineers need access to a few of the university's web apps for the 
+AZ2-101	MEDIUM	0	An environmental nonprofit invites staff from a partner agency to collaborate on its Microsoft 365 environment. The invited users have just redeemed their invit
+AZ2-102	HARD	2	An automotive supplier onboarding a new parts partner asks its security lead to explain, for the kickoff deck, how external identities work in Azure. Both compa
+AZ2-103	MEDIUM	3	A streaming service wants a consistent rule for its Microsoft 365 apps: employees signing in from the office or other known locations proceed normally, but a si
+AZ2-104	MEDIUM	3	An identity architect at a software company is sketching how Microsoft Entra Conditional Access works for a design review. The sketch has two boxes: one for the
+AZ2-105	HARD	2	During a design review at an e-commerce company, a newly hired architect keeps mixing up Conditional Access with Azure RBAC and Azure Policy. Which statement wo
+AZ2-106	EASY	0	A SaaS company with several engineering teams must control access to its Azure resources. Each team should receive only the level of access it needs to complete
+AZ2-107	MEDIUM	3	A game studio's deployment team must be able to create and manage all of the Azure resources in the studio's "game-builds" resource group. The studio's security
+AZ2-108	MEDIUM	1	External auditors at a pharmaceutical company need to view every resource in one subscription — including resources in resource groups that will be created mont
+AZ2-109	MEDIUM	2	A platform engineer is mentoring a newly hired Azure administrator on how role-based access control works. The administrator asks what a role assignment is made
+AZ2-110	EASY	0	An insurance carrier's security office publishes a new access policy: always authenticate and authorize every request based on all available data, grant only ju
+AZ2-111	HARD	1	A field-services company lets technicians reach work apps from their own phones and home networks. Under the company's new Zero Trust policy, how is a sign-in l
+AZ2-112	EASY	1	A city government's IT architect presents the security design for a new records system: protections are stacked in multiple layers with the records at the cente
+AZ2-113	MEDIUM	2	While mapping controls for its defense-in-depth strategy, an airline's security team reaches the layer that directly protects customer records and operational d
+AZ2-114	EASY	0	A utility company runs workloads in Azure, in other clouds, and on on-premises servers. Its security team wants one tool that monitors the whole estate, continu
+AZ2-115	MEDIUM	3	The new CIO of a regional bank keeps mixing up the bank's security tools and asks the security lead for one accurate sentence about Microsoft Defender for Cloud
+AZ3-001	EASY	2	A software company's monthly Azure bill came in well above forecast. During a cost-review meeting, the team evaluates four candidate actions, and the facts stat
+AZ3-002	EASY	0	An online gift retailer adds extra virtual machines and storage for the December shopping season and removes them in January. December's Azure bill is far highe
+AZ3-003	EASY	1	A photography platform runs two storage accounts in the same Azure region, each holding a similar volume of photos. One account keeps archives on a cool access 
+AZ3-004	MEDIUM	2	A video production company is planning a new rendering service and compares identical virtual machine configurations in two Azure regions using Microsoft's esti
+AZ3-005	MEDIUM	3	An IT services team decommissioned six virtual machines when a client project ended last quarter, but the following Azure invoices barely decreased. The virtual
+AZ3-006	HARD	1	A network engineer at a logistics company is reviewing the data-transfer section of the Azure invoice. Some inbound transfers show no charge, while outbound tra
+AZ3-007	MEDIUM	0	A manufacturer's production database and its reporting virtual machines run continuously, around the clock, with a stable and predictable workload profile. Fina
+AZ3-008	HARD	3	An event ticketing platform expects a major sales surge. The engineers debate two ways to prepare: scale out by adding identical virtual machine instances, or s
+AZ3-009	EASY	2	A startup is planning its first Azure solution: a web application with a managed database and object storage. Leadership wants a realistic estimate of the month
+AZ3-010	EASY	0	A junior engineer at a logistics software firm is asked to build an estimate for a planned deployment in the Azure pricing calculator. She hesitates, worried th
+AZ3-011	MEDIUM	3	A streaming media company is designing a new customer portal. Before deploying anything, the architects want to compare the estimated monthly cost of the planne
+AZ3-012	HARD	1	A conglomerate's CFO asks the IT team to use Microsoft's Total Cost of Ownership (TCO) calculator to build the business case for moving workloads to Azure, foll
+AZ3-013	EASY	0	A healthcare group's Azure spend has grown quickly across several subscriptions. The new finance director wants one place to analyze where the money goes, recei
+AZ3-014	EASY	2	A fintech's operations analyst must investigate last month's Azure bill: which services drove the costs, how they accumulated over the month, and whether spendi
+AZ3-015	MEDIUM	3	A game studio's nonproduction subscription keeps burning through its monthly allowance without anyone noticing until the invoice arrives. The studio wants spend
+AZ3-016	MEDIUM	0	The research computing lead at a university wants an email sent to the lab's shared mailbox as soon as monthly spending on a production resource group reaches 8
+AZ3-017	MEDIUM	1	An automotive supplier with an Enterprise Agreement funds its Azure usage with Azure Prepayment, previously called monetary commitment. The billing administrato
+AZ3-018	MEDIUM	2	After a busy quarter, a marketing agency's Azure bill is far above expectations. The environment includes many development and test virtual machines that are su
+AZ3-019	MEDIUM	3	A holding company runs workloads for two independent business units in a single Azure subscription. Each unit must now receive its own Azure invoice, and each u
+AZ3-020	EASY	1	A fast-growing SaaS provider wants a lightweight way to attach structured information — such as environment, owner, and cost center — to its Azure resources so 
+AZ3-021	MEDIUM	0	An engineering consultancy keeps all of its Azure resources in one subscription, with resource groups organized by application. Finance now needs monthly cost r
+AZ3-022	MEDIUM	3	A streaming provider's platform team runs a maintenance pipeline that must execute a task against every resource belonging to one specific workload. The resourc
+AZ3-023	MEDIUM	2	An insurer's cloud governance team publishes a tagging standard: every new resource must carry an owner tag, and tags that are accidentally removed should be re
+AZ3-024	MEDIUM	1	A retail chain's architect applies the tag CostCenter=100 to a resource group that contains several virtual machines. A later inventory report that lists each v
+AZ3-025	HARD	0	A pharmaceutical company on an Enterprise Agreement enables the tag inheritance setting in Microsoft Cost Management. Its resource groups carry cost center tags
+AZ3-026	EASY	0	A national hospital network keeps clinical and operational data in several places: an on-premises SQL Server instance, Azure data services, and a third-party so
+AZ3-027	EASY	0	Analysts at an online retailer waste hours every week asking engineers where datasets live and what each column means. The data team wants a governed, searchabl
+AZ3-028	MEDIUM	2	An external auditor is questioning the figures in a logistics company's quarterly fuel-cost report and asks exactly how each number was derived. The data platfo
+AZ3-029	MEDIUM	3	A compliance officer at an insurance group must build an inventory of where sensitive information — such as policyholders' identification numbers and health det
+AZ3-030	MEDIUM	1	A streaming media company is defining its governance program. The platform team must enforce rules on Azure resources, such as deploying only to approved region
+AZ3-031	HARD	2	During onboarding week at an energy utility, a newly hired cloud engineer is asked to summarize Microsoft Purview for the rest of the team. Several teammates cu
+AZ3-032	EASY	0	The IT operations lead at a university must ensure that resources across several Azure subscriptions follow institutional standards — for example, only approved
+AZ3-033	MEDIUM	2	A fintech's platform team has drafted a policy that requires every storage account to carry an Owner tag. Before enforcing the rule, they want to track how it w
+AZ3-034	MEDIUM	1	The security team at a manufacturing company must guarantee that no new virtual machine can be created outside the company's approved Azure regions — an attempt
+AZ3-035	MEDIUM	3	A cloud architect at a public-sector agency needs to roll out a security baseline made of many related policy definitions — allowed locations, required tags, an
+AZ3-036	MEDIUM	0	A holding company organizes its Azure environment under a management group that contains multiple subscriptions. Governance staff want a single policy assignmen
+AZ3-037	MEDIUM	3	An administrator at a food delivery company has assigned a policy that requires an Environment tag on resources. The director now asks for a list of the resourc
+AZ3-038	MEDIUM	1	A software company requires every new Azure resource to carry a CostCenter tag. Deployments that omit the tag must not be rejected — instead, Azure should add t
+AZ3-039	MEDIUM	1	A junior cloud administrator at a startup asks a senior engineer to clarify the difference between Azure RBAC and Azure Policy. The senior engineer explains tha
+AZ3-040	HARD	2	A subscription-level policy assignment blocks the creation of networking resources everywhere in a research organization's subscription. A new dedicated resourc
+AZ3-041	HARD	3	An airline's subscription contains hundreds of virtual machines, several of which use unapproved VM sizes. An administrator assigns a new Audit-effect policy th
+AZ3-042	EASY	1	During a cleanup sprint at a utilities company, an operator deleted the wrong resource group and caused a production outage. Management asks for the simplest bu
+AZ3-043	EASY	0	A pharmacy chain's production database server has a Delete (CanNotDelete) lock applied. An authorized database engineer needs to apply a routine configuration u
+AZ3-044	MEDIUM	2	An external audit at a pension fund requires that, for the next 60 days, nobody may change or delete the resources used by the claims system in any way, though 
+AZ3-045	MEDIUM	0	A media company wants to protect all resources in its production subscription from accidental deletion with a single lock, while day-to-day configuration change
+AZ3-046	MEDIUM	3	At a mining company, a subscription Owner with full Azure RBAC permissions tries to delete a storage account that has a CanNotDelete lock, and the operation fai
+AZ3-047	MEDIUM	1	To reduce accidental deletions, a team lead at an e-commerce company proposes applying a tag named Lock with the value DoNotDelete to every production resource,
+AZ3-048	HARD	2	An administrator at a bank applies a ReadOnly lock to a production storage account. An automation tool that previously listed the account's access keys to conne
+AZ3-049	HARD	0	A database administrator applies a ReadOnly lock to the logical server that hosts a critical Azure SQL database and tells management the data is now protected a
+AZ3-050	HARD	3	A payment-processing company defines two requirements: (1) the production payments database must be protected against accidental deletion by anyone — including 
+AZ3-051	EASY	2	A regional bank has opened its first Azure subscription. The IT operations team includes administrators with no scripting background who prefer working visually
+AZ3-052	EASY	0	A data analyst at an online education company starts every workday in the Azure portal by opening the same handful of resources: a web app, its database, and tw
+AZ3-053	MEDIUM	1	A small design agency is deciding which Azure management tool fits each kind of task. The agency owner is comfortable with visual tools and wants to understand 
+AZ3-054	EASY	3	During onboarding at a logistics company, a new operations engineer asks how the team runs Azure commands without installing anything on their laptops. Which st
+AZ3-055	MEDIUM	1	The platform engineers at a video streaming startup are fluent in Bash scripting on Linux but have never used PowerShell. They want a command-line tool they can
+AZ3-056	MEDIUM	0	An insurance company is writing an internal quick-reference guide about its Azure management tools. The documentation owner asks for one accurate sentence about
+AZ3-057	MEDIUM	2	An auditor at a public-sector agency occasionally runs a few Azure PowerShell cmdlets from different shared workstations. She wants a shell that is already sign
+AZ3-058	MEDIUM	3	An energy company is preparing an internal comparison of Azure command-line tools, and the author needs an accurate definition of the Azure CLI. Which statement
+AZ3-059	HARD	0	Two engineers at a manufacturing firm are comparing Azure command-line tools before the team standardizes on one. One argues that the tools serve different work
+AZ3-060	EASY	1	A pharmaceutical distributor runs workloads in its own datacenter, in Azure, and in another public cloud. Management wants one consistent way to govern, invento
+AZ3-061	MEDIUM	0	A grocery retailer will start using Azure Arc for the Windows and Linux servers in its regional datacenters. A junior engineer asks how those machines, which st
+AZ3-062	MEDIUM	3	A hospital network wants to keep several database and container workloads on-premises but manage them with Azure tools. The architecture team is checking which 
+AZ3-063	HARD	2	A mining company must keep its warehouse management system on on-premises servers for three more years, but security leadership wants those servers to follow th
+AZ3-064	EASY	1	A software vendor's engineering director wants infrastructure changes handled the way application code is: reviewed, versioned, and reproducible by anyone on th
+AZ3-065	MEDIUM	3	At a food delivery platform, each test environment was configured manually by different engineers. The environments have drifted apart, deployments fail unpredi
+AZ3-066	MEDIUM	0	A game studio redeploys its staging infrastructure frequently. The lead engineer wants the assurance that applying the same deployment definition to an environm
+AZ3-067	HARD	2	An e-commerce company provisions its Azure environment with a long Bash script: create the network, then the virtual machines, then the database, in a strict se
+AZ3-068	EASY	1	A nonprofit's IT team is studying how Azure handles resource operations behind the scenes. A volunteer with cloud experience asks for a plain definition of Azur
+AZ3-069	EASY	0	Developers at a news organization noticed that a capability available in the Azure portal is also available in the Azure CLI, Azure PowerShell, and the REST API
+AZ3-070	MEDIUM	2	While reviewing a deployment definition at a public transit authority, an intern sees the entry "type": "Microsoft.Storage/storageAccounts" and asks what the Mi
+AZ3-071	MEDIUM	3	A real estate firm's platform team is comparing deployment options for a new Azure environment. A new engineer asks what an ARM template actually is. Which stat
+AZ3-072	MEDIUM	1	A telecom operator's deployment definition must work unchanged for development, staging, and production, which differ only in resource names, sizes, and locatio
+AZ3-073	MEDIUM	2	An environmental monitoring company's Azure environment has 15 resources, several of which depend on others being created first. The team does not want to calcu
+AZ3-074	HARD	0	A hotel chain's platform group is deciding how to write its Azure infrastructure definitions. A consultant recommended Bicep, and the CTO wants to confirm exact
+AZ3-075	HARD	3	A sports league's digital platform team has had deployments fail halfway, leaving partially created environments that engineers must clean up by hand. The team 
+AZ3-076	EASY	2	A video streaming company runs its platform on Azure. The operations lead wants the team to follow Azure best practices without hiring external consultants: she
+AZ3-077	EASY	2	A logistics company's cloud engineer is reviewing the Azure Advisor dashboard. One recommendation flags a configuration risk in how several production virtual m
+AZ3-078	MEDIUM	0	The CFO of a fintech startup challenges the platform team to cut the company's Azure bill. The team already uses Microsoft Cost Management: cost analysis shows 
+AZ3-079	MEDIUM	3	An IT administrator at a university is triaging Azure Advisor recommendations with her team. One recommendation about a storage account is valid, but the projec
+AZ3-080	HARD	1	During an architecture review at a utility company, a junior architect reads out four statements about Azure Advisor to the review board. Which statement is acc
+AZ3-081	EASY	0	An online retailer runs its storefront on several Azure services. The operations manager wants a portal experience that shows active outages, upcoming planned m
+AZ3-082	EASY	3	News outlets are reporting a widespread Azure incident. The IT director of a public-sector agency wants to check the overall condition of the Azure platform its
+AZ3-083	MEDIUM	1	A hospital's patient portal depends on Azure services that occasionally need platform maintenance. The infrastructure team wants advance notice of upcoming main
+AZ3-084	MEDIUM	2	A CRM startup's services are used by customers around the clock. The on-call engineer cannot watch the Azure portal all day and wants to be notified automatical
+AZ3-085	MEDIUM	0	At a manufacturing plant, the monitoring application on an Azure virtual machine suddenly becomes unreachable. Before opening a support ticket, the engineer wan
+AZ3-086	HARD	2	A cloud architect at an international NGO is onboarding new administrators. As part of the training material, she must document the three components of Azure Se
+AZ3-087	EASY	3	An insurance company is defining its monitoring strategy. The platform team wants a single service that gathers both metrics and logs from the company's Azure r
+AZ3-088	MEDIUM	0	During a monitoring design session at a game studio, two engineers are documenting how Azure Monitor organizes the data it collects. One of them asks for the pr
+AZ3-089	EASY	0	A security analyst at an e-commerce company needs to explore the log data that Azure Monitor has collected from the company's Azure resources — starting with a 
+AZ3-090	EASY	2	A junior engineer at an energy company has just been granted access to the Log Analytics tool in the Azure portal. Before writing her first log query, she asks 
+AZ3-091	MEDIUM	3	Investigators at a bank are reconstructing a security incident. They need a single experience where they can write queries that combine log data collected from 
+AZ3-092	MEDIUM	1	A retail chain has grown by acquisition, and each business unit has its own Azure subscription. Analysts currently repeat every query in each subscription's por
+AZ3-093	HARD	1	A travel booking platform is designing its monitoring pipeline. The lead engineer sketches the flow: telemetry is gathered from applications, operating systems,
+AZ3-094	EASY	0	A marketing analytics firm runs a virtual machine that processes nightly data loads. Operations wants an automatic email to the team's mailbox whenever the VM's
+AZ3-095	MEDIUM	3	A media company operates dozens of alert rules across its Azure environment. Whenever any alert fires, the same response must happen: two on-call engineers rece
+AZ3-096	HARD	1	A video platform's reliability team has learned that a specific database connection error message appearing across the logs of several backend services is an ea
+AZ3-097	MEDIUM	2	An airline's booking website becomes slow during fare promotions. The web team wants to understand the application from the users' perspective: request rates, r
+AZ3-098	MEDIUM	0	A government services portal must stay reachable around the clock, but almost nobody uses it at night. The operations team wants to know promptly if the public 
+AZ3-099	MEDIUM	3	A healthcare provider runs its appointment application on Azure App Service. The development team wants Application Insights telemetry — requests, dependencies,
+AZ3-100	MEDIUM	1	The licensing manager at a manufacturing company is reviewing monitoring expenses. The platform team already uses Azure Monitor to collect metrics and logs from

@@ -1,7 +1,11 @@
-# ALLOWLIST DE URLS VERIFICADAS — Quality Gate do Comitê DBDEA
+# ALLOWLIST DE URLS VERIFICADAS — Quality Gate do banco de questões (todas as certificações)
 # Política (Security Engineer): só adicione URL após verificação on-line (HTTP 200 + leitura de conteúdo)
 # e registro no log de verificação. URLs do banco de questões DEVEM vir daqui (types.ts: 'verified list').
 # URL	Título exemplo	Fonte
+https://azure.microsoft.com/en-us/pricing/calculator/	Azure Pricing Calculator — Microsoft Azure	bank
+https://azure.microsoft.com/en-us/pricing/purchase-options/pay-as-you-go/	Pay as you go — Microsoft Azure	bank
+https://azure.microsoft.com/en-us/resources/cloud-computing-dictionary/what-are-iaas-paas-and-saas	What are IaaS, PaaS, and SaaS? — Microsoft Azure	bank
+https://azure.microsoft.com/en-us/resources/cloud-computing-dictionary/what-is-elastic-computing	What is elasticity in cloud computing? — Microsoft Azure	bank
 https://docs.databricks.com/aws/en/admin/system-tables	System tables reference — Databricks Docs	bank
 https://docs.databricks.com/aws/en/admin/system-tables/audit-logs	Audit log system table reference — Databricks Docs	bank
 https://docs.databricks.com/aws/en/archive/connectors/jdbc	Query databases using JDBC — Databricks Docs	bank
@@ -78,3 +82,113 @@ https://docs.databricks.com/aws/en/tables/constraints	Table constraints — Data
 https://docs.databricks.com/aws/en/tables/convert-to-managed	Convert external or foreign Delta Lake tables to Unity Catalog managed tables — Databricks Docs	bank
 https://docs.databricks.com/aws/en/tables/external	Work with external tables — Databricks Docs	bank
 https://docs.databricks.com/aws/en/tables/features/change-data-feed	Use change data feed — Databricks Docs	bank
+https://learn.microsoft.com/en-us/azure/advisor/advisor-cost-recommendations	Optimize virtual machine (VM) or virtual machine scale set (VMSS) spend by resizing or shutting down underutilized instances — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/advisor/advisor-overview	Introduction to Azure Advisor — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/aks/intro-kubernetes	What is Azure Kubernetes Service (AKS)? — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/app-service/overview	App Service overview — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/azure-arc/overview	Azure Arc overview — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/azure-functions/functions-overview	Azure Functions overview — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/azure-government/documentation-government-welcome	What is Azure Government? — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/azure-monitor/alerts/alerts-overview	Overview of Azure Monitor alerts — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/azure-monitor/app/app-insights-overview	Application Insights OpenTelemetry observability overview — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/azure-monitor/app/availability	Application Insights availability tests — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/azure-monitor/fundamentals/data-platform	Azure Monitor data platform — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/azure-monitor/fundamentals/overview	Azure Monitor overview — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/azure-monitor/logs/log-analytics-overview	Overview of Log Analytics in Azure Monitor — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/azure-monitor/logs/log-analytics-workspace-overview	Log Analytics workspace overview — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/azure-portal/azure-portal-overview	What is the Azure portal? — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/lock-resources	Lock your Azure resources to protect your infrastructure — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/move-resource-group-and-subscription	Move Azure resources to a new resource group or subscription — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/overview	What is Azure Resource Manager? — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources	Use tags to organize your Azure resources and management hierarchy — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/overview	What are ARM templates? — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/china/overview-operations	Microsoft Azure operated by 21Vianet — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/cloud-shell/overview	What is Azure Cloud Shell? — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/container-instances/container-instances-overview	Serverless containers in Azure — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/cost-management-billing/cost-management-billing-overview	Overview of Billing — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/cost-management-billing/costs/enable-tag-inheritance	Group and allocate costs using tag inheritance — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/cost-management-billing/costs/quick-acm-cost-analysis	Quickstart: Start using Cost Analysis — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/cost-management-billing/costs/tutorial-acm-create-budgets	Tutorial: Create and manage budgets — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/cost-management-billing/reservations/save-compute-costs-reservations	What are Azure Reservations? — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/databox/data-box-overview	Microsoft Azure Data Box overview — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/defender-for-cloud/defender-for-cloud-introduction	Microsoft Defender for Cloud Overview — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/expressroute/expressroute-introduction	Azure ExpressRoute Overview: Connect over a private connection — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/governance/management-groups/overview	What are Azure management groups? — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/governance/policy/overview	Overview of Azure Policy — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/migrate/migrate-services-overview	About Azure Migrate — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/private-link/private-endpoint-overview	What is a private endpoint? — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/reliability/availability-zones-overview	What are availability zones? — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/reliability/regions-paired	Azure region pairs and nonpaired regions — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles	Azure built-in roles — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/role-based-access-control/overview	What is Azure role-based access control (Azure RBAC)? — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/service-health/overview	What is Azure Service Health? — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/service-health/resource-health-overview	Azure Resource Health overview — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/storage/blobs/access-tiers-overview	Access tiers for blob data — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/storage/blobs/storage-blobs-introduction	Introduction to Blob (object) Storage — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/storage/common/storage-account-overview	Storage Account Overview — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/storage/common/storage-account-upgrade	Upgrade to a general-purpose v2 storage account — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/storage/common/storage-use-azcopy-v10	Copy or move data to Azure Storage by using AzCopy v10 — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/storage/file-sync/file-sync-introduction	What is Azure File Sync? — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/storage/files/storage-files-introduction	What is Azure Files? — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/storage/queues/storage-queues-introduction	Introduction to Azure Queue Storage — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/storage/tables/table-storage-overview	Introduction to Table storage - Object storage in Azure — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/virtual-desktop/overview	What is Azure Virtual Desktop? — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/virtual-machine-scale-sets/overview	Azure Virtual Machine Scale Sets overview — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/virtual-machines/availability-set-overview	Availability sets overview — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/virtual-machines/managed-disks-overview	Overview of Azure Disk Storage — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/virtual-machines/overview	Overview of virtual machines in Azure — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/virtual-machines/spot-vms	Azure Spot Virtual Machines — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/virtual-network/virtual-network-peering-overview	Azure Virtual Network Peering — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-overview	What is Azure Virtual Network? — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-about-vpngateways	About Azure VPN Gateway — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/cli/azure/what-is-azure-cli	What is the Azure CLI? — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/devops/deliver/what-is-infrastructure-as-code	What is infrastructure as code (IaC)? — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/entra/external-id/what-is-b2b	What is Microsoft Entra B2B collaboration? — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/entra/identity/authentication/concept-mfa-howitworks	Microsoft Entra multifactor authentication overview — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/entra/identity/conditional-access/overview	Microsoft Entra Conditional Access: Zero Trust Policy Engine — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/entra/identity/domain-services/overview	Overview of Microsoft Entra Domain Services — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/entra/identity/enterprise-apps/what-is-single-sign-on	What is single sign-on in Microsoft Entra ID? — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/powershell/azure/what-is-azure-powershell	What is Azure PowerShell — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/purview/unified-catalog	Learn about Microsoft Purview Unified Catalog — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-azure-compute-networking-services/2-virtual-machines/	Describe Azure virtual machines — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-azure-compute-networking-services/5-containers/	Describe Azure containers — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-azure-compute-networking-services/6-functions/	Describe Azure functions — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-azure-compute-networking-services/7-describe-application-hosting-options/	Describe application hosting options — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-azure-identity-access-security/2-directory-services	Describe Azure directory services — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-azure-identity-access-security/3-authentication-methods	Describe Azure authentication methods — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-azure-identity-access-security/4-external-identities	Describe Azure external identities — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-azure-identity-access-security/5-conditional-access	Describe Azure conditional access — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-azure-identity-access-security/6-role-based-access-control	Describe Azure role-based access control — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-azure-identity-access-security/7-describe-zero-trust-model	Describe Zero Trust model — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-azure-identity-access-security/8-describe-defense-depth	Describe defense-in-depth — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-azure-identity-access-security/9-describe-microsoft-defender-for-cloud	Describe Microsoft Defender for Cloud — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-azure-networking-services/2-virtual-network/	Describe Azure virtual networking — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-azure-networking-services/5-domain-name-system/	Describe Azure DNS — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-azure-storage-services/2-accounts/	Describe Azure storage accounts — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-azure-storage-services/3-redundancy/	Describe Azure storage redundancy — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-azure-storage-services/4-describe-azure-storage-services/	Describe Azure storage services — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-azure-storage-services/6-identify-azure-data-migration-options/	Identify Azure data migration options — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-azure-storage-services/7-identify-azure-file-movement-options/	Identify Azure file movement options — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-benefits-use-cloud-services/2-high-availability-scalability-cloud	Describe the benefits of high availability and scalability in the cloud — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-benefits-use-cloud-services/3-reliability-predictability-cloud	Describe the benefits of reliability and predictability in the cloud — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-benefits-use-cloud-services/4-security-governance-cloud	Describe the benefits of security and governance in the cloud — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-benefits-use-cloud-services/5-manageability-cloud	Describe the benefits of manageability in the cloud — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-cloud-compute/3-what-cloud-compute/	What is cloud computing — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-cloud-compute/4-describe-shared-responsibility-model/	Describe the shared responsibility model — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-cloud-compute/5-define-cloud-models/	Define cloud models — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-cloud-compute/6-describe-consumption-based-model/	Describe the consumption-based model — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-cloud-service-types/2-describe-infrastructure-service/	Describe infrastructure as a service — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-cloud-service-types/3-describe-platform-service/	Describe platform as a service — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-cloud-service-types/4-describe-software-service/	Describe software as a service — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-core-architectural-components-of-azure/5-describe-azure-physical-infrastructure	Describe Azure physical infrastructure — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-core-architectural-components-of-azure/6-describe-azure-management-infrastructure	Describe Azure management infrastructure — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-cost-management-azure/2-describe-factors-affect-costs-azure	Describe factors that can affect costs in Azure — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-cost-management-azure/3-compare-pricing-total-cost-of-ownership-calculators	Explore the pricing calculator — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-cost-management-azure/6-describe-azure-tool	Describe the Microsoft Cost Management tool — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-cost-management-azure/7-describe-purpose-of-tags	Describe the purpose of tags — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-cost-management-azure/7a-describe-cost-optimization-options	Describe cost optimization options in Azure — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-features-tools-azure-for-governance-compliance/2-describe-purpose-microsoft-purview	Describe the purpose of Microsoft Purview — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-features-tools-azure-for-governance-compliance/3-describe-purpose-azure-policy	Describe the purpose of Azure Policy — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-features-tools-azure-for-governance-compliance/4-describe-purpose-resource-locks	Describe the purpose of resource locks — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-features-tools-manage-deploy-azure-resources/2-describe-interacting-azure/	Describe tools for interacting with Azure — Microsoft Learn	bank
+https://learn.microsoft.com/en-us/training/modules/describe-monitoring-tools-azure/4-describe-azure-monitor/	Describe Azure Monitor — Microsoft Learn	bank

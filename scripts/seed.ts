@@ -2,40 +2,22 @@
  * Seed script — idempotent (safe to re-run; updates content by stable keys).
  * Public IDs (RAN-EXAM-SEQ) come from the FROZEN registry (src/data/questions/id-registry.ts):
  * assigned on creation only — never rewritten on update (published IDs are immutable).
+ *
+ * Works per certification: each CertBank seeds its own questions into its own
+ * certification/domains — never mixing DBDEA and AZ-900 in the same domain map.
  * Run with: bun scripts/seed.ts
  */
 import { PrismaClient } from "@prisma/client";
-import { CERTIFICATIONS, EXAM_DISTRIBUTION } from "../src/data/certifications";
-import { s1Questions } from "../src/data/questions/s1-platform";
-import { s2Questions } from "../src/data/questions/s2-ingestion";
-import { s3Questions } from "../src/data/questions/s3-transformation";
-import { s4Questions } from "../src/data/questions/s4-jobs";
-import { s5Questions } from "../src/data/questions/s5-cicd";
-import { s6Questions } from "../src/data/questions/s6-troubleshooting";
-import { s7Questions } from "../src/data/questions/s7-governance";
+import { CERT_BANKS } from "../src/data/questions/bank";
 import { ID_REGISTRY_BY_KEY } from "../src/data/questions/id-registry";
-import type { SeedQuestion } from "../src/data/questions/types";
 
 const db = new PrismaClient();
 
-const ALL_QUESTIONS: SeedQuestion[] = [
-  ...s1Questions,
-  ...s2Questions,
-  ...s3Questions,
-  ...s4Questions,
-  ...s5Questions,
-  ...s6Questions,
-  ...s7Questions,
-];
-
-// Persist the official exam distribution next to the certification so the API layer
-// (and any future certification) can compute stratified samples from the DB.
-function distributionJson(): string {
-  return JSON.stringify(EXAM_DISTRIBUTION);
-}
-
 async function main() {
-  for (const cert of CERTIFICATIONS) {
+  for (const bank of CERT_BANKS) {
+    const cert = bank.cert;
+    const questions = bank.files.flatMap((file) => file.questions);
+
     const data = {
       slug: cert.slug,
       examCode: cert.examCode,
@@ -89,7 +71,7 @@ async function main() {
     // frozen registry, never touched on update. version is managed manually (bump on fixes).
     let created = 0;
     let updated = 0;
-    for (const q of ALL_QUESTIONS) {
+    for (const q of questions) {
       const domain = domainByCode.get(q.domainCode);
       if (!domain) throw new Error(`No domain for code ${q.domainCode} (${q.key})`);
       const publicId = ID_REGISTRY_BY_KEY[q.key];
@@ -126,7 +108,7 @@ async function main() {
     console.log(`  total enabled questions in DB: ${totalQ}`);
     for (const d of cert.domains) {
       const n = await db.question.count({ where: { domainId: domainByCode.get(d.code)!.id, enabled: true } });
-      console.log(`  S${d.code} ${d.name}: ${n} questions (${d.weightPercent}%)`);
+      console.log(`  ${cert.examCode} D${d.code} ${d.name}: ${n} questions (${d.weightPercent}%)`);
     }
   }
 }
