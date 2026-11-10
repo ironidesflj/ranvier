@@ -32,6 +32,18 @@ describe("multi-cert regression guard", () => {
     expect(source).not.toContain("May 2026");
   });
 
+
+  it("progresso exige a certificação (sem número cruzado entre certs)", () => {
+    const service = readFileSync(path.join(root, "src", "lib", "attempt-service.ts"), "utf8");
+    expect(service).toContain("getProgress(certSlug: string)");
+    const route = readFileSync(path.join(root, "src", "app", "api", "progress", "route.ts"), "utf8");
+    expect(route).toContain("certSlug");
+    const client = readFileSync(path.join(root, "src", "lib", "api-client.ts"), "utf8");
+    expect(client).toContain("/api/progress?certSlug=");
+    const view = readFileSync(path.join(root, "src", "components", "app", "progress-view.tsx"), "utf8");
+    expect(view).toContain('queryKey: ["progress", certSlug]');
+  });
+
   it("o glossário exige checagem por certificação (fallback fora do DBDEA)", () => {
     const source = readFileSync(path.join(root, "src", "components", "app", "glossary-view.tsx"), "utf8");
     expect(source).toContain("examCode === \"DBDEA\"");
