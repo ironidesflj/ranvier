@@ -54,6 +54,7 @@ export function CertSelectorMenu({ variant = "bar" }: { variant?: "bar" | "butto
   const { t, f, lang, langReady } = useLang();
   const { certSlug, setCert, navigate } = useAppStore();
   const queryClient = useQueryClient();
+  const [open, setOpen] = useState(false);
   const [pendingCert, setPendingCert] = useState<{ slug: string; code: string } | null>(null);
 
   const { data } = useQuery({
@@ -65,15 +66,17 @@ export function CertSelectorMenu({ variant = "bar" }: { variant?: "bar" | "butto
   const certs: PublicCertification[] = data?.certifications ?? [];
   const active = certs.find((c) => c.slug === certSlug) ?? certs[0] ?? null;
 
-  /* Sessão em andamento: a troca pede confirmação (patch §9.5). Com uma
-     única certificação disponível hoje, este guarda fica dormente — a
-     arquitetura já nasce correta para as próximas. */
+  /* Sessão em andamento: a troca pede confirmação (patch §9.5). Só busca
+     quando o menu abre (perf 2026-11-10: essa chamada rodava em TODA tela
+     porque o seletor vive na barra e era o maior custo do loading inicial). */
   const { data: attemptsData } = useQuery({
     queryKey: ["attempts"],
     queryFn: api.listAttempts,
-    staleTime: 30_000,
+    enabled: open,
+    staleTime: 60_000,
   });
-  const inProgress = attemptsData?.attempts.find((a) => a.status === "IN_PROGRESS") ?? null;
+  const inProgress =
+    attemptsData?.attempts.find((a) => a.status === "IN_PROGRESS" && a.certSlug === active?.slug) ?? null;
 
   function chooseCert(slug: string, code: string) {
     if (!active || slug === active.slug) return;
@@ -93,7 +96,7 @@ export function CertSelectorMenu({ variant = "bar" }: { variant?: "bar" | "butto
 
   return (
     <>
-      <DropdownMenu>
+      <DropdownMenu open={open} onOpenChange={setOpen}>
         <DropdownMenuTrigger asChild>
           {variant === "bar" ? (
             <button

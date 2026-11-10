@@ -500,7 +500,7 @@ export const dict = {
       community: "Comunidade",
       license: "Conteúdo CC BY-SA 4.0 · Código MIT",
       adsLabel: "Publicidade",
-      version: "v{version} — dados do exame: maio/2026",
+      version: "v{version} — dados oficiais por certificação",
     },
     /* View Ajustes (guia Noos v1.1 §04 — destino do shell) */
     settings: {
@@ -1054,7 +1054,7 @@ export const dict = {
       community: "Community",
       license: "Content CC BY-SA 4.0 · Code MIT",
       adsLabel: "Advertisement",
-      version: "v{version} — exam data: May 2026",
+      version: "v{version} — official data per certification",
     },
     /* Settings view (Noos guide v1.1 §04 — shell destination) */
     settings: {
