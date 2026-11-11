@@ -48,4 +48,43 @@ describe("multi-cert regression guard", () => {
     const source = readFileSync(path.join(root, "src", "components", "app", "glossary-view.tsx"), "utf8");
     expect(source).toContain("examCode === \"DBDEA\"");
   });
+
+  /* P2 fix (2026-11-11): validity/renewal/language notes and vendor link
+     labels are per-certification data, never fixed copy. AZ-900 was showing
+     DBDEA's "2 anos (recertificação obrigatória)" + a Databricks note. */
+  it("a tela de certificação lê validade/notas/rótulos por certificação (sem copy fixa)", () => {
+    const view = readFileSync(path.join(root, "src", "components", "app", "cert-view.tsx"), "utf8");
+    expect(view).toContain("certFacts(");
+    for (const fixedKey of [
+      "t.cert.validityValue",
+      "t.cert.examLanguagesNote",
+      "t.cert.officialGuide",
+      "t.cert.officialTraining",
+    ]) {
+      expect(view).not.toContain(fixedKey);
+    }
+
+    /* A copy global não pode voltar a fixar fatos de uma certificação. */
+    const i18n = readFileSync(path.join(root, "src", "lib", "i18n.ts"), "utf8");
+    for (const leaked of [
+      "DBDEA",
+      "recertificação obrigatória",
+      "recertification required",
+      "Japonês e Coreano",
+      "Japanese and Korean",
+      "Exam Guide oficial (PDF)",
+      "Official Exam Guide (PDF)",
+      "(Academy)",
+    ]) {
+      expect(i18n).not.toContain(leaked);
+    }
+  });
+
+  it("home e resultado não exibem validade/renovação fixas nem certificação fixa", () => {
+    for (const file of ["home-view.tsx", "results-view.tsx", "exam-view.tsx"]) {
+      const source = readFileSync(path.join(root, "src", "components", "app", file), "utf8");
+      expect(source).not.toMatch(/validityValue|examLanguagesNote/i);
+      expect(source).not.toContain("Databricks · DBDEA");
+    }
+  });
 });

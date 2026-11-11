@@ -4,6 +4,12 @@
  * (version as of May 4, 2026) on an October 2025 research session:
  *  - https://www.databricks.com/learn/certification/data-engineer-associate
  *  - https://www.databricks.com/sites/default/files/2026-05/databricks-certified-data-engineer-associate-exam-guide-may-2026-000.pdf
+ *
+ * AZ-900 validity verified against Microsoft's official policy (2026-11-11):
+ * Microsoft Fundamentals certifications do NOT expire and require no
+ * recertification:
+ *  - https://learn.microsoft.com/en-gb/credentials/support/credential-expiration-policy
+ *  - https://learn.microsoft.com/en-us/credentials/certifications/renew-your-microsoft-certification-faq
  */
 export interface SeedDomain {
   code: number;
@@ -14,6 +20,27 @@ export interface SeedDomain {
   outlineEn: string[];
   /** PT-BR rendering of the outline bullets. */
   outlinePt: string[];
+}
+
+/**
+ * Validity/renewal policy of the credential — an EDITORIAL fact of the
+ * certification itself, never global copy. Microsoft Fundamentals do not
+ * expire; Databricks credentials are valid for two years and require
+ * recertification. The certification screen reads these fields for the
+ * ACTIVE certification only (P2 fix, 2026-11-11: AZ-900 used to inherit the
+ * DBDEA "2 years (recertification required)" line and a Databricks note).
+ */
+export interface SeedCertificationValidity {
+  /** false for credentials that never expire (Microsoft Fundamentals). */
+  doesExpire: boolean;
+  /** Value shown in the "Validade"/"Validity" fact (PT). */
+  labelPt: string;
+  labelEn: string;
+  /** Optional note shown under the exam facts. Omitted = no note (DBDEA screen unchanged). */
+  notePt?: string;
+  noteEn?: string;
+  /** Official source(s) for the note. Rendered only when the note exists. */
+  sources?: { url: string; labelPt: string; labelEn: string }[];
 }
 
 export interface SeedCertification {
@@ -39,6 +66,17 @@ export interface SeedCertification {
   descriptionPt: string;
   codeNoteEn: string;
   codeNotePt: string;
+  /** Validity/renewal policy — per certification (never global copy). */
+  validity: SeedCertificationValidity;
+  /** Full note about app/real-exam languages (vendor-specific: DBDEA lists Japanese/Korean). */
+  examLanguagesNoteEn: string;
+  examLanguagesNotePt: string;
+  /** Label of the official study-guide link, per vendor ("Exam Guide (PDF)" vs "study guide (Microsoft Learn)"). */
+  guideLabelEn: string;
+  guideLabelPt: string;
+  /** Label of the recommended-training link, per vendor ("Academy" vs "Microsoft Learn"). */
+  trainingLabelEn: string;
+  trainingLabelPt: string;
   domains: SeedDomain[];
   /** Stratified per-domain counts for a full exam simulation (sums to questionCount). */
   examDistribution: Record<number, number>;
@@ -71,6 +109,20 @@ export const CERTIFICATIONS: SeedCertification[] = [
       "Data manipulation code in the exam is provided in SQL when possible; in all other cases, code is in Python.",
     codeNotePt:
       "No exame, código de manipulação de dados é em SQL quando possível; nos demais casos, em Python.",
+    validity: {
+      doesExpire: true,
+      labelPt: "2 anos (recertificação obrigatória)",
+      labelEn: "2 years (recertification required)",
+      // No separate note: the DBDEA screen is intentionally unchanged.
+    },
+    examLanguagesNoteEn:
+      "App questions are in English, matching the real exam. Fun fact: the real exam is also offered in Portuguese (BR), Japanese and Korean.",
+    examLanguagesNotePt:
+      "As questões do app são em inglês, como no exame real. Curiosidade: o exame real também é oferecido em Português (BR), Japonês e Coreano.",
+    guideLabelEn: "Official Exam Guide (PDF)",
+    guideLabelPt: "Exam Guide oficial (PDF)",
+    trainingLabelEn: "Recommended training (Academy)",
+    trainingLabelPt: "Treinamento recomendado (Academy)",
     examDistribution: { 1: 3, 2: 9, 3: 10, 4: 7, 5: 5, 6: 4, 7: 7 },
     domains: [
       {
@@ -234,6 +286,38 @@ export const CERTIFICATIONS: SeedCertification[] = [
       "Avalia conhecimento fundamental de conceitos de nuvem e do Azure: o modelo de nuvem e seus benefícios, arquitetura e serviços centrais do Azure (computação, rede, armazenamento, identidade e segurança) e gestão e governança (custos, conformidade, monitoramento e ferramentas).",
     codeNoteEn: "No code: AZ-900 is a fundamentals exam.",
     codeNotePt: "Sem código: AZ-900 é uma prova de fundamentos.",
+    /* Microsoft Fundamentals do NOT expire — verified against Microsoft's
+       official credential-expiration policy (2026-11-11). No recertification
+       applies; the certification screen must not inherit the DBDEA line. */
+    validity: {
+      doesExpire: false,
+      labelPt: "Não expira",
+      labelEn: "Does not expire",
+      notePt:
+        "Certificações Microsoft Fundamentals não expiram: não há recertificação obrigatória e a credencial permanece válida. Fonte oficial: política de expiração de credenciais da Microsoft.",
+      noteEn:
+        "Microsoft Fundamentals certifications do not expire: there is no recertification requirement and the credential stays valid. Official source: Microsoft's credential expiration policy.",
+      sources: [
+        {
+          url: "https://learn.microsoft.com/en-gb/credentials/support/credential-expiration-policy",
+          labelPt: "Política de expiração de credenciais (Microsoft)",
+          labelEn: "Credential expiration policy (Microsoft)",
+        },
+        {
+          url: "https://learn.microsoft.com/en-us/credentials/certifications/renew-your-microsoft-certification-faq",
+          labelPt: "FAQ de renovação de certificações (Microsoft)",
+          labelEn: "Renew your Microsoft certification — FAQ",
+        },
+      ],
+    },
+    examLanguagesNoteEn:
+      "App questions are in English; the official exam is also offered in Portuguese (Brazil) and other languages.",
+    examLanguagesNotePt:
+      "As questões do app são em inglês; o exame oficial também é oferecido em Português (Brasil) e outros idiomas.",
+    guideLabelEn: "Official study guide (Microsoft Learn)",
+    guideLabelPt: "Guia de estudo oficial (Microsoft Learn)",
+    trainingLabelEn: "Recommended training (Microsoft Learn)",
+    trainingLabelPt: "Treinamento recomendado (Microsoft Learn)",
     examDistribution: { 1: 14, 2: 19, 3: 17 },
     domains: [
       {
