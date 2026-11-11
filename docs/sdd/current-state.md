@@ -391,3 +391,21 @@ aprovada: glossário (v1.9.0) e depois flashcards offline (v1.10.0) —
 - **Copy/links neutros por certificação:** hero (eyebrow/lead), ticket, fontes do Sobre/Guia, rodapés (app/certificar/ajustes), metadados de layout/manifest e glossário deixam de citar Databricks quando a certificação é Azure. Glossário (94 verbetes DBDEA) agora mostra estado vazio com link ao glossário oficial para outras certificações.
 - **Layout:** barra azul de pesos não estoura mais o container (clamp em 100%) e o cartão de exame mostra a distribuição correta.
 - **Performance:** a home passou a usar `GET /api/overview` (um request, três consultas em paralelo, um rate-limit) no lugar de 3 GETs; cache cliente de 30s. Índices novos em `Attempt(anonId|userId, startedAt)` e `FlashcardState(anonId|userId, dueAt)` (aplicar com `db:push:prod`).
+
+
+## Adendo 2026-11-11 — AZ-900: fatos por certificação (PR #17)
+
+- **Sintoma:** AZ-900 mostrava validade do DBDEA ("2 anos · recertificação
+  obrigatória") e nota sobre Databricks.
+- **Causa:** `cert-view` montava a seção com copy global fixa do i18n, não com
+  dados da certificação ativa.
+- **Correção:** `src/data/certifications.ts` ganhou fatos por certificação
+  (`validity.doesExpire/labelPt/En/notePt/En/sources`, nota de idiomas, rótulos
+  de guia/treino); `src/lib/cert-facts.ts` resolve pela cert ativa; a tela só
+  renderiza o bloco de renovação quando existe. DBDEA inalterado.
+- **AZ-900:** “Não expira”/“Does not expire”, com links para
+  credential-expiration-policy e renew-your-microsoft-certification-faq.
+- **Provas:** `bun test` 15 pass / 0 fail; `bunx tsc --noEmit`, build e lint
+  exit 0; testes de transição DBDEA→AZ-900→DBDEA (inclusive via `setCert`).
+- **Merge:** `62d38ea` (PR #17). Checkout local sincronizado em 2026-11-11.
+- **Risco:** sem QA visual com banco semeado; sem bump de versão (dados/texto).
