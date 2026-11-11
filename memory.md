@@ -1,6 +1,6 @@
 # Ranvier — maintainer memory / handoff
 
-Last checked: 2026-11-06 (America/Sao_Paulo)
+Last checked: 2026-11-11 (America/Sao_Paulo)
 
 ## Current state
 
@@ -50,3 +50,19 @@ Commit `1d28e85` contains five local QA fixes: generic localized auth errors; Ho
 ## Source of truth
 
 Read `docs/sdd/current-state.md` for the verified snapshot, `docs/sdd/plan.md` for open decisions, `docs/SDD.md` for architecture, and `worklog.md` for chronological evidence. When they disagree with code or live systems, verify first and update the documents; do not silently repeat stale claims.
+
+
+## 2026-11-11 — AZ-900: validade e notas por certificação (PR #17, merged `62d38ea`)
+
+- Bug P2: a tela de certificação da AZ-900 herdava a copy fixa do DBDEA
+  ("2 anos / recertificação obrigatória" + nota Databricks).
+- Correção: fatos editoriais por certificação em `src/data/certifications.ts`
+  (`validity {doesExpire,labelPt/En,notePt/En,sources}`, nota de idiomas,
+  rótulos) + helper `src/lib/cert-facts.ts`; DBDEA preservado byte a byte.
+  AZ-900 = **“Não expira”/“Does not expire”** com links oficiais da Microsoft.
+- Testes: `cert-facts.test.ts` (PT/EN, transição DBDEA→AZ-900→DBDEA via
+  `setCert`, fallback/seed) + guards estáticos; `bun test` 15 pass, typecheck/
+  build/lint verdes no clone.
+- Checkout canônico local sincronizado em `62d38ea` em 2026-11-11.
+- Risco residual: sem verificação visual com banco semeado; versão 1.11.1 não
+  foi bumpada (correção de texto/dados, sem mudança de schema).
