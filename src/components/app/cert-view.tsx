@@ -27,6 +27,7 @@ import { useAppStore } from "@/store/app-store";
 import { api, ApiError } from "@/lib/api-client";
 import { QueryError } from "@/components/app/query-error";
 import { EXAM_DISTRIBUTIONS } from "@/data/certifications";
+import { certFacts } from "@/lib/cert-facts";
 
 export function CertView() {
   const { t, lang, langReady } = useLang();
@@ -76,21 +77,26 @@ export function CertView() {
     );
   }
 
+  /* Fatos editoriais POR certificação (validade/renovação, nota de idiomas e
+     rótulos dos links oficiais). Nunca copy fixa: AZ-900 não expira e não
+     pode herdar a linha/nota do DBDEA (bug P2 de 11/nov). */
+  const certCopy = certFacts(cert.slug, lang);
+
   const facts = [
     { icon: BadgeCheck, label: t.home.facts.questions, value: String(cert.questionCount) },
     { icon: Clock, label: t.home.facts.duration, value: `${cert.durationMin} ${t.common.minutes}` },
     { icon: Target, label: t.home.facts.passing, value: `${cert.passingScore}%` },
     { icon: DollarSign, label: t.home.facts.fee, value: cert.fee },
     { icon: Languages, label: t.cert.languages, value: cert.languages },
-    { icon: RefreshCw, label: t.cert.validity, value: t.cert.validityValue },
+    { icon: RefreshCw, label: t.cert.validity, value: certCopy.validity },
     { icon: Timer, label: t.cert.delivery, value: cert.delivery },
     { icon: BadgeCheck, label: t.cert.unscored, value: t.cert.unscoredValue },
   ];
 
   const officialLinks = [
     { icon: ExternalLink, label: t.cert.officialPage, href: cert.officialUrl },
-    { icon: FileText, label: t.cert.officialGuide, href: cert.guideUrl },
-    { icon: GraduationCap, label: t.cert.officialTraining, href: cert.trainingUrl },
+    { icon: FileText, label: certCopy.guideLabel, href: cert.guideUrl },
+    { icon: GraduationCap, label: certCopy.trainingLabel, href: cert.trainingUrl },
   ];
 
   return (
@@ -130,6 +136,32 @@ export function CertView() {
             </div>
           ))}
         </div>
+        {/* Validade/renovação POR certificação: DBDEA não tem nota (tela
+            inalterada); AZ-900 declara que não expira e cita a política
+            oficial da Microsoft. */}
+        {certCopy.renewalNote && (
+          <p className="mt-3 max-w-[62ch] text-xs leading-relaxed text-muted-foreground">
+            {certCopy.renewalNote}
+            {certCopy.renewalSources.length > 0 && (
+              <>
+                {" "}
+                {certCopy.renewalSources.map((source, index) => (
+                  <span key={source.url}>
+                    {index > 0 ? " · " : ""}
+                    <a
+                      href={source.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline underline-offset-2 hover:text-foreground"
+                    >
+                      {source.label}
+                    </a>
+                  </span>
+                ))}
+              </>
+            )}
+          </p>
+        )}
         <div className="mt-3 grid gap-px border sm:grid-cols-2">
           <div className="flex items-start gap-3 bg-card p-4">
             <Code2 className="mt-0.5 h-4 w-4 shrink-0 text-app-ink" aria-hidden />
@@ -137,9 +169,7 @@ export function CertView() {
           </div>
           <div className="flex items-start gap-3 bg-card p-4">
             <Languages className="mt-0.5 h-4 w-4 shrink-0 text-app-ink" aria-hidden />
-            <p className="text-xs leading-relaxed text-muted-foreground">
-              {t.cert.questionsAlwaysEn} {t.cert.examLanguagesNote}
-            </p>
+            <p className="text-xs leading-relaxed text-muted-foreground">{certCopy.examLanguagesNote}</p>
           </div>
         </div>
         <p className="mt-2 text-xs text-muted-foreground">{t.home.passingNote}</p>
